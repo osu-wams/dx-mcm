@@ -1,0 +1,42 @@
+service:
+  name: dx-mcm
+
+package:
+  individually: true
+
+plugins:
+  - serverless-webpack
+  - serverless-offline
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - sqs:SendMessage
+      Resource:
+        - Fn::GetAtt: [receiverQueue, Arn]
+
+functions:
+  sender:
+    handler: src/sender.handler
+    events:
+      - http:
+          method: post
+          path: sender
+
+  receiver:
+    handler: src/receiver.handler
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - receiverQueue
+              - Arn
+resources:
+  Resources:
+    receiverQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: receiverQueue
