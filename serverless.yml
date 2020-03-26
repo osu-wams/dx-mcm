@@ -8,9 +8,14 @@ plugins:
   - serverless-webpack
   - serverless-offline
 
+custom:
+  serverless-offline:
+    port: 4000
+
 provider:
   name: aws
   runtime: nodejs12.x
+  region: us-east-1
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -21,6 +26,10 @@ provider:
 functions:
   sender:
     handler: src/sender.handler
+    environment:
+      SQS_AWS_ACCOUNT_ID: ${file(config.${self:provider.stage}.json):SQS_AWS_ACCOUNT_ID}
+      SQS_HOST: ${file(config.${self:provider.stage}.json):SQS_HOST}
+      SQS_QUEUE_NAME: ${file(config.${self:provider.stage}.json):SQS_QUEUE_NAME}
     events:
       - http:
           method: post

@@ -1,0 +1,5 @@
+{
+  "SQS_AWS_ACCOUNT_ID": "queue",
+  "SQS_HOST": "http://localhost:4576",
+  "SQS_QUEUE_NAME": "receiverQueue"
+}
