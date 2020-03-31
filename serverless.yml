@@ -1,51 +1,34 @@
 service:
-  name: dx-mcm
+  name: osu-dx-mcm-${opt:stage, 'development'}
 
 package:
   individually: true
+  exclude:
+    - .git/**
 
 plugins:
   - serverless-webpack
-  - serverless-offline
-
-custom:
-  serverless-offline:
-    port: 4000
 
 provider:
   name: aws
   runtime: nodejs12.x
-  region: us-east-1
+  stage: ${opt:stage, 'development'}
+  region: ${opt:region, 'us-west-2'}
+  stackName: ${self:service.name}
+  deploymentBucket:
+    name: osu-dx-mcm-deployments
+    blockPublicAccess: true
+  deploymentPrefix: ${self:service.name}
+  environment:
+    ENV: ${opt:stage, 'development'}
+  tracing: ${file(./serverless.config.${opt:stage, 'development'}.yml):provider.tracing}
   iamRoleStatements:
     - Effect: Allow
       Action:
-        - sqs:SendMessage
-      Resource:
-        - Fn::GetAtt: [receiverQueue, Arn]
+        - sns:Publish
+      Resource: !Ref apiSnsTopic
 
 functions:
-  sender:
-    handler: src/sender.handler
-    environment:
-      SQS_AWS_ACCOUNT_ID: ${file(config.${self:provider.stage}.json):SQS_AWS_ACCOUNT_ID}
-      SQS_HOST: ${file(config.${self:provider.stage}.json):SQS_HOST}
-      SQS_QUEUE_NAME: ${file(config.${self:provider.stage}.json):SQS_QUEUE_NAME}
-    events:
-      - http:
-          method: post
-          path: sender
+  - ${file(./src/api/serverless-functions.yml)}
 
-  receiver:
-    handler: src/receiver.handler
-    events:
-      - sqs:
-          arn:
-            Fn::GetAtt:
-              - receiverQueue
-              - Arn
-resources:
-  Resources:
-    receiverQueue:
-      Type: AWS::SQS::Queue
-      Properties:
-        QueueName: receiverQueue
+resources: ${file(./serverless-resources.yml)}

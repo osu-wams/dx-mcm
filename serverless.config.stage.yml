@@ -1,0 +1,4 @@
+provider:
+  tracing:
+    apiGateway: true
+    lambda: true

@@ -1,14 +1,7 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
-import { SQS } from "aws-sdk";
+import { SNS } from "aws-sdk";
 
-const config = {
-  endpoint: process.env.SQS_HOST,
-  accessKeyId: "na",
-  secretAccessKey: "na",
-  region: "us-west-2"
-};
-
-const sqs = new SQS(config);
+const sns = new SNS();
 
 export const handler: APIGatewayProxyHandler = async (event, context) => {
   console.log(context);
@@ -23,22 +16,15 @@ export const handler: APIGatewayProxyHandler = async (event, context) => {
       })
     };
   }
-  const queueUrl: string = `${process.env.SQS_HOST}/${process.env.SQS_AWS_ACCOUNT_ID}/${process.env.SQS_QUEUE_NAME}`;
   try {
-    await sqs
-      .sendMessage({
-        QueueUrl: queueUrl,
-        MessageBody: event.body,
-        MessageAttributes: {
-          AttributeNameHere: {
-            StringValue: "Attribute Value Here",
-            DataType: "String"
-          }
-        }
+    const result = await sns
+      .publish({
+        Message: event.body,
+        TopicArn: process.env.SNS_TOPIC_ARN
       })
       .promise();
 
-    message = "Message placed in the Queue!";
+    message = result.MessageId as string;
   } catch (error) {
     console.log("boom");
     console.dir(error, { depth: null, showHidden: true });

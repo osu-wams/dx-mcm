@@ -1064,21 +1064,6 @@ aws-sdk@*, aws-sdk@^2.645.0:
     uuid "3.3.2"
     xml2js "0.4.19"
 
-aws-sdk@^2.402.0:
-  version "2.646.0"
-  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.646.0.tgz#a5334912e09c56d4cb110d878f105832bc48d0f2"
-  integrity sha512-aL+NrZ/PfgOPY1jwTXwHjhdgVzuaKW00+GPMaisS0sNYdoKtjQfpXK6Z8zV7LWl73Jg9phUmHoYRqYjsVLMOMg==
-  dependencies:
-    buffer "4.9.1"
-    events "1.1.1"
-    ieee754 "1.1.13"
-    jmespath "0.15.0"
-    querystring "0.2.0"
-    sax "1.2.1"
-    url "0.10.3"
-    uuid "3.3.2"
-    xml2js "0.4.19"
-
 aws-sdk@^2.642.0:
   version "2.644.0"
   resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.644.0.tgz#a7422be28b5952955db8a0e09defb5341082b252"
@@ -2427,11 +2412,6 @@ es6-iterator@^2.0.3, es6-iterator@~2.0.1, es6-iterator@~2.0.3:
     d "1"
     es5-ext "^0.10.35"
     es6-symbol "^3.1.1"
-
-es6-promisify@6.0.1:
-  version "6.0.1"
-  resolved "https://registry.yarnpkg.com/es6-promisify/-/es6-promisify-6.0.1.tgz#6edaa45f3bd570ffe08febce66f7116be4b1cdb6"
-  integrity sha512-J3ZkwbEnnO+fGAKrjVpeUAnZshAdfZvbhQpqfIH9kSAspReRC4nJnu8ewm55b4y9ElyeuhCTzJD0XiH8Tsbhlw==
 
 es6-promisify@^6.0.0:
   version "6.1.0"
@@ -5802,14 +5782,6 @@ serialize-javascript@^2.1.2:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/serialize-javascript/-/serialize-javascript-2.1.2.tgz#ecec53b0e0317bdc95ef76ab7074b7384785fa61"
   integrity sha512-rs9OggEUF0V4jUSecXazOYsLfu7OGK2qIn3c7IPBiffz32XniEp/TX9Xmc9LQfK2nQ2QKHvZ2oygKUGU0lG4jQ==
-
-serverless-localstack@^0.4.24:
-  version "0.4.24"
-  resolved "https://registry.yarnpkg.com/serverless-localstack/-/serverless-localstack-0.4.24.tgz#e98d36975853affb2566af3b58af6e900e6eb6de"
-  integrity sha512-/wbN0uIBIKkjjsf6ux4johOQkvOdrkh67LFULirZmHuOXlDNoOwByeN4Q7tODhcrJTqvsdskAY5FooPLbgLkxA==
-  dependencies:
-    aws-sdk "^2.402.0"
-    es6-promisify "6.0.1"
 
 serverless-offline@^6.0.0:
   version "6.0.0"

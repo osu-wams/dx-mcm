@@ -1,0 +1,10 @@
+apiPublisher:
+  handler: src/api/publisher.handler
+  name: ${self:service.name}-apiPublisher
+  description: Posts API calls to the SNS topic for lambda subscribers to act upon.
+  environment:
+    SNS_TOPIC_ARN: !Ref apiSnsTopic
+  events:
+    - http:
+        method: post
+        path: /api

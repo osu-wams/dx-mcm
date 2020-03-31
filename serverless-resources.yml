@@ -1,0 +1,5 @@
+Resources:
+  apiSnsTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: ${self:service.name}-api
