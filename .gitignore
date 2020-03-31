@@ -1,5 +1,6 @@
 .serverless
 .webpack
 node_modules
-config.*.json
-!config.dev.json
+serverless.config.*.json
+!serverless.config.development.json
+

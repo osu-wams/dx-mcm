@@ -1,4 +1,0 @@
-provider:
-  tracing:
-    apiGateway: false
-    lambda: false
