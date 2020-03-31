@@ -6,5 +6,6 @@ apiPublisher:
     SNS_TOPIC_ARN: !Ref apiSnsTopic
   events:
     - http:
+        private: true # forces header x-api-key to be present with a valid key from provider.apiKeys
         method: post
         path: /api

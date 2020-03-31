@@ -22,13 +22,18 @@ provider:
   environment:
     ENV: ${opt:stage, 'development'}
   tracing: ${file(./serverless.config.${opt:stage, 'development'}.yml):provider.tracing}
+  apiKeys: ${file(./serverless.config.${opt:stage, 'development'}.yml):provider.apiKeys}
   iamRoleStatements:
     - Effect: Allow
       Action:
         - sns:Publish
       Resource: !Ref apiSnsTopic
+  apiGateway:
+    apiKeySourceType: HEADER
+  usagePlan: ${file(./serverless.config.${opt:stage, 'development'}.yml):provider.usagePlan}
 
 functions:
   - ${file(./src/api/serverless-functions.yml)}
+  - ${file(./src/listener/serverless-functions.yml)}
 
 resources: ${file(./serverless-resources.yml)}
