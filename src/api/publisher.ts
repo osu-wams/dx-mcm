@@ -1,5 +1,5 @@
-import { APIGatewayProxyHandler } from "aws-lambda";
-import { SNS } from "aws-sdk";
+import { APIGatewayProxyHandler } from 'aws-lambda';
+import { SNS } from 'aws-sdk';
 
 const sns = new SNS();
 
@@ -8,8 +8,8 @@ export const handler: APIGatewayProxyHandler = async (event, context) => {
     return {
       statusCode: 400,
       body: JSON.stringify({
-        message: "No body was found"
-      })
+        message: 'No body was found',
+      }),
     };
   }
   try {
@@ -23,10 +23,10 @@ export const handler: APIGatewayProxyHandler = async (event, context) => {
         TopicArn: process.env.SNS_TOPIC_ARN,
         MessageAttributes: {
           execute: {
-            DataType: "String",
-            StringValue: execute
-          }
-        }
+            DataType: 'String',
+            StringValue: execute,
+          },
+        },
       })
       .promise();
 
@@ -35,17 +35,17 @@ export const handler: APIGatewayProxyHandler = async (event, context) => {
       statusCode,
       body: JSON.stringify({
         message,
-        execute
-      })
+        execute,
+      }),
     };
   } catch (error) {
-    console.log("boom");
+    console.log('boom');
     console.dir(error, { depth: null, showHidden: true });
     return {
       statusCode: 500,
       body: JSON.stringify({
-        error
-      })
+        error,
+      }),
     };
   }
 };
