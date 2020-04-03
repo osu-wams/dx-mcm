@@ -2,8 +2,6 @@ provider:
   tracing:
     apiGateway: true
     lambda: true
-  apiKeys:
-    - test
   usagePlan:
     quota:
       limit: 1000

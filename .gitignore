@@ -1,6 +1,6 @@
 .serverless
 .webpack
 node_modules
-serverless.config.*
-!serverless.config.development.*
+.env.production
+.env.stage
 

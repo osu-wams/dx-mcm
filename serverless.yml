@@ -7,6 +7,7 @@ package:
     - .git/**
 
 plugins:
+  - serverless-dotenv-plugin
   - serverless-webpack
 
 provider:
@@ -20,14 +21,22 @@ provider:
     blockPublicAccess: true
   deploymentPrefix: ${self:service.name}
   environment:
-    ENV: ${opt:stage, 'development'}
+    ENV: ${env:ENV}
+  apiKeys:
+    - ${env:AWS_APIGW_API_KEY}
   tracing: ${file(./serverless.config.${opt:stage, 'development'}.yml):provider.tracing}
-  apiKeys: ${file(./serverless.config.${opt:stage, 'development'}.yml):provider.apiKeys}
   iamRoleStatements:
     - Effect: Allow
       Action:
         - sns:Publish
       Resource: !Ref apiSnsTopic
+    - Effect: Allow
+      Action:
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:Query
+      Resource:
+        - !GetAtt messagesTable.Arn
   apiGateway:
     apiKeySourceType: HEADER
   usagePlan: ${file(./serverless.config.${opt:stage, 'development'}.yml):provider.usagePlan}
