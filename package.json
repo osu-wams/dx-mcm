@@ -6,7 +6,8 @@
   "license": "MIT",
   "scripts": {
     "repl": "LOAD_DOTENV=1 ts-node -P tsconfig.repl.json",
-    "test": "jest"
+    "test": "jest",
+    "cov": "jest --coverage"
   },
   "dependencies": {
     "aws-lambda": "^1.0.5",
