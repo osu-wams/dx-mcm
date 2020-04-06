@@ -8,4 +8,8 @@ apiPublisher:
     - http:
         private: true # forces header x-api-key to be present with a valid key from provider.apiKeys
         method: post
-        path: /api
+        path: /api/{action}
+        request:
+          parameters:
+            paths:
+              action: true

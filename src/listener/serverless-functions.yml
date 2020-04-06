@@ -21,4 +21,4 @@ messageListener:
         topicName: ${self:service.name}-api # sadly, this has to be a string and can't be !GetAtt due to a bug, see https://github.com/serverless/serverless/issues/3824#issuecomment-436533656
         filterPolicy:
           execute:
-            - createMessage
+            - createmessage
