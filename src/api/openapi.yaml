@@ -1,0 +1,68 @@
+openapi: 3.0.1
+info:
+  title: DX Multi Channel Messaging
+  description: Test
+  version: 1.0.0
+servers:
+  - url: 'https://dx-mcm.oregonstate.edu/'
+tags:
+  - name: api
+    description: DX Multi-Channel Messaging
+paths:
+  /api/{action}:
+    post:
+      tags:
+        - api
+      summary: Send a multi-channel message
+      description: See documentation for more details
+      operationId: postMessage
+      parameters:
+        - in: path
+          name: action
+          schema:
+            type: string
+            enum:
+              - createMessage
+          required: true
+          description: >
+            The API action to perform.
+
+            * `createMessage` : Initiate a new multi-channel message.
+      requestBody:
+        description: The message request to send.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '500':
+          description: Error
+          content: {}
+      x-codegen-request-body-name: messageRequest
+components:
+  schemas:
+    ApiResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        message:
+          type: string
+    ApiRequest:
+      type: object
+      required:
+        - payload
+      properties:
+        payload:
+          type: object
+  securitySchemes:
+    api_key:
+      type: apiKey
+      name: x-api-key
+      in: header

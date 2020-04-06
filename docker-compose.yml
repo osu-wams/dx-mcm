@@ -1,0 +1,14 @@
+version: '3.7'
+
+services:
+  # Work with the file at http://localhost:8081/?url=/openapi.yaml
+  swagger-editor:
+    image: swaggerapi/swagger-editor
+    container_name: 'swagger-editor'
+    ports:
+      - '8081:8080'
+    volumes:
+      - type: bind
+        source: ./src/api/openapi.yaml
+        target: /usr/share/nginx/html/openapi.yaml
+        read_only: false
