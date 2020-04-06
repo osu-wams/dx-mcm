@@ -1,6 +1,6 @@
 import { DYNAMODB_TABLE_PREFIX } from '../constants';
 import { DynamoDB } from 'aws-sdk';
-import db from '../database';
+import { createTable, putItem, query } from '../database';
 
 export interface DynamoDBMessageItem extends DynamoDB.PutItemInputAttributeMap {
   sendAt: { S: string }; // partition key
@@ -68,13 +68,18 @@ class Message {
         content,
         contentShort,
       } = p.dynamoDbMessage;
-      this.sendAt = sendAt.S || '';
-      this.id = id.S || '';
-      this.status = status.S || '';
-      this.populationParams = populationParams.M || {};
-      this.channelIds = channelIds.SS || [];
-      this.content = content.S || '';
-      this.contentShort = contentShort.S || '';
+      if (sendAt) this.sendAt = sendAt.S || '';
+      if (id) this.id = id.S || '';
+      if (status) this.status = status.S || '';
+      if (channelIds) this.channelIds = channelIds.SS || [];
+      if (content) this.content = content.S || '';
+      if (contentShort) this.contentShort = contentShort.S || '';
+      if (populationParams && populationParams.M) {
+        const { affiliation } = populationParams.M;
+        this.populationParams = {
+          affiliation: affiliation.S,
+        };
+      }
     }
   }
 
@@ -91,7 +96,7 @@ class Message {
         ReturnValues: 'NONE',
       };
 
-      const result = await db.putItem(params).promise();
+      const result = await putItem(params);
       console.log('Message.upsert succeeded:', result);
       return Message.find(props.sendAt, props.id);
     } catch (err) {
@@ -113,7 +118,7 @@ class Message {
         },
         Select: 'ALL_ATTRIBUTES',
       };
-      const results: AWS.DynamoDB.QueryOutput = await db.query(params).promise();
+      const results: AWS.DynamoDB.QueryOutput = await query(params);
       if (!results.Items) return [];
       return results.Items.map((i) => new Message({ dynamoDbMessage: i }));
     } catch (err) {
@@ -137,7 +142,7 @@ class Message {
         },
         Select: 'ALL_ATTRIBUTES',
       };
-      const results: AWS.DynamoDB.QueryOutput = await db.query(params).promise();
+      const results: AWS.DynamoDB.QueryOutput = await query(params);
       if (!results.Items) return undefined;
       return new Message({ dynamoDbMessage: results.Items.shift() });
     } catch (err) {
@@ -171,7 +176,7 @@ class Message {
    * Create the table in DynamoDb for local development
    */
   static createTable = () => {
-    db.createTable({
+    createTable({
       AttributeDefinitions: [
         { AttributeName: 'sendAt', AttributeType: 'S' },
         { AttributeName: 'id', AttributeType: 'S' },
@@ -189,7 +194,6 @@ class Message {
         StreamEnabled: false,
       },
     })
-      .promise()
       .then((v) => console.log(v))
       .catch((err) => console.error(err));
   };
