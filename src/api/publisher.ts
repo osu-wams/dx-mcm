@@ -16,7 +16,7 @@ export const handler: APIGatewayProxyHandler = async (event, context) => {
     console.log(context);
     let statusCode: number = 200;
     let message: string;
-    const { execute } = JSON.parse(event.body);
+    const execute = event.path.split('/').pop()?.toLowerCase();
     const result = await sns
       .publish({
         Message: event.body,
