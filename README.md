@@ -18,3 +18,17 @@ Run a lambda function with provided JSON that it expects to handle locally using
 ```
 $ yarn sls invoke local --function <functionName> --path events/<jsonfilename> -l
 ```
+
+# Testing Workflow
+
+Each function should be written such that they can have functionality tests run without employing any external services and unit tests to cover
+the expectations of the operation. An example of this approach can be found in `src/database.ts` in that it provides basic helper/wrapper methods
+that can be easily targetted and mocked in tests (see `__tests__/message.test.ts`).
+
+```
+# Collect coverage
+$ yarn cov
+
+# Just run tests
+$ yarn test
+```
