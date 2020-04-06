@@ -11,10 +11,6 @@ jest.mock('@src/database', () => ({
   putItem: () => mockPutItem(),
 }));
 
-afterEach(() => {
-  jest.resetAllMocks();
-});
-
 describe('Message', () => {
   describe('constructor', () => {
     it('builds a dynamodb item from a message', () => {
