@@ -22,12 +22,12 @@ paths:
           schema:
             type: string
             enum:
-              - createMessage
+              - create_message
           required: true
           description: >
             The API action to perform.
 
-            * `createMessage` : Initiate a new multi-channel message.
+            * `create_message` : Initiate a new multi-channel message.
       requestBody:
         description: The message request to send.
         content:
@@ -50,7 +50,9 @@ components:
     ApiResponse:
       type: object
       properties:
-        id:
+        requestId:
+          type: string
+        action:
           type: string
         message:
           type: string
