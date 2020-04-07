@@ -1,0 +1,4 @@
+s3Sync:
+  - bucketName: osu-dx-mcm-static
+    localDir: dist/static
+    acl: public-read

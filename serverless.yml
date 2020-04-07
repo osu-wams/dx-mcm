@@ -8,7 +8,10 @@ package:
 
 plugins:
   - serverless-dotenv-plugin
+  - serverless-s3-sync
   - serverless-webpack
+
+custom: ${file(./serverless-custom.yml)}
 
 provider:
   name: aws

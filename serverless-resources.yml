@@ -20,3 +20,8 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: 5
         WriteCapacityUnits: 5
+  staticBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: osu-dx-mcm-static
+      AccessControl: PublicRead
