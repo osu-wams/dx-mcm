@@ -1,6 +1,6 @@
-listener:
-  handler: src/listener/receiver.handler
-  name: ${self:service.name}-listenerReceiver
+messageListener:
+  handler: src/services/messages/listener.handler
+  name: ${self:service.name}-messageListener
   description: !Join [' ', ['Listens to SNS Topic', !GetAtt apiSnsTopic.TopicName]]
   events:
     - sns:
@@ -8,5 +8,4 @@ listener:
         topicName: ${self:service.name}-api # sadly, this has to be a string and can't be !GetAtt due to a bug, see https://github.com/serverless/serverless/issues/3824#issuecomment-436533656
         filterPolicy:
           action:
-            - test3
-            - test2
+            - create_message

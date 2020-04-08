@@ -47,5 +47,6 @@ provider:
 functions:
   - ${file(./src/api/serverless-functions.yml)}
   - ${file(./src/listener/serverless-functions.yml)}
+  - ${file(./src/services/serverless-functions.yml)}
 
 resources: ${file(./serverless-resources.yml)}

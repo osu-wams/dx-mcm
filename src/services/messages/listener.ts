@@ -1,5 +1,5 @@
 import { SNSHandler } from 'aws-lambda';
-import Message from '../models/message';
+import Message from '@src/models/message';
 
 export const handler: SNSHandler = async (event, _context, _callback) => {
   try {
