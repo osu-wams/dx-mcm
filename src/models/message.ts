@@ -1,6 +1,6 @@
-import { DYNAMODB_TABLE_PREFIX } from '../constants';
+import { DYNAMODB_TABLE_PREFIX } from '@src/constants';
 import { DynamoDB } from 'aws-sdk';
-import { createTable, putItem, query } from '../database';
+import { createTable, putItem, query } from '@src/database';
 
 export interface DynamoDBMessageItem extends DynamoDB.PutItemInputAttributeMap {
   sendAt: { S: string }; // partition key
