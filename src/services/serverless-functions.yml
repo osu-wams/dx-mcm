@@ -1,6 +1,6 @@
 messageListener:
-  handler: src/services/messages/listener.handler
-  name: ${self:service.name}-messageListener
+  handler: src/services/messages/apiListener.handler
+  name: ${self:service.name}-apiMessageListener
   description: !Join [' ', ['Listens to SNS Topic', !GetAtt apiSnsTopic.TopicName]]
   events:
     - sns:
