@@ -4,10 +4,17 @@ export interface IResponseBodyArgs {
   error?: Error;
   requestId?: string;
   message?: string;
+  object?: object;
   action: string | undefined;
 }
 
-export const responseBody = ({ error, requestId, action, message }: IResponseBodyArgs): string => {
+export const responseBody = ({
+  error,
+  requestId,
+  action,
+  message,
+  object,
+}: IResponseBodyArgs): string => {
   if (error) {
     return JSON.stringify({
       requestId,
@@ -20,6 +27,7 @@ export const responseBody = ({ error, requestId, action, message }: IResponseBod
     requestId,
     message,
     action,
+    object,
   });
 };
 

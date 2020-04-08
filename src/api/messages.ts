@@ -23,7 +23,11 @@ export const handler: APIGatewayProxyHandler = async (event, _context) => {
       .promise();
     return {
       statusCode: 200,
-      body: responseBody({ requestId: published.MessageId, action }),
+      body: responseBody({
+        message: 'Message created.',
+        action,
+        object: { messageId: published.MessageId },
+      }),
     };
   } catch (error) {
     console.dir(error, { depth: null, showHidden: true });
