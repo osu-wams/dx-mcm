@@ -1,9 +1,8 @@
-import { SNSHandler, SNSMessageAttributes } from 'aws-lambda';
-
-export const handler: SNSHandler = async (event, _context, _callback) => {
+// TODO: find appropriate type for event
+export const handler = async (event: any) => {
   try {
     for (const record of event.Records) {
-      const messageAttributes: SNSMessageAttributes = record.Sns.MessageAttributes;
+      const messageAttributes = record.Sns.MessageAttributes;
       console.log('Message Attributes -->  ', messageAttributes);
       console.log('Message Subject -->  ', record.Sns.Subject);
       console.log('Message Body -->  ', record.Sns.Message);

@@ -1,8 +1,8 @@
-import { APIGatewayProxyHandler } from 'aws-lambda';
 import { SNS } from 'aws-sdk';
 import { validate, responseBody } from '@src/api/utils';
 
-export const handler: APIGatewayProxyHandler = async (event, _context) => {
+// TODO: Find appropriate type for event
+export const handler = async (event: any) => {
   const { valid, response, payload, action } = validate(event);
   if (!valid) return response;
 
