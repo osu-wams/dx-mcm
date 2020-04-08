@@ -1,6 +1,6 @@
-apiPublisher:
-  handler: src/api/publisher.handler
-  name: ${self:service.name}-apiPublisher
+messagesPublisher:
+  handler: src/api/messages.handler
+  name: ${self:service.name}-messagesPublisher
   description: Posts API calls to the SNS topic for lambda subscribers to act upon.
   environment:
     SNS_TOPIC_ARN: !Ref apiSnsTopic
@@ -8,7 +8,7 @@ apiPublisher:
     - http:
         private: true # forces header x-api-key to be present with a valid key from provider.apiKeys
         method: post
-        path: /api/{action}
+        path: /api/v1/messages/{action}
         request:
           parameters:
             paths:

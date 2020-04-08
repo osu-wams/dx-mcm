@@ -4,12 +4,12 @@ info:
   description: Test
   version: 1.0.0
 servers:
-  - url: 'https://dx-mcm.oregonstate.edu/'
+  - url: 'https://dx-mcm.oregonstate.edu/api/v1'
 tags:
   - name: api
     description: DX Multi-Channel Messaging
 paths:
-  /api/{action}:
+  /messages/{action}:
     post:
       tags:
         - api

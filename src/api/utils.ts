@@ -1,44 +1,13 @@
-import { APIGatewayProxyHandler, APIGatewayProxyEvent } from 'aws-lambda';
-import { SNS } from 'aws-sdk';
+import { APIGatewayProxyEvent } from 'aws-lambda';
 
-export const handler: APIGatewayProxyHandler = async (event, _context) => {
-  const { valid, response, payload, action } = validate(event);
-  if (!valid) return response;
-
-  try {
-    const sns = new SNS();
-    const published = await sns
-      .publish({
-        Message: JSON.stringify(payload),
-        TopicArn: process.env.SNS_TOPIC_ARN,
-        MessageAttributes: {
-          action: {
-            DataType: 'String',
-            StringValue: action,
-          },
-        },
-      })
-      .promise();
-    return {
-      statusCode: 200,
-      body: responseBody({ requestId: published.MessageId, action }),
-    };
-  } catch (error) {
-    console.dir(error, { depth: null, showHidden: true });
-    return {
-      statusCode: 500,
-      body: responseBody({ error, action }),
-    };
-  }
-};
-interface IResponseBodyArgs {
+export interface IResponseBodyArgs {
   error?: Error;
   requestId?: string;
   message?: string;
   action: string | undefined;
 }
 
-const responseBody = ({ error, requestId, action, message }: IResponseBodyArgs): string => {
+export const responseBody = ({ error, requestId, action, message }: IResponseBodyArgs): string => {
   if (error) {
     return JSON.stringify({
       requestId,
@@ -54,7 +23,7 @@ const responseBody = ({ error, requestId, action, message }: IResponseBodyArgs):
   });
 };
 
-const validate = (event: APIGatewayProxyEvent) => {
+export const validate = (event: APIGatewayProxyEvent) => {
   const result = {
     valid: false,
     response: { statusCode: 400, body: JSON.stringify({ message: 'Bad Request' }) },
