@@ -19,7 +19,6 @@ describe('handler', () => {
   it('creates a new record', async () => {
     mockPutItem.mockResolvedValue(message);
     mockQuery.mockResolvedValue({ Items: [dynamoDbMessage] });
-    console.log(event);
     const result = await handler(event);
     expect(consoleSpy).toHaveBeenCalled();
     expect(result).toEqual(undefined);

@@ -1,23 +1,32 @@
 import Message from '@src/models/message';
+import { SNSEvent, SNSEventRecord } from 'aws-lambda';
+import { validate } from '@src/services/utils';
 
-// TODO: find appropriate type for event
-export const handler = async (event: any) => {
+export const handler = async (event: SNSEvent) => {
+  const [valid, record] = validate(event);
+  if (!valid || !record) {
+    return;
+  }
+
   try {
-    const record = event.Records.pop();
-    const {
-      payload: { content, contentShort, channelIds, populationParams },
-    } = JSON.parse(record.Sns.Message);
-    const message = await Message.upsert({
-      sendAt: new Date().toISOString().slice(0, 10),
-      id: record.Sns.MessageId,
-      status: 'NEW',
-      populationParams,
-      channelIds,
-      content,
-      contentShort,
-    });
-    console.log('Created -->  ', message);
+    await persistMessage(record);
   } catch (error) {
     console.error(error);
   }
+};
+
+const persistMessage = async (record: SNSEventRecord) => {
+  const {
+    payload: { content, contentShort, channelIds, populationParams, sendAt },
+  } = JSON.parse(record.Sns.Message);
+  const message = await Message.upsert({
+    id: record.Sns.MessageId,
+    status: 'CREATED',
+    sendAt,
+    populationParams,
+    channelIds,
+    content,
+    contentShort,
+  });
+  console.log('Created -->  ', message);
 };
