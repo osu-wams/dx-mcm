@@ -25,6 +25,11 @@ const message = {
   sendAt: '2020-01-01',
   status: 'NEW',
 };
+const messageStatus = {
+  id: '123456789',
+  sendAt: '2020-01-01',
+  status: 'NEW',
+};
 const emptyMessage = {
   channelIds: [],
   content: '',
@@ -35,4 +40,4 @@ const emptyMessage = {
   status: '',
 };
 
-export { dynamoDbMessage, emptyDynamoDbMessage, emptyMessage, message };
+export { dynamoDbMessage, emptyDynamoDbMessage, emptyMessage, message, messageStatus };

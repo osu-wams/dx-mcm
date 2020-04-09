@@ -1,5 +1,11 @@
-import Message from '@src/models/message';
-import { dynamoDbMessage, message, emptyMessage, emptyDynamoDbMessage } from '@mocks/message.mock';
+import Message, { Status } from '@src/models/message';
+import {
+  dynamoDbMessage,
+  message,
+  messageStatus,
+  emptyMessage,
+  emptyDynamoDbMessage,
+} from '@mocks/message.mock';
 
 const mockCreateTable = jest.fn();
 const mockQuery = jest.fn();
@@ -86,6 +92,28 @@ describe('Message', () => {
       mockPutItem.mockRejectedValue('boom');
       try {
         await Message.upsert(message);
+      } catch (err) {
+        expect(err).toBe('boom');
+      }
+    });
+  });
+
+  describe('byStatusBeforeDate', () => {
+    it('does not find any matching records', async () => {
+      mockQuery.mockResolvedValue({ Items: undefined });
+      expect(await Message.byStatusBeforeDate(Status.NEW, '1492-01-01')).toStrictEqual([]);
+    });
+    it('finds all matching records', async () => {
+      mockQuery.mockResolvedValue({ Items: [dynamoDbMessage, dynamoDbMessage] });
+      expect(await Message.byStatusBeforeDate(Status.NEW, '2222-01-01')).toEqual([
+        messageStatus,
+        messageStatus,
+      ]);
+    });
+    it('throws an error when there is a unhandled exception', async () => {
+      mockQuery.mockRejectedValue('boom');
+      try {
+        await Message.byStatusBeforeDate(Status.NEW, '2222-01-01');
       } catch (err) {
         expect(err).toBe('boom');
       }

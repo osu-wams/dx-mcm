@@ -163,10 +163,7 @@ class Message {
     }
   };
 
-  static byStatusBeforeDate = async (
-    status: Status,
-    sendAt: string,
-  ): Promise<MessageStatus[] | undefined> => {
+  static byStatusBeforeDate = async (status: Status, sendAt: string): Promise<MessageStatus[]> => {
     try {
       const params: AWS.DynamoDB.QueryInput = {
         TableName: Message.TABLE_NAME,
@@ -183,7 +180,7 @@ class Message {
         Select: 'ALL_PROJECTED_ATTRIBUTES',
       };
       const results: AWS.DynamoDB.QueryOutput = await query(params);
-      if (!results.Items) return undefined;
+      if (!results.Items) return [];
       return results.Items.map((i) => ({
         id: i.id.S || '',
         sendAt: i.sendAt.S || '',
