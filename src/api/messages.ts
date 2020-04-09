@@ -1,12 +1,8 @@
 import { SNS } from 'aws-sdk';
 import { validate, responseBody } from '@src/api/utils';
-import { APIGatewayProxyHandler, APIGatewayProxyEvent, APIGatewayProxyCallback } from 'aws-lambda';
+import { APIGatewayProxyHandler, APIGatewayProxyEvent } from 'aws-lambda'; // eslint-disable-line no-unused-vars, import/no-unresolved
 
-export const handler: APIGatewayProxyHandler = async (
-  event: APIGatewayProxyEvent,
-  _context: any,
-  _callback: APIGatewayProxyCallback,
-) => {
+export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent) => {
   const { valid, response, payload, action } = validate(event);
   if (!valid) return response;
 
@@ -41,3 +37,5 @@ export const handler: APIGatewayProxyHandler = async (
     };
   }
 };
+
+export default handler;

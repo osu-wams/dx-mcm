@@ -1,4 +1,4 @@
-import { SNSEvent, SNSEventRecord } from 'aws-lambda';
+import { SNSEvent, SNSEventRecord } from 'aws-lambda'; // eslint-disable-line no-unused-vars, import/no-unresolved
 
 export const validate = (event: SNSEvent): [boolean, SNSEventRecord | undefined] => {
   if (event.Records.length === 0) {
@@ -15,3 +15,5 @@ export const validate = (event: SNSEvent): [boolean, SNSEventRecord | undefined]
 
   return [true, record];
 };
+
+export default validate;

@@ -1,5 +1,5 @@
 import { DYNAMODB_TABLE_PREFIX } from '@src/constants';
-import { DynamoDB } from 'aws-sdk';
+import { DynamoDB } from 'aws-sdk'; // eslint-disable-line no-unused-vars
 import { createTable, putItem, query } from '@src/database';
 
 export interface DynamoDBMessageItem extends DynamoDB.PutItemInputAttributeMap {
@@ -35,10 +35,12 @@ interface MessageStatus {
   status: string;
 }
 
+/* eslint-disable no-unused-vars */
 export enum Status {
   NEW = 'NEW',
   SENT = 'SENT',
 }
+/* eslint-enable no-unused-vars */
 
 class Message {
   sendAt: string = '';
@@ -56,6 +58,7 @@ class Message {
   contentShort: string = '';
 
   static TABLE_NAME: string = `${DYNAMODB_TABLE_PREFIX}Messages`;
+
   static STATUS_INDEX_NAME: string = `${DYNAMODB_TABLE_PREFIX}MessageStatuses`;
 
   constructor(p: MessageParams) {

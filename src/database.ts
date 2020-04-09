@@ -1,7 +1,5 @@
-require('./config');
-
-import { DYNAMODB_API_VERSION } from './constants';
 import { DynamoDB } from 'aws-sdk';
+import { DYNAMODB_API_VERSION } from './constants';
 
 const database = new DynamoDB({ apiVersion: DYNAMODB_API_VERSION });
 
