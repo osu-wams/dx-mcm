@@ -1,8 +1,12 @@
 import { SNS } from 'aws-sdk';
 import { validate, responseBody } from '@src/api/utils';
+import { APIGatewayProxyHandler, APIGatewayProxyEvent, APIGatewayProxyCallback } from 'aws-lambda';
 
-// TODO: Find appropriate type for event
-export const handler = async (event: any) => {
+export const handler: APIGatewayProxyHandler = async (
+  event: APIGatewayProxyEvent,
+  _context: any,
+  _callback: APIGatewayProxyCallback,
+) => {
   const { valid, response, payload, action } = validate(event);
   if (!valid) return response;
 

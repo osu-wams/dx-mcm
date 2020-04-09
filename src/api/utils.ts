@@ -1,3 +1,5 @@
+import { APIGatewayProxyEvent } from 'aws-lambda';
+
 export interface IResponseBodyArgs {
   error?: Error;
   requestId?: string;
@@ -29,8 +31,7 @@ export const responseBody = ({
   });
 };
 
-// TODO: Find appropriate type for event
-export const validate = (event: any) => {
+export const validate = (event: APIGatewayProxyEvent) => {
   const result = {
     valid: false,
     response: { statusCode: 400, body: JSON.stringify({ message: 'Bad Request' }) },

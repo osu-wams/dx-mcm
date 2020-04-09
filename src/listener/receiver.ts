@@ -1,5 +1,6 @@
-// TODO: find appropriate type for event
-export const handler = async (event: any) => {
+import { SNSEvent } from 'aws-lambda';
+
+export const handler = async (event: SNSEvent) => {
   try {
     for (const record of event.Records) {
       const messageAttributes = record.Sns.MessageAttributes;
