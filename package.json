@@ -6,8 +6,9 @@
   "license": "MIT",
   "scripts": {
     "repl": "LOAD_DOTENV=1 ts-node -r tsconfig-paths/register -P tsconfig.repl.json",
+    "lint": "eslint --ext .ts,.js 'src/**/*' 'mocks/**/*'",
     "test": "jest",
-    "cov": "jest --coverage"
+    "test:coverage": "jest --coverage"
   },
   "dependencies": {
     "aws-sdk": "^2.645.0",
@@ -18,7 +19,16 @@
     "@types/aws-lambda": "^8.10.48",
     "@types/jest": "^25.2.1",
     "@types/node": "^12.12.31",
+    "@typescript-eslint/eslint-plugin": "^2.27.0",
+    "@typescript-eslint/parser": "^2.27.0",
+    "codecov": "^3.6.5",
     "eslint": "^6.8.0",
+    "eslint-config-airbnb": "^18.1.0",
+    "eslint-config-airbnb-base": "^14.1.0",
+    "eslint-config-prettier": "^6.10.1",
+    "eslint-import-resolver-alias": "^1.1.2",
+    "eslint-plugin-import": "^2.20.2",
+    "eslint-utils": "^2.0.0",
     "jest": "^25.2.7",
     "serverless": "^1.67.0",
     "serverless-dotenv-plugin": "^2.3.2",
