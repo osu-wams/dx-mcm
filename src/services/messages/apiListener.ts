@@ -1,4 +1,4 @@
-import Message from '@src/models/message';
+import Message, { Status } from '@src/models/message';
 import { SNSEvent, SNSEventRecord } from 'aws-lambda';
 import { validate } from '@src/services/utils';
 
@@ -21,7 +21,7 @@ const persistMessage = async (record: SNSEventRecord) => {
   } = JSON.parse(record.Sns.Message);
   const message = await Message.upsert({
     id: record.Sns.MessageId,
-    status: 'CREATED',
+    status: Status.NEW,
     sendAt,
     populationParams,
     channelIds,

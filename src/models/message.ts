@@ -3,13 +3,13 @@ import { DynamoDB } from 'aws-sdk';
 import { createTable, putItem, query } from '@src/database';
 
 export interface DynamoDBMessageItem extends DynamoDB.PutItemInputAttributeMap {
-  sendAt: { S: string }; // partition key
-  id: { S: string }; // sort key
-  status: { S: string };
-  populationParams: { M: { affiliation: { S: string } } };
   channelIds: { SS: string[] };
   content: { S: string };
   contentShort: { S: string };
+  id: { S: string }; // sort key
+  populationParams: { M: { affiliation: { S: string } } };
+  sendAt: { S: string }; // partition key
+  status: { S: string };
 }
 
 interface MessagePopulationParams {
@@ -17,16 +17,27 @@ interface MessagePopulationParams {
 }
 
 interface MessageParams {
+  dynamoDbMessage?: AWS.DynamoDB.AttributeMap;
   message?: {
-    sendAt: string;
-    id: string;
-    status: string;
-    populationParams: MessagePopulationParams;
     channelIds: string[];
     content: string;
     contentShort: string;
+    id: string;
+    populationParams: MessagePopulationParams;
+    sendAt: string;
+    status: string;
   };
-  dynamoDbMessage?: AWS.DynamoDB.AttributeMap;
+}
+
+interface MessageStatus {
+  id: string;
+  sendAt: string;
+  status: string;
+}
+
+export enum Status {
+  NEW = 'NEW',
+  SENT = 'SENT',
 }
 
 class Message {
@@ -34,7 +45,7 @@ class Message {
 
   id: string = '';
 
-  status: string = '';
+  status: string = Status.NEW;
 
   populationParams: MessagePopulationParams = {};
 
@@ -45,6 +56,7 @@ class Message {
   contentShort: string = '';
 
   static TABLE_NAME: string = `${DYNAMODB_TABLE_PREFIX}Messages`;
+  static STATUS_INDEX_NAME: string = `${DYNAMODB_TABLE_PREFIX}MessageStatuses`;
 
   constructor(p: MessageParams) {
     if (p.message) {
@@ -150,6 +162,39 @@ class Message {
       throw err;
     }
   };
+
+  static byStatusBeforeDate = async (
+    status: Status,
+    sendAt: string,
+  ): Promise<MessageStatus[] | undefined> => {
+    try {
+      const params: AWS.DynamoDB.QueryInput = {
+        TableName: Message.TABLE_NAME,
+        IndexName: Message.STATUS_INDEX_NAME,
+        KeyConditionExpression: '#keyAttribute = :keyValue AND #rangeAttribute <= :rangeValue',
+        ExpressionAttributeNames: {
+          '#keyAttribute': 'status',
+          '#rangeAttribute': 'sendAt',
+        },
+        ExpressionAttributeValues: {
+          ':keyValue': { S: status },
+          ':rangeValue': { S: sendAt },
+        },
+        Select: 'ALL_PROJECTED_ATTRIBUTES',
+      };
+      const results: AWS.DynamoDB.QueryOutput = await query(params);
+      if (!results.Items) return undefined;
+      return results.Items.map((i) => ({
+        id: i.id.S || '',
+        sendAt: i.sendAt.S || '',
+        status: i.status.S || '',
+      }));
+    } catch (err) {
+      console.error(`Message.readyToSend(${status}, ${sendAt}) failed:`, err);
+      throw err;
+    }
+  };
+
   /**
    * Translate the TrendingResource properties into the properly shaped data as an Item for
    * Dynamodb.
