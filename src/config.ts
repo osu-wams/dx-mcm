@@ -1,10 +1,10 @@
 import dotenv from 'dotenv';
 
 const loadConfig = () => {
-  if (process.env.LOAD_DOTENV) {
+  if (process.env.DOTENV_CONFIG_PATH) {
     dotenv.config({
       debug: Boolean(process.env.DEBUG),
-      path: `${process.cwd()}/.env.development`,
+      path: process.env.DOTENV_CONFIG_PATH,
     });
   }
 };

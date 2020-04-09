@@ -5,7 +5,7 @@
   "author": "Josh Gum",
   "license": "MIT",
   "scripts": {
-    "repl": "LOAD_DOTENV=1 ts-node -r tsconfig-paths/register -P tsconfig.repl.json",
+    "repl": "DOTENV_CONFIG_PATH=./.env.repl ts-node -r tsconfig-paths/register -P tsconfig.repl.json",
     "lint": "eslint --ext .ts,.js 'src/**/*' 'mocks/**/*'",
     "test": "jest",
     "test:coverage": "jest --coverage"
