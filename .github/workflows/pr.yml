@@ -25,7 +25,7 @@ jobs:
           AWS_REGION: ${{ secrets.AWS_REGION }}
       - name: report code coverage
         run: npx codecov@3
-        if: matrix.node-version == '10.x'
+        if: matrix.node-version == '12.x'
         env:
           CI: true
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
