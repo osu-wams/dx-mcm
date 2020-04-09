@@ -1,3 +1,5 @@
+[![codecov](https://codecov.io/gh/osu-wams/dx-mcm/branch/master/graph/badge.svg)](https://codecov.io/gh/osu-wams/dx-mcm)
+
 # Development Workflow
 
 ## ts-node as the REPL
