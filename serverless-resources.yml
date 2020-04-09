@@ -12,6 +12,8 @@ Resources:
           AttributeType: S
         - AttributeName: id
           AttributeType: S
+        - AttributeName: status
+          AttributeType: S
       KeySchema:
         - AttributeName: sendAt
           KeyType: HASH
@@ -20,6 +22,20 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: 5
         WriteCapacityUnits: 5
+      GlobalSecondaryIndexes:
+        - IndexName: ${opt:stage, self:provider.stage}-dx-mcm-MessageStatuses
+          KeySchema:
+            - AttributeName: status
+              KeyType: HASH
+            - AttributeName: sendAt
+              KeyType: RANGE
+          Projection:
+            NonKeyAttributes:
+              - id
+            ProjectionType: INCLUDE
+          ProvisionedThroughput:
+            ReadCapacityUnits: 5
+            WriteCapacityUnits: 5
   staticBucket:
     Type: AWS::S3::Bucket
     Properties:
