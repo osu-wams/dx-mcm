@@ -2,13 +2,13 @@
 
 ## ts-node as the REPL
 
-Run ts-node to `require` and run code for testing/development, `tsconfig.repl.json` is configured to allow for more relaxed coding in this environment.
+Run ts-node to `import` and run code for testing/development, `tsconfig.repl.json` is configured to allow for more relaxed coding in this environment.
 
 ```
 $ yarn repl
 ...
-> const message = require('./src/models/message');
-> message.default.createTable();
+> import Message from '@src/models/message';
+> Message.createTable();
 ```
 
 ## Invoke local lambda with mock data
