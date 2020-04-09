@@ -98,6 +98,10 @@ class Message {
     }
   }
 
+  // sendAtElapsed() {
+  //   return this.sendAt <= new Date().toISOString().slice(0, 10);
+  // }
+
   static upsert = async (props: Message): Promise<Message | undefined> => {
     // ! DynamoDb only supports 'ALL_OLD' or 'NONE' for return values from the
     // ! putItem call, which means the only way to get values from ddb would be to

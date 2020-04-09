@@ -3,6 +3,12 @@ Resources:
     Type: AWS::SNS::Topic
     Properties:
       TopicName: ${self:service.name}-api
+  messagesSqsQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: ${self:service.name}-messages.fifo
+      ContentBasedDeduplication: true
+      FifoQueue: true
   messagesTable:
     Type: AWS::DynamoDB::Table
     Properties:
