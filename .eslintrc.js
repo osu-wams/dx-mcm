@@ -5,6 +5,9 @@ module.exports = {
     project: './tsconfig.json',
   },
   plugins: ['@typescript-eslint'],
+  env: {
+    jest: true,
+  },
   settings: {
     'import/resolver': {
       alias: {
