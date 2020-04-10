@@ -194,7 +194,7 @@ class Message {
         status: i.status.S || '',
       }));
     } catch (err) {
-      console.error(`Message.readyToSend(${status}, ${sendAt}) failed:`, err);
+      console.error(`Message.byStatusBeforeDate(${status}, ${sendAt}) failed:`, err);
       throw err;
     }
   };
