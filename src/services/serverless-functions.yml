@@ -1,7 +1,8 @@
-messageListener:
-  handler: src/services/messages/apiListener.handler
-  name: ${self:service.name}-apiMessageListener
-  description: !Join [' ', ['Listens to SNS Topic', !GetAtt apiSnsTopic.TopicName]]
+createMessageListener:
+  handler: src/services/messages/createMessageListener.handler
+  name: ${self:service.name}-createMessageListener
+  description:
+    !Join [' ', ['Listens to SNS Topic', !GetAtt apiSnsTopic.TopicName, 'to create new Messages.']]
   environment:
     SQS_QUEUE_NAME: !GetAtt messagesSqsQueue.QueueName
   events:

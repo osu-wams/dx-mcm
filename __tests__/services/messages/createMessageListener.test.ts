@@ -1,4 +1,4 @@
-import { handler } from '@src/services/messages/apiListener';
+import { handler } from '@src/services/messages/createMessageListener';
 import { dynamoDbMessage, message } from '@mocks/message.mock';
 import * as event from '../../../events/lambda.sns.create_message.json';
 
@@ -12,15 +12,11 @@ jest.mock('@src/database', () => ({
   putItem: () => mockPutItem(),
 }));
 
-const consoleSpy = jest.spyOn(console, 'log');
-const consoleErrorSpy = jest.spyOn(console, 'error');
-
 describe('handler', () => {
   it('creates a new record', async () => {
     mockPutItem.mockResolvedValue(message);
     mockQuery.mockResolvedValue({ Items: [dynamoDbMessage] });
     const result = await handler(event);
-    expect(consoleSpy).toHaveBeenCalled();
     expect(result).toEqual(undefined);
   });
   it('throws an error when there is a unhandled exception', async () => {
@@ -28,7 +24,6 @@ describe('handler', () => {
     try {
       await handler(event);
     } catch (err) {
-      expect(consoleErrorSpy).toHaveBeenCalled();
       expect(err).toBe('boom');
     }
   });
