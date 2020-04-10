@@ -40,6 +40,12 @@ provider:
         - dynamodb:Query
       Resource:
         - !GetAtt messagesTable.Arn
+    - Effect: Allow
+      Action:
+        - sqs:SendMessage
+        - sqs:GetQueueUrl
+      Resource:
+        - !GetAtt messagesSqsQueue.Arn
   apiGateway:
     apiKeySourceType: HEADER
   usagePlan: ${file(./serverless.config.${opt:stage, 'development'}.yml):provider.usagePlan}
