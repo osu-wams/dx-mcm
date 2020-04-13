@@ -8,5 +8,5 @@ export const getQueueUrl = async (queueName: string): Promise<SQS.GetQueueUrlRes
 export const sendMessage = async (params: {
   QueueUrl: string;
   MessageBody: string;
-  MessageGroupId: string;
+  MessageGroupId?: string;
 }): Promise<SQS.SendMessageResult | AWSError> => messageQueue.sendMessage(params).promise();
