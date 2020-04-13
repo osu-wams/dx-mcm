@@ -14,7 +14,7 @@
         "MessageAttributes": {
           "action": {
             "Type": "String",
-            "Value": "create_message"
+            "Value": "/api/v1/messages/create"
           }
         },
         "Type": "Notification",
