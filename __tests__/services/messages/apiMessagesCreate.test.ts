@@ -1,4 +1,4 @@
-import { handler } from '@src/services/messages/createMessageListener';
+import { handler } from '@src/services/messages/apiMessagesCreate';
 import { dynamoDbMessage, message } from '@mocks/message.mock';
 import * as event from '../../../events/lambda.sns.create_message.json';
 

@@ -1,6 +1,6 @@
-createMessageListener:
-  handler: src/services/messages/createMessageListener.handler
-  name: ${self:service.name}-createMessageListener
+apiMessagesCreate:
+  handler: src/services/messages/apiMessagesCreate.handler
+  name: ${self:service.name}-apiMessagesCreate
   description:
     !Join [' ', ['Listens to SNS Topic', !GetAtt apiSnsTopic.TopicName, 'to create new Messages.']]
   environment:
@@ -12,9 +12,9 @@ createMessageListener:
         filterPolicy:
           action:
             - /api/v1/messages/create
-processMessagesListener:
-  handler: src/services/messages/processMessagesListener.handler
-  name: ${self:service.name}-processMessagesListener
+apiMessagesProcess:
+  handler: src/services/messages/apiMessagesProcess.handler
+  name: ${self:service.name}-apiMessagesProcess
   description:
     !Join [
       ' ',
