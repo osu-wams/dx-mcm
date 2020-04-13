@@ -4,11 +4,11 @@ createMessageListener:
   description:
     !Join [' ', ['Listens to SNS Topic', !GetAtt apiSnsTopic.TopicName, 'to create new Messages.']]
   environment:
-    SQS_QUEUE_NAME: !GetAtt messagesSqsQueue.QueueName
+    SQS_PUBLISH_QUEUE_NAME: !GetAtt messagesSqsQueue.QueueName
   events:
     - sns:
         arn: !Ref apiSnsTopic
         topicName: ${self:service.name}-api # sadly, this has to be a string and can't be !GetAtt due to a bug, see https://github.com/serverless/serverless/issues/3824#issuecomment-436533656
         filterPolicy:
           action:
-            - create_message
+            - /api/v1/messages/create

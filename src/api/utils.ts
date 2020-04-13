@@ -36,7 +36,7 @@ export const validate = (event: APIGatewayProxyEvent) => {
     valid: false,
     response: { statusCode: 400, body: JSON.stringify({ message: 'Bad Request' }) },
     payload: {},
-    action: event.path.split('/').pop()?.toLowerCase(),
+    action: event.path.toLowerCase(),
   };
 
   try {

@@ -1,4 +1,6 @@
 import { SNSEvent, SNSEventRecord } from 'aws-lambda'; // eslint-disable-line no-unused-vars, import/no-unresolved
+import { AWSError, SQS } from 'aws-sdk'; // eslint-disable-line no-unused-vars
+import { getQueueUrl as messageQueueGetQueueUrl } from '@src/messageQueue';
 
 /**
  * Validate and return the SNS record associated to this event.
@@ -22,4 +24,14 @@ export const validate = (event: SNSEvent): [boolean, SNSEventRecord | undefined]
   return [true, record];
 };
 
-export default validate;
+export const getQueueUrl = async (queueName: string): Promise<string> => {
+  const response = await messageQueueGetQueueUrl(queueName);
+  if (response === AWSError) {
+    throw new Error(`Handled AWSError when fetching queueUrl: ${response}`);
+  }
+  const queueResponse = response as SQS.GetQueueUrlResult;
+  if (!queueResponse.QueueUrl) {
+    throw new Error(`Failed fetching queueUrl: ${queueResponse}`);
+  }
+  return queueResponse.QueueUrl;
+};
