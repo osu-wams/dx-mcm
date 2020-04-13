@@ -1,6 +1,21 @@
-import { SNSEvent, SNSEventRecord } from 'aws-lambda'; // eslint-disable-line no-unused-vars, import/no-unresolved
+import { SNSEvent, SNSEventRecord, SQSEvent, SQSRecord } from 'aws-lambda'; // eslint-disable-line no-unused-vars, import/no-unresolved
 import { AWSError, SQS } from 'aws-sdk'; // eslint-disable-line no-unused-vars
 import { getQueueUrl as messageQueueGetQueueUrl } from '@src/messageQueue';
+
+/**
+ * Validate and return the SQS records associated to this event.
+ * @param event - An event from SQS
+ * @returns Array[boolean, record] - If the validation was successful and the record it validated or undefined
+ * @see <project_root>/events/lambda.sqs.*
+ */
+export const validateSQS = (event: SQSEvent): [boolean, SQSRecord[] | undefined] => {
+  if (event.Records.length === 0) {
+    console.error(`Event has no records -->  `, event);
+    return [false, undefined];
+  }
+
+  return [true, event.Records];
+};
 
 /**
  * Validate and return the SNS record associated to this event.
@@ -8,7 +23,7 @@ import { getQueueUrl as messageQueueGetQueueUrl } from '@src/messageQueue';
  * @returns Array[boolean, record] - If the validation was successful and the record it validated or undefined
  * @see <project_root>/events/lambda.sns.*
  */
-export const validate = (event: SNSEvent): [boolean, SNSEventRecord | undefined] => {
+export const validateSNS = (event: SNSEvent): [boolean, SNSEventRecord | undefined] => {
   if (event.Records.length === 0) {
     console.error(`Event has no records -->  `, event);
     return [false, undefined];
