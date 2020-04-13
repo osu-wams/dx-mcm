@@ -31,7 +31,7 @@ export const responseBody = ({
   });
 };
 
-export const validate = (event: APIGatewayProxyEvent) => {
+export const validateSnsAction = (event: APIGatewayProxyEvent) => {
   const result = {
     valid: false,
     response: { statusCode: 400, body: JSON.stringify({ message: 'Bad Request' }) },

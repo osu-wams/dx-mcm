@@ -1,11 +1,11 @@
 import { SQS_PROCESS_USER_MESSAGE_QUEUE_NAME } from '@src/constants';
 import { SQSEvent } from 'aws-lambda'; // eslint-disable-line no-unused-vars, import/no-unresolved
-import { validateSQS, getQueueUrl } from '@src/services/utils';
+import { validate, getQueueUrl } from '@src/services/sqsUtils';
 import { publishToQueue } from '@src/services/messages/utils';
 import Message from '@src/models/message';
 
 export const handler = async (event: SQSEvent) => {
-  const [valid, records] = validateSQS(event);
+  const [valid, records] = validate(event);
   if (!valid || !records) {
     return;
   }

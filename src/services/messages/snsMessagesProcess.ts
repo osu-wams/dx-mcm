@@ -1,12 +1,13 @@
 import throat from 'throat';
 import { SQS_PROCESS_MESSAGE_QUEUE_NAME } from '@src/constants';
 import { SNSEvent } from 'aws-lambda'; // eslint-disable-line no-unused-vars, import/no-unresolved
-import { validateSNS, getQueueUrl } from '@src/services/utils';
+import { validate } from '@src/services/snsUtils';
+import { getQueueUrl } from '@src/services/sqsUtils';
 import { publishToQueue } from '@src/services/messages/utils';
 import Message, { MessageStatus, Status } from '@src/models/message'; // eslint-disable-line no-unused-vars
 
 export const handler = async (event: SNSEvent) => {
-  const [valid, record] = validateSNS(event);
+  const [valid, record] = validate(event);
   if (!valid || !record) {
     return;
   }

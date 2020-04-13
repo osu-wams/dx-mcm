@@ -1,5 +1,6 @@
 service:
   name: osu-dx-mcm-${opt:stage, 'development'}
+  description: OSU DX Multi-Channel Messaging Stack
 
 package:
   individually: true
@@ -62,7 +63,6 @@ provider:
   usagePlan: ${file(./serverless.config.${opt:stage, 'development'}.yml):provider.usagePlan}
 
 functions:
-  - ${file(./src/api/serverless-functions.yml)}
-  - ${file(./src/services/serverless-functions.yml)}
+  - ${file(./src/services/messages/serverless-functions.yml)}
 
 resources: ${file(./serverless-resources.yml)}

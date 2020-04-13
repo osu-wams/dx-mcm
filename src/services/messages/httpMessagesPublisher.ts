@@ -1,9 +1,10 @@
 import { SNS } from 'aws-sdk';
-import { validate, responseBody } from '@src/api/utils';
+import { SNS_TOPIC_ARN } from '@src/constants';
+import { validateSnsAction, responseBody } from '@src/services/httpUtils';
 import { APIGatewayProxyHandler, APIGatewayProxyEvent } from 'aws-lambda'; // eslint-disable-line no-unused-vars, import/no-unresolved
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent) => {
-  const { valid, response, payload, action } = validate(event);
+  const { valid, response, payload, action } = validateSnsAction(event);
   if (!valid) return response;
 
   try {
@@ -11,7 +12,7 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
     const published = await sns
       .publish({
         Message: JSON.stringify(payload),
-        TopicArn: process.env.SNS_TOPIC_ARN,
+        TopicArn: SNS_TOPIC_ARN,
         Subject: 'Messages',
         MessageAttributes: {
           action: {

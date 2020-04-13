@@ -1,0 +1,78 @@
+httpMessagesList:
+  handler: src/services/messages/httpMessagesList.handler
+  name: ${self:service.name}-messagesList
+  description: Query a list of messages
+  events:
+    - http:
+        private: true # forces header x-api-key to be present with a valid key from provider.apiKeys
+        method: get
+        path: /api/v1/messages/sendAt
+    - http:
+        private: true # forces header x-api-key to be present with a valid key from provider.apiKeys
+        method: get
+        path: /api/v1/messages/sendAt/{date}
+        request:
+          parameters:
+            paths:
+              date: true
+httpMessagesPublisher:
+  handler: src/services/messages/httpMessagesPublisher.handler
+  name: ${self:service.name}-messagesPublisher
+  description: Posts API calls to the SNS topic for lambda subscribers to act upon.
+  environment:
+    SNS_TOPIC_ARN: !Ref apiSnsTopic
+  events:
+    - http:
+        private: true # forces header x-api-key to be present with a valid key from provider.apiKeys
+        method: post
+        path: /api/v1/messages/action/{action}
+        request:
+          parameters:
+            paths:
+              action: true
+snsMessagesCreate:
+  handler: src/services/messages/snsMessagesCreate.handler
+  name: ${self:service.name}-messagesCreate
+  description:
+    !Join [' ', ['Listens to SNS Topic', !GetAtt apiSnsTopic.TopicName, 'to create new Messages.']]
+  environment:
+    SQS_PROCESS_MESSAGE_QUEUE_NAME: !GetAtt messagesSqsQueue.QueueName
+  events:
+    - sns:
+        arn: !Ref apiSnsTopic
+        topicName: ${self:service.name}-api # sadly, this has to be a string and can't be !GetAtt due to a bug, see https://github.com/serverless/serverless/issues/3824#issuecomment-436533656
+        filterPolicy:
+          action:
+            - /api/v1/messages/action/create
+snsMessagesProcess:
+  handler: src/services/messages/snsMessagesProcess.handler
+  name: ${self:service.name}-messagesProcess
+  description:
+    !Join [
+      ' ',
+      [
+        'Listens to SNS Topic',
+        !GetAtt apiSnsTopic.TopicName,
+        'to initiate processing any Messages ready to be sent.',
+      ],
+    ]
+  environment:
+    SQS_PROCESS_MESSAGE_QUEUE_NAME: !GetAtt messagesSqsQueue.QueueName
+  events:
+    - sns:
+        arn: !Ref apiSnsTopic
+        topicName: ${self:service.name}-api # sadly, this has to be a string and can't be !GetAtt due to a bug, see https://github.com/serverless/serverless/issues/3824#issuecomment-436533656
+        filterPolicy:
+          action:
+            - /api/v1/messages/action/process
+sqsMessageProcessor:
+  handler: src/services/messages/sqsMessageProcessor.handler
+  name: ${self:service.name}-messageProcessor
+  description:
+    !Join [' ', ['Listens to SQS Queue', !GetAtt messagesSqsQueue.QueueName, 'to send a Message.']]
+  environment:
+    SQS_PROCESS_USER_MESSAGE_QUEUE_NAME: !GetAtt userMessagesSqsQueue.QueueName
+  events:
+    - sqs:
+        arn: !GetAtt messagesSqsQueue.Arn
+        batchSize: 1
