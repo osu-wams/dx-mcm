@@ -9,7 +9,7 @@ tags:
   - name: api
     description: DX Multi-Channel Messaging
 paths:
-  /messages/{action}:
+  /messages/action/{action}:
     post:
       tags:
         - api
@@ -22,12 +22,14 @@ paths:
           schema:
             type: string
             enum:
-              - create_message
+              - create
+              - process
           required: true
           description: >
             The API action to perform.
 
-            * `create_message` : Initiate a new multi-channel message.
+            * `create` : Initiate a new multi-channel message.
+            * `process` : Initiate sending any message that is currently ready to send.
       requestBody:
         description: The message request to send.
         content:
