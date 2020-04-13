@@ -14,7 +14,7 @@
         "MessageAttributes": {
           "action": {
             "Type": "String",
-            "Value": "/api/v1/messages/process"
+            "Value": "/api/v1/messages/action/process"
           }
         },
         "Type": "Notification",
