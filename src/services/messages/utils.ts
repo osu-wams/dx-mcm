@@ -20,14 +20,24 @@ export const persistMessage = async (record: SNSEventRecord): Promise<Message | 
   return message;
 };
 
-export const publishToQueue = async (message: Message, queueUrl: string) => {
-  const published = await sendMessage({
+export const publishToQueue = async (
+  message: Message,
+  queueUrl: string,
+  messageGroupId?: string,
+) => {
+  const publish: {
+    QueueUrl: string;
+    MessageBody: string;
+    MessageGroupId?: string;
+  } = {
     QueueUrl: queueUrl,
     MessageBody: JSON.stringify(message),
-    MessageGroupId: message.id,
-  });
+  };
+  if (messageGroupId) publish.MessageGroupId = messageGroupId;
+
+  const published = await sendMessage(publish);
   if (!published || published === AWSError) {
     console.error('Failed to publish -->  ', message, published);
   }
-  console.log('Published -->  ', published);
+  console.log('Published -->  ', queueUrl, message, published);
 };
