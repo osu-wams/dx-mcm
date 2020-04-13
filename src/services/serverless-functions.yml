@@ -4,7 +4,7 @@ createMessageListener:
   description:
     !Join [' ', ['Listens to SNS Topic', !GetAtt apiSnsTopic.TopicName, 'to create new Messages.']]
   environment:
-    SQS_PUBLISH_QUEUE_NAME: !GetAtt messagesSqsQueue.QueueName
+    SQS_PROCESS_MESSAGE_QUEUE_NAME: !GetAtt messagesSqsQueue.QueueName
   events:
     - sns:
         arn: !Ref apiSnsTopic
@@ -12,3 +12,35 @@ createMessageListener:
         filterPolicy:
           action:
             - /api/v1/messages/create
+processMessagesListener:
+  handler: src/services/messages/processMessagesListener.handler
+  name: ${self:service.name}-processMessagesListener
+  description:
+    !Join [
+      ' ',
+      [
+        'Listens to SNS Topic',
+        !GetAtt apiSnsTopic.TopicName,
+        'to initiate processing any Messages ready to be sent.',
+      ],
+    ]
+  environment:
+    SQS_PROCESS_MESSAGE_QUEUE_NAME: !GetAtt messagesSqsQueue.QueueName
+  events:
+    - sns:
+        arn: !Ref apiSnsTopic
+        topicName: ${self:service.name}-api # sadly, this has to be a string and can't be !GetAtt due to a bug, see https://github.com/serverless/serverless/issues/3824#issuecomment-436533656
+        filterPolicy:
+          action:
+            - /api/v1/messages/process
+messageProcessor:
+  handler: src/services/messages/messageProcessor.handler
+  name: ${self:service.name}-messageProcessor
+  description:
+    !Join [' ', ['Listens to SQS Queue', !GetAtt messagesSqsQueue.QueueName, 'to send a Message.']]
+  environment:
+    SQS_PROCESS_USER_MESSAGE_QUEUE_NAME: !GetAtt userMessagesSqsQueue.QueueName
+  events:
+    - sqs:
+        arn: !GetAtt messagesSqsQueue.Arn
+        batchSize: 1

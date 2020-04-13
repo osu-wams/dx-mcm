@@ -9,6 +9,10 @@ Resources:
       QueueName: ${self:service.name}-messages.fifo
       ContentBasedDeduplication: true
       FifoQueue: true
+  userMessagesSqsQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: ${self:service.name}-user-messages
   messagesTable:
     Type: AWS::DynamoDB::Table
     Properties:
