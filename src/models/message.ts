@@ -29,7 +29,7 @@ interface MessageParams {
   };
 }
 
-interface MessageStatus {
+export interface MessageStatus {
   id: string;
   sendAt: string;
   status: string;
