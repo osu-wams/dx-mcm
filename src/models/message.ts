@@ -43,19 +43,19 @@ export enum Status {
 /* eslint-enable no-unused-vars */
 
 class Message {
-  sendAt: string = '';
-
-  id: string = '';
-
-  status: string = Status.NEW;
-
-  populationParams: MessagePopulationParams = {};
-
   channelIds: string[] = [];
 
   content: string = '';
 
   contentShort: string = '';
+
+  id: string = '';
+
+  populationParams: MessagePopulationParams = {};
+
+  sendAt: string = '';
+
+  status: string = Status.NEW;
 
   static TABLE_NAME: string = `${DYNAMODB_TABLE_PREFIX}Messages`;
 
