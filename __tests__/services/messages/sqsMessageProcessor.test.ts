@@ -1,7 +1,8 @@
-import { handler } from '@src/services/messages/snsMessagesCreate';
-import { dynamoDbMessage, message } from '@mocks/message.mock';
-import * as event from '../../../events/lambda.sns.messagesCreate.json';
+import { handler } from '@src/services/messages/sqsMessageProcessor';
+// import { dynamoDbMessage } from '@mocks/message.mock';
+import * as event from '../../../events/lambda.sqs.messageProcessor.json';
 
+/*
 const mockCreateTable = jest.fn();
 const mockQuery = jest.fn();
 const mockPutItem = jest.fn();
@@ -11,6 +12,7 @@ jest.mock('@src/database', () => ({
   query: () => mockQuery(),
   putItem: () => mockPutItem(),
 }));
+*/
 
 const mockGetQueueUrl = jest.fn();
 const mockSendMessage = jest.fn();
@@ -21,9 +23,7 @@ jest.mock('@src/messageQueue', () => ({
 }));
 
 describe('handler', () => {
-  it('creates a new record', async () => {
-    mockPutItem.mockResolvedValue(message);
-    mockQuery.mockResolvedValue({ Items: [dynamoDbMessage] });
+  it('publishes pending messages to the queue', async () => {
     mockGetQueueUrl.mockResolvedValue({ QueueUrl: 'some-url' });
     const result = await handler(event);
     expect(result).toEqual(undefined);
@@ -31,7 +31,7 @@ describe('handler', () => {
     expect(mockSendMessage).toHaveBeenCalled();
   });
   it('throws an error when there is a unhandled exception', async () => {
-    mockPutItem.mockRejectedValue('boom');
+    mockGetQueueUrl.mockRejectedValue('boom');
     try {
       await handler(event);
     } catch (err) {
