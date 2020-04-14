@@ -1,9 +1,8 @@
 import throat from 'throat';
-import { APIGatewayProxyHandler, APIGatewayProxyEvent } from 'aws-lambda'; // eslint-disable-line no-unused-vars, import/no-unresolved
+import { APIGatewayProxyEvent } from 'aws-lambda'; // eslint-disable-line no-unused-vars, import/no-unresolved
 import Message, { MessageStatus, Status } from '@src/models/message'; // eslint-disable-line no-unused-vars
 
-export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent) => {
-  console.log(event);
+export const handler = async (event: APIGatewayProxyEvent) => {
   try {
     const { date } = event.pathParameters ?? { date: new Date().toISOString().slice(0, 10) };
     const messageStatuses: MessageStatus[] = await Message.byStatusBeforeDate(Status.NEW, date);
