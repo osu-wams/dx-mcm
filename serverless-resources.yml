@@ -55,8 +55,6 @@ Resources:
           AttributeType: S
         - AttributeName: channelMessageId
           AttributeType: S
-        - AttributeName: messageId
-          AttributeType: S
         - AttributeName: channelId
           AttributeType: S
         - AttributeName: sendAt
