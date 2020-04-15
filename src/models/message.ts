@@ -1,6 +1,6 @@
 import { DYNAMODB_TABLE_PREFIX } from '@src/constants';
 import { DynamoDB } from 'aws-sdk'; // eslint-disable-line no-unused-vars
-import { createTable, putItem, query } from '@src/database';
+import { putItem, query } from '@src/database';
 
 export interface DynamoDBMessageItem extends DynamoDB.PutItemInputAttributeMap {
   channelIds: { SS: string[] };
@@ -98,10 +98,6 @@ class Message {
     }
   }
 
-  // sendAtElapsed() {
-  //   return this.sendAt <= new Date().toISOString().slice(0, 10);
-  // }
-
   static upsert = async (props: Message): Promise<Message | undefined> => {
     // ! DynamoDb only supports 'ALL_OLD' or 'NONE' for return values from the
     // ! putItem call, which means the only way to get values from ddb would be to
@@ -189,9 +185,9 @@ class Message {
       const results: AWS.DynamoDB.QueryOutput = await query(params);
       if (!results.Items) return [];
       return results.Items.map((i) => ({
-        id: i.id.S || '',
-        sendAt: i.sendAt.S || '',
-        status: i.status.S || '',
+        id: i.id.S!,
+        sendAt: i.sendAt.S!,
+        status: i.status.S!,
       }));
     } catch (err) {
       console.error(`Message.byStatusBeforeDate(${status}, ${sendAt}) failed:`, err);
@@ -200,10 +196,10 @@ class Message {
   };
 
   /**
-   * Translate the TrendingResource properties into the properly shaped data as an Item for
+   * Translate the properties into the properly shaped data as an Item for
    * Dynamodb.
    * @param props - the properties to translate to a dynamodb item
-   * @returns DynamoDbTrendingResourceItem - the Item for use in Dynamodb
+   * @returns - the Item for use in Dynamodb
    */
   static asDynamoDbItem = (props: Message): DynamoDBMessageItem => {
     return {
@@ -212,39 +208,13 @@ class Message {
       status: { S: props.status },
       populationParams: {
         M: {
-          affiliation: { S: props.populationParams.affiliation || '' },
+          affiliation: { S: props.populationParams.affiliation! },
         },
       },
       channelIds: { SS: props.channelIds },
       content: { S: props.content },
       contentShort: { S: props.contentShort },
     };
-  };
-
-  /**
-   * Create the table in DynamoDb for local development
-   */
-  static createTable = () => {
-    createTable({
-      AttributeDefinitions: [
-        { AttributeName: 'sendAt', AttributeType: 'S' },
-        { AttributeName: 'id', AttributeType: 'S' },
-      ],
-      KeySchema: [
-        { AttributeName: 'sendAt', KeyType: 'HASH' },
-        { AttributeName: 'id', KeyType: 'RANGE' },
-      ],
-      ProvisionedThroughput: {
-        ReadCapacityUnits: 5,
-        WriteCapacityUnits: 5,
-      },
-      TableName: Message.TABLE_NAME,
-      StreamSpecification: {
-        StreamEnabled: false,
-      },
-    })
-      .then((v) => console.log(v))
-      .catch((err) => console.error(err));
   };
 }
 

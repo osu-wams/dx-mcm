@@ -9,7 +9,4 @@ export const putItem = (i: DynamoDB.PutItemInput): Promise<DynamoDB.PutItemOutpu
 export const query = (i: DynamoDB.QueryInput): Promise<DynamoDB.QueryOutput> =>
   database.query(i).promise();
 
-export const createTable = (t: DynamoDB.CreateTableInput): Promise<DynamoDB.CreateTableOutput> =>
-  database.createTable(t).promise();
-
 export default database;

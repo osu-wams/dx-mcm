@@ -31,16 +31,9 @@ describe('Message', () => {
       const model = new Message({ dynamoDbMessage: emptyDynamoDbMessage });
       expect(model).toEqual(emptyMessage);
     });
-  });
-
-  describe('createTable', () => {
-    it('runs create table and logs success', () => {
-      mockCreateTable.mockResolvedValue('mockCreateTable resolved true in test');
-      expect(Message.createTable()).toBe(undefined);
-    });
-    it('runs create table and logs error', () => {
-      mockCreateTable.mockRejectedValue('mockCreateTable rejected with error in test');
-      expect(Message.createTable()).toBe(undefined);
+    it('builds an invalid empty message from an empty dynamodb item', () => {
+      const model = new Message({ dynamoDbMessage: {} });
+      expect(model).toEqual(new Message({}));
     });
   });
 

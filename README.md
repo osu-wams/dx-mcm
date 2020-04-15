@@ -19,7 +19,7 @@ Run ts-node to `import` and run code for testing/development, `tsconfig.repl.jso
 $ yarn repl
 ...
 > import Message from '@src/models/message';
-> Message.createTable();
+> Message.find("blah");
 ```
 
 ## Invoke local lambda with mock data

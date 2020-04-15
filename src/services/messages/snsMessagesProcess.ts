@@ -33,6 +33,7 @@ export const handler = async (event: SNSEvent) => {
         ),
     );
   } catch (error) {
+    /* istanbul ignore next */
     console.error(error);
   }
 };
