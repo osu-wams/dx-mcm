@@ -17,6 +17,7 @@ export const handler = async (event: SNSEvent) => {
       await publishToQueue(message, queueUrl, message.id);
     }
   } catch (error) {
+    /* istanbul ignore next */
     console.error(error);
   }
 };

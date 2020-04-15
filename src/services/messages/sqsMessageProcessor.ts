@@ -22,6 +22,7 @@ export const handler = async (event: SQSEvent) => {
     }
     */
   } catch (error) {
+    /* istanbul ignore next */
     console.error(error);
   }
 };
