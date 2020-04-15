@@ -4,6 +4,7 @@ import { putItem, updateItem, query } from '@src/database';
 
 export interface DynamoDBUserMessageItem extends DynamoDB.PutItemInputAttributeMap {
   channelId: { S: string };
+  channelMessageId: { S: string };
   content: { S: string };
   contentShort: { S: string };
   messageId: { S: string };
@@ -27,6 +28,7 @@ interface UserMessageParams {
 
 export interface UserMessageStatus {
   channelId: string;
+  channelMessageId: string;
   messageId: string;
   osuId: string;
   sendAt: string;
@@ -48,8 +50,10 @@ export enum Status {
  * @param channelId the channel id
  * @param messageId the message id
  */
-const channelMessageId = (channelId: string, messageId: string): string =>
-  `${channelId}:${messageId}`;
+const channelMessageId = (channelId: string, messageId: string): string => {
+  if (channelId.length > 0 && messageId.length > 0) return `${channelId}:${messageId}`;
+  return '';
+};
 
 class UserMessage {
   channelId: string = '';
@@ -72,6 +76,10 @@ class UserMessage {
 
   static STATUS_INDEX_NAME: string = `${DYNAMODB_TABLE_PREFIX}-UserMessageStatuses`;
 
+  static CHANNEL_INDEX_NAME: string = `${DYNAMODB_TABLE_PREFIX}-UserMessageChannels`;
+
+  static SEND_AT_INDEX_NAME: string = `${DYNAMODB_TABLE_PREFIX}-UserMessageSendAt`;
+
   static COMPOSITE_KEY_NAME: string = 'channelMessageId';
 
   constructor(p: UserMessageParams) {
@@ -84,11 +92,13 @@ class UserMessage {
       this.channelId = channelId;
       this.content = content;
       this.contentShort = contentShort;
+      this.channelMessageId = channelMessageId(this.channelId, this.messageId);
     }
 
     if (p.dynamoDbUserMessage) {
       const {
         sendAt,
+        channelMessageId: dbChannelMessageId,
         messageId,
         status,
         osuId,
@@ -103,9 +113,8 @@ class UserMessage {
       if (channelId) this.channelId = channelId.S || '';
       if (content) this.content = content.S || '';
       if (contentShort) this.contentShort = contentShort.S || '';
+      if (dbChannelMessageId) this.channelMessageId = dbChannelMessageId.S || '';
     }
-
-    this.channelMessageId = channelMessageId(this.channelId, this.messageId);
   }
 
   static upsert = async (props: UserMessage): Promise<UserMessage | undefined> => {
@@ -200,6 +209,7 @@ class UserMessage {
       if (!results.Items) return [];
       return results.Items.map((i) => ({
         channelId: i.channelId.S!,
+        channelMessageId: i.channelMessageId.S!,
         messageId: i.messageId.S!,
         osuId: i.osuId.S!,
         sendAt: i.sendAt.S!,
@@ -247,6 +257,9 @@ class UserMessage {
   static asDynamoDbItem = (props: UserMessage): DynamoDBUserMessageItem => {
     return {
       channelId: { S: props.channelId },
+      channelMessageId: {
+        S: props.channelMessageId ?? channelMessageId(props.channelId, props.messageId),
+      },
       content: { S: props.content },
       contentShort: { S: props.contentShort },
       messageId: { S: props.messageId },
