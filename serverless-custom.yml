@@ -1,4 +1,4 @@
 s3Sync:
-  - bucketName: osu-dx-mcm-static
+  - bucketName: ${self:service.name}-static
     localDir: dist/static
     acl: public-read
