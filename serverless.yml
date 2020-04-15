@@ -39,15 +39,23 @@ provider:
       Action:
         - dynamodb:GetItem
         - dynamodb:PutItem
+        - dynamodb:UpdateItem
         - dynamodb:Query
       Resource:
         - !GetAtt messagesTable.Arn
+        - !Join ['', [!GetAtt messagesTable.Arn, '/index/${self:service.name}-MessageStatuses']]
+        - !GetAtt userMessagesTable.Arn
         - !Join [
             '',
-            [
-              !GetAtt messagesTable.Arn,
-              '/index/${opt:stage, self:provider.stage}-dx-mcm-MessageStatuses',
-            ],
+            [!GetAtt userMessagesTable.Arn, '/index/${self:service.name}-UserMessageStatuses'],
+          ]
+        - !Join [
+            '',
+            [!GetAtt userMessagesTable.Arn, '/index/${self:service.name}-UserMessageChannels'],
+          ]
+        - !Join [
+            '',
+            [!GetAtt userMessagesTable.Arn, '/index/${self:service.name}-UserMessageSendAt'],
           ]
     - Effect: Allow
       Action:
@@ -65,5 +73,6 @@ provider:
 
 functions:
   - ${file(./src/services/messages/serverless-functions.yml)}
+  - ${file(./src/services/userMessages/serverless-functions.yml)}
 
 resources: ${file(./serverless-resources.yml)}

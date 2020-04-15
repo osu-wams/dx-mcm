@@ -1,0 +1,13 @@
+httpUserMessagesList:
+  handler: src/services/userMessages/httpUserMessagesList.handler
+  name: ${self:service.name}-userMessagesList
+  description: Query a list of user messages
+  events:
+    - http:
+        private: true # forces header x-api-key to be present with a valid key from provider.apiKeys
+        method: get
+        path: /api/v1/userMessages/{osuId}
+        request:
+          parameters:
+            paths:
+              osuId: true
