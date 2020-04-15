@@ -27,6 +27,7 @@ interface UserMessageParams {
 
 export interface UserMessageStatus {
   channelId: string;
+  channelMessageId: string;
   messageId: string;
   osuId: string;
   sendAt: string;
@@ -71,6 +72,10 @@ class UserMessage {
   static TABLE_NAME: string = `${DYNAMODB_TABLE_PREFIX}-UserMessages`;
 
   static STATUS_INDEX_NAME: string = `${DYNAMODB_TABLE_PREFIX}-UserMessageStatuses`;
+
+  static CHANNEL_INDEX_NAME: string = `${DYNAMODB_TABLE_PREFIX}-UserMessageChannels`;
+
+  static SEND_AT_INDEX_NAME: string = `${DYNAMODB_TABLE_PREFIX}-UserMessageSendAt`;
 
   static COMPOSITE_KEY_NAME: string = 'channelMessageId';
 
@@ -200,6 +205,7 @@ class UserMessage {
       if (!results.Items) return [];
       return results.Items.map((i) => ({
         channelId: i.channelId.S!,
+        channelMessageId: i.channelMessageId.S!,
         messageId: i.messageId.S!,
         osuId: i.osuId.S!,
         sendAt: i.sendAt.S!,
