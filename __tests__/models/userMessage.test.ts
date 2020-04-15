@@ -99,7 +99,12 @@ describe('UserMessage', () => {
       expect(await UserMessage.byStatus('123456789', Status.NEW)).toStrictEqual([]);
     });
     it('finds all matching records', async () => {
-      mockQuery.mockResolvedValue({ Items: [dynamoDbUserMessage, dynamoDbUserMessage] });
+      mockQuery.mockResolvedValue({
+        Items: [
+          { ...dynamoDbUserMessage, channelMessageId: { S: userMessage.channelMessageId } },
+          { ...dynamoDbUserMessage, channelMessageId: { S: userMessage.channelMessageId } },
+        ],
+      });
       expect(await UserMessage.byStatus('123456789', Status.NEW)).toEqual([
         userMessageStatus,
         userMessageStatus,

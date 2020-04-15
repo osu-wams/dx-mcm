@@ -28,6 +28,7 @@ const userMessage = {
 };
 const userMessageStatus = {
   channelId: '123',
+  channelMessageId: '123:message-123456789',
   messageId: 'message-123456789',
   osuId: '123456789',
   sendAt: '2020-01-01',
