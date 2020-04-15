@@ -46,6 +46,80 @@ Resources:
           ProvisionedThroughput:
             ReadCapacityUnits: 5
             WriteCapacityUnits: 5
+  userMessagesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: ${self:service.name}-UserMessages
+      AttributeDefinitions:
+        - AttributeName: osuId
+          AttributeType: S
+        - AttributeName: channelMessageId
+          AttributeType: S
+        - AttributeName: messageId
+          AttributeType: S
+        - AttributeName: channelId
+          AttributeType: S
+        - AttributeName: sendAt
+          AttributeType: S
+        - AttributeName: status
+          AttributeType: S
+      KeySchema:
+        - AttributeName: osuId
+          KeyType: HASH
+        - AttributeName: channelMessageId
+          KeyType: RANGE
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+      GlobalSecondaryIndexes:
+        - IndexName: ${self:service.name}-UserMessageStatuses
+          KeySchema:
+            - AttributeName: osuId
+              KeyType: HASH
+            - AttributeName: status
+              KeyType: RANGE
+          Projection:
+            NonKeyAttributes:
+              - channelMessageId
+              - messageId
+              - channelId
+              - sendAt
+            ProjectionType: INCLUDE
+          ProvisionedThroughput:
+            ReadCapacityUnits: 5
+            WriteCapacityUnits: 5
+        - IndexName: ${self:service.name}-UserMessageChannels
+          KeySchema:
+            - AttributeName: osuId
+              KeyType: HASH
+            - AttributeName: channelId
+              KeyType: RANGE
+          Projection:
+            NonKeyAttributes:
+              - channelMessageId
+              - messageId
+              - sendAt
+              - status
+            ProjectionType: INCLUDE
+          ProvisionedThroughput:
+            ReadCapacityUnits: 5
+            WriteCapacityUnits: 5
+        - IndexName: ${self:service.name}-UserMessageSendAt
+          KeySchema:
+            - AttributeName: osuId
+              KeyType: HASH
+            - AttributeName: sendAt
+              KeyType: RANGE
+          Projection:
+            NonKeyAttributes:
+              - channelMessageId
+              - messageId
+              - channelId
+              - status
+            ProjectionType: INCLUDE
+          ProvisionedThroughput:
+            ReadCapacityUnits: 5
+            WriteCapacityUnits: 5
   staticBucket:
     Type: AWS::S3::Bucket
     Properties:
