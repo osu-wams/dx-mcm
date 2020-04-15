@@ -33,17 +33,6 @@ describe('Message', () => {
     });
   });
 
-  describe('createTable', () => {
-    it('runs create table and logs success', () => {
-      mockCreateTable.mockResolvedValue('mockCreateTable resolved true in test');
-      expect(Message.createTable()).toBe(undefined);
-    });
-    it('runs create table and logs error', () => {
-      mockCreateTable.mockRejectedValue('mockCreateTable rejected with error in test');
-      expect(Message.createTable()).toBe(undefined);
-    });
-  });
-
   describe('find', () => {
     it('does not find a matching record', async () => {
       mockQuery.mockResolvedValue({ Items: undefined });
