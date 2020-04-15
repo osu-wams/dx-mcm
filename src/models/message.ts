@@ -185,9 +185,9 @@ class Message {
       const results: AWS.DynamoDB.QueryOutput = await query(params);
       if (!results.Items) return [];
       return results.Items.map((i) => ({
-        id: i.id.S || '',
-        sendAt: i.sendAt.S || '',
-        status: i.status.S || '',
+        id: i.id.S!,
+        sendAt: i.sendAt.S!,
+        status: i.status.S!,
       }));
     } catch (err) {
       console.error(`Message.byStatusBeforeDate(${status}, ${sendAt}) failed:`, err);
@@ -208,7 +208,7 @@ class Message {
       status: { S: props.status },
       populationParams: {
         M: {
-          affiliation: { S: props.populationParams.affiliation || '' },
+          affiliation: { S: props.populationParams.affiliation! },
         },
       },
       channelIds: { SS: props.channelIds },

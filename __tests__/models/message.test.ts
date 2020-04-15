@@ -31,6 +31,10 @@ describe('Message', () => {
       const model = new Message({ dynamoDbMessage: emptyDynamoDbMessage });
       expect(model).toEqual(emptyMessage);
     });
+    it('builds an invalid empty message from an empty dynamodb item', () => {
+      const model = new Message({ dynamoDbMessage: {} });
+      expect(model).toEqual(new Message({}));
+    });
   });
 
   describe('find', () => {
