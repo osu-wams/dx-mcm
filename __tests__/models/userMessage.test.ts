@@ -10,11 +10,13 @@ import {
 const mockCreateTable = jest.fn();
 const mockQuery = jest.fn();
 const mockPutItem = jest.fn();
+const mockUpdateItem = jest.fn();
 jest.mock('@src/database', () => ({
   ...jest.requireActual('@src/database'),
   createTable: () => mockCreateTable(),
   query: () => mockQuery(),
   putItem: () => mockPutItem(),
+  updateItem: () => mockUpdateItem(),
 }));
 
 describe('UserMessage', () => {
@@ -107,6 +109,24 @@ describe('UserMessage', () => {
       mockQuery.mockRejectedValue('boom');
       try {
         await UserMessage.byStatus('123456789', Status.NEW);
+      } catch (err) {
+        expect(err).toBe('boom');
+      }
+    });
+  });
+
+  describe('updateStatus', () => {
+    it('updates the status of a new record', async () => {
+      mockUpdateItem.mockResolvedValue(userMessage);
+      const original = { ...userMessage }; // cause a new object to be created with original values, userMessage gets mutated
+      const updated = await UserMessage.updateStatus(userMessage, Status.READ);
+      expect(updated.status).not.toEqual(original.status);
+      expect(updated.status).toEqual(Status.READ);
+    });
+    it('throws an error when there is a unhandled exception', async () => {
+      mockUpdateItem.mockRejectedValue('boom');
+      try {
+        await UserMessage.updateStatus(userMessage, Status.READ);
       } catch (err) {
         expect(err).toBe('boom');
       }
