@@ -1,5 +1,14 @@
 [![codecov](https://codecov.io/gh/osu-wams/dx-mcm/branch/master/graph/badge.svg)](https://codecov.io/gh/osu-wams/dx-mcm)
 
+# Deploy a developer-specific development stack
+
+Perform a complete build and deployment to a bespoke stack including the developers name. This feature provides each developer a way to work in isolation without having
+any potential impacts on others work and testing.
+
+```
+$ yarn deploy --developer=<YOUR_NAME_HERE>
+```
+
 # Development Workflow
 
 ## ts-node as the REPL
