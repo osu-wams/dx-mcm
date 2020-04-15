@@ -18,6 +18,7 @@ const emptyDynamoDbUserMessage = {
 };
 const userMessage = {
   channelId: '123',
+  channelMessageId: '123:message-123456789',
   content: 'content',
   contentShort: 'contentShort',
   messageId: 'message-123456789',
@@ -34,6 +35,7 @@ const userMessageStatus = {
 };
 const emptyUserMessage = {
   channelId: '',
+  channelMessageId: ':',
   content: '',
   contentShort: '',
   messageId: '',

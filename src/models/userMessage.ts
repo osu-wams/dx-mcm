@@ -1,6 +1,6 @@
 import { DYNAMODB_TABLE_PREFIX } from '@src/constants';
 import { DynamoDB } from 'aws-sdk'; // eslint-disable-line no-unused-vars
-import { putItem, query } from '@src/database';
+import { putItem, updateItem, query } from '@src/database';
 
 export interface DynamoDBUserMessageItem extends DynamoDB.PutItemInputAttributeMap {
   channelId: { S: string };
@@ -42,8 +42,19 @@ export enum Status {
 }
 /* eslint-enable no-unused-vars */
 
+/**
+ * Generate the composite key value (<channelId>:<messageId>) to act as the
+ * RANGE key for DynamoDb
+ * @param channelId the channel id
+ * @param messageId the message id
+ */
+const channelMessageId = (channelId: string, messageId: string): string =>
+  `${channelId}:${messageId}`;
+
 class UserMessage {
   channelId: string = '';
+
+  channelMessageId?: string;
 
   content: string = '';
 
@@ -60,6 +71,8 @@ class UserMessage {
   static TABLE_NAME: string = `${DYNAMODB_TABLE_PREFIX}-UserMessages`;
 
   static STATUS_INDEX_NAME: string = `${DYNAMODB_TABLE_PREFIX}-UserMessageStatuses`;
+
+  static COMPOSITE_KEY_NAME: string = 'channelMessageId';
 
   constructor(p: UserMessageParams) {
     if (p.userMessage) {
@@ -91,6 +104,8 @@ class UserMessage {
       if (content) this.content = content.S || '';
       if (contentShort) this.contentShort = contentShort.S || '';
     }
+
+    this.channelMessageId = channelMessageId(this.channelId, this.messageId);
   }
 
   static upsert = async (props: UserMessage): Promise<UserMessage | undefined> => {
@@ -148,18 +163,17 @@ class UserMessage {
         KeyConditionExpression: '#keyAttribute = :keyValue AND #rangeAttribute = :rangeValue',
         ExpressionAttributeNames: {
           '#keyAttribute': 'osuId',
-          '#rangeAttribute': 'messageId',
+          '#rangeAttribute': UserMessage.COMPOSITE_KEY_NAME,
         },
         ExpressionAttributeValues: {
           ':keyValue': { S: osuId },
-          ':rangeValue': { S: messageId },
+          ':rangeValue': { S: channelMessageId(channelId, messageId) },
         },
         Select: 'ALL_ATTRIBUTES',
       };
       const results: AWS.DynamoDB.QueryOutput = await query(params);
       if (!results.Items) return undefined;
-      const result = results.Items.find((i) => i.channelId.S === channelId);
-      return new UserMessage({ dynamoDbUserMessage: result });
+      return new UserMessage({ dynamoDbUserMessage: results.Items.shift() });
     } catch (err) {
       console.error(`UserMessage.find(${osuId}, ${messageId}, ${channelId}) failed:`, err);
       throw err;
@@ -193,6 +207,33 @@ class UserMessage {
       }));
     } catch (err) {
       console.error(`UserMessage.byStatus(${osuId}, ${status}) failed:`, err);
+      throw err;
+    }
+  };
+
+  static updateStatus = async (props: UserMessage, status: string): Promise<UserMessage> => {
+    try {
+      const userMessage = props;
+      const params: AWS.DynamoDB.UpdateItemInput = {
+        TableName: UserMessage.TABLE_NAME,
+        Key: {
+          osuId: { S: userMessage.osuId.toString() },
+          [UserMessage.COMPOSITE_KEY_NAME]: {
+            S: channelMessageId(userMessage.channelId, userMessage.messageId),
+          },
+        },
+        ReturnValues: 'NONE',
+        UpdateExpression: 'SET #updateAttribute = :updateAttributeValue',
+        ExpressionAttributeNames: { '#updateAttribute': 'status' },
+        ExpressionAttributeValues: { ':updateAttributeValue': { S: status } },
+      };
+
+      const result = await updateItem(params);
+      console.log('UserMessage.updateStatus succeeded:', result);
+      userMessage.status = status;
+      return userMessage;
+    } catch (err) {
+      console.error(`UserMessage.updateStatus failed:`, err);
       throw err;
     }
   };

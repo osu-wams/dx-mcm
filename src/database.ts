@@ -6,6 +6,9 @@ const database = new DynamoDB({ apiVersion: DYNAMODB_API_VERSION });
 export const putItem = (i: DynamoDB.PutItemInput): Promise<DynamoDB.PutItemOutput> =>
   database.putItem(i).promise();
 
+export const updateItem = (i: DynamoDB.UpdateItemInput): Promise<DynamoDB.UpdateItemOutput> =>
+  database.updateItem(i).promise();
+
 export const query = (i: DynamoDB.QueryInput): Promise<DynamoDB.QueryOutput> =>
   database.query(i).promise();
 
