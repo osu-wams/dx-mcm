@@ -1,7 +1,7 @@
 require('./config');
 
 const DYNAMODB_API_VERSION = '2012-08-10';
-const DYNAMODB_TABLE_PREFIX = `${process.env.ENV}-dx-mcm-`;
+const DYNAMODB_TABLE_PREFIX = `${process.env.SERVICE_NAME}`;
 const SNS_TOPIC_ARN = `${process.env.SNS_TOPIC_ARN}`;
 const SQS_PROCESS_MESSAGE_QUEUE_NAME = `${process.env.SQS_PROCESS_MESSAGE_QUEUE_NAME}`;
 const SQS_PROCESS_USER_MESSAGE_QUEUE_NAME = `${process.env.SQS_PROCESS_USER_MESSAGE_QUEUE_NAME}`;
