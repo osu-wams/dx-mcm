@@ -1,5 +1,6 @@
 const dynamoDbUserMessage = {
   channelId: { S: '123' },
+  channelMessageId: { S: '123:message-123456789' },
   content: { S: 'content' },
   contentShort: { S: 'contentShort' },
   messageId: { S: 'message-123456789' },
@@ -9,6 +10,7 @@ const dynamoDbUserMessage = {
 };
 const emptyDynamoDbUserMessage = {
   channelId: { S: undefined },
+  channelMessageId: { S: undefined },
   content: { S: undefined },
   contentShort: { S: undefined },
   messageId: { S: undefined },
@@ -36,7 +38,7 @@ const userMessageStatus = {
 };
 const emptyUserMessage = {
   channelId: '',
-  channelMessageId: ':',
+  channelMessageId: '',
   content: '',
   contentShort: '',
   messageId: '',
