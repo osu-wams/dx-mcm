@@ -16,7 +16,7 @@ Resources:
   messagesTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: ${opt:stage, self:provider.stage}-dx-mcm-Messages
+      TableName: ${self:service.name}-Messages
       AttributeDefinitions:
         - AttributeName: sendAt
           AttributeType: S
@@ -33,7 +33,7 @@ Resources:
         ReadCapacityUnits: 5
         WriteCapacityUnits: 5
       GlobalSecondaryIndexes:
-        - IndexName: ${opt:stage, self:provider.stage}-dx-mcm-MessageStatuses
+        - IndexName: ${self:service.name}-MessageStatuses
           KeySchema:
             - AttributeName: status
               KeyType: HASH
@@ -49,5 +49,5 @@ Resources:
   staticBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: osu-dx-mcm-static
+      BucketName: ${self:service.name}-static
       AccessControl: PublicRead

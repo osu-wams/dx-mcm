@@ -57,9 +57,9 @@ class Message {
 
   status: string = Status.NEW;
 
-  static TABLE_NAME: string = `${DYNAMODB_TABLE_PREFIX}Messages`;
+  static TABLE_NAME: string = `${DYNAMODB_TABLE_PREFIX}-Messages`;
 
-  static STATUS_INDEX_NAME: string = `${DYNAMODB_TABLE_PREFIX}MessageStatuses`;
+  static STATUS_INDEX_NAME: string = `${DYNAMODB_TABLE_PREFIX}-MessageStatuses`;
 
   constructor(p: MessageParams) {
     if (p.message) {
