@@ -1,0 +1,69 @@
+name: ${self:service.name}-messageStateMachine
+id: messageStateMachine
+type: EXPRESS
+loggingConfig:
+  level: ALL
+  includeExecutionData: true
+  destinations:
+    - !GetAtt messageStateMachineLogGroup.Arn
+definition:
+  Comment: 'Processing a Message to get its target population and create new UserMessage records.'
+  StartAt: Process
+  States:
+    Process:
+      Type: Parallel
+      Next: CreateUserMessage
+      Branches:
+        - StartAt: GetUserPopulation
+          States:
+            GetUserPopulation:
+              Type: Task
+              Resource: !GetAtt stepGetUserPopulation.Arn
+              TimeoutSeconds: 120
+              HeartbeatSeconds: 30
+              ResultPath: '$.users'
+              Retry:
+                - ErrorEquals:
+                    [
+                      'States.Timeout',
+                      'Lambda.ServiceException',
+                      'Lambda.AWSLambdaException',
+                      'Lambda.SdkClientException',
+                    ]
+                  IntervalSeconds: 1
+                  BackoffRate: 2
+                  MaxAttempts: 5
+              Catch:
+                - ErrorEquals: ['States.Runtime']
+                  Next: RuntimeError
+                - ErrorEquals: ['HandledError']
+                  Next: HandledError
+                - ErrorEquals: ['States.ALL']
+                  Next: CatchAllFallback
+              End: true
+            RuntimeError:
+              Type: Pass
+              Result: 'Task failed to execute at runtime, this could be due to an invalid JSON payload in InputPath or OutputPath'
+              ResultPath: '$.error'
+              End: true
+            HandledError:
+              Type: Pass
+              Result: 'Handled error preventing GetUserPopulation task from completing, Message is unable to be delivered.'
+              ResultPath: '$.error'
+              End: true
+            CatchAllFallback:
+              Type: Pass
+              Result: 'GetUserPopulation caught an unhandled error.'
+              ResultPath: '$.error'
+              End: true
+        - StartAt: GetChannels
+          States:
+            GetChannels:
+              Type: Task
+              Resource: !GetAtt stepGetChannels.Arn
+              ResultPath: '$.channels'
+              End: true
+    CreateUserMessage:
+      Type: Task
+      Resource: !GetAtt stepCreateUserMessage.Arn
+      End: true

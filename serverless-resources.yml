@@ -123,3 +123,8 @@ Resources:
     Properties:
       BucketName: ${self:service.name}-static
       AccessControl: PublicRead
+  messageStateMachineLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: ${self:service.name}-messageStateMachineLogGroup
+      RetentionInDays: 14

@@ -76,3 +76,17 @@ sqsMessageProcessor:
     - sqs:
         arn: !GetAtt messagesSqsQueue.Arn
         batchSize: 1
+
+stepCreateUserMessage:
+  handler: src/services/messages/stepCreateUserMessage.handler
+  name: ${self:service.name}-messageCreateUserMessage
+  environment:
+    SQS_PROCESS_USER_MESSAGE_QUEUE_NAME: !GetAtt userMessagesSqsQueue.QueueName
+
+stepGetChannels:
+  handler: src/services/messages/stepGetChannels.handler
+  name: ${self:service.name}-messageGetChannels
+
+stepGetUserPopulation:
+  handler: src/services/messages/stepGetUserPopulation.handler
+  name: ${self:service.name}-messageGetUserPopulation

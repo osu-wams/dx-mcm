@@ -10,6 +10,7 @@ package:
 plugins:
   - serverless-dotenv-plugin
   - serverless-s3-sync
+  - serverless-step-functions
   - serverless-webpack
 
 custom: ${file(./serverless-custom.yml)}
@@ -67,9 +68,26 @@ provider:
       Resource:
         - !GetAtt messagesSqsQueue.Arn
         - !GetAtt userMessagesSqsQueue.Arn
+    - Effect: Allow
+      Action:
+        - logs:CreateLogDelivery
+        - logs:GetLogDelivery
+        - logs:UpdateLogDelivery
+        - logs:DeleteLogDelivery
+        - logs:ListLogDeliveries
+        - logs:PutResourcePolicy
+        - logs:DescribeResourcePolicies
+        - logs:DescribeLogGroups
+      Resource:
+        - !Join [':', ['arn:aws:states', !Ref AWS::Region, !Ref AWS::AccountId, 'stateMachine:*']]
+
   apiGateway:
     apiKeySourceType: HEADER
   usagePlan: ${file(./serverless.config.${opt:stage, 'development'}.yml):provider.usagePlan}
+
+stepFunctions:
+  stateMachines:
+    messageStateMachine: ${file(./src/services/messages/serverless-state-machine.yml)}
 
 functions:
   - ${file(./src/services/messages/serverless-functions.yml)}
