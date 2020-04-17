@@ -12,16 +12,19 @@ definition:
   States:
     Process:
       Type: Parallel
+      Comment: 'Adds Parallel task results to original data; { processedQueries:{ users: [],channels: [] } }'
       Next: CreateUserMessage
+      ResultPath: '$.processedQueries'
       Branches:
         - StartAt: GetUserPopulation
           States:
             GetUserPopulation:
               Type: Task
+              Comment: 'Branch returns only its data (users:[]) to parent parallel state for inclusion'
               Resource: !GetAtt stepGetUserPopulation.Arn
               TimeoutSeconds: 120
               HeartbeatSeconds: 30
-              ResultPath: '$.users'
+              ResultPath: '$'
               Retry:
                 - ErrorEquals:
                     [
@@ -60,10 +63,12 @@ definition:
           States:
             GetChannels:
               Type: Task
+              Comment: 'Branch returns only its data (channels:[]) to parent parallel state for inclusion'
               Resource: !GetAtt stepGetChannels.Arn
-              ResultPath: '$.channels'
+              ResultPath: '$'
               End: true
     CreateUserMessage:
       Type: Task
+      Comment: 'Given the Message and { processedQueries: { users: [], channels: [] } found in upstream processing, create a new UserMessage for each and publish to the SQS Queue.'
       Resource: !GetAtt stepCreateUserMessage.Arn
       End: true
