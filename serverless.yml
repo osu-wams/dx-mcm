@@ -10,6 +10,7 @@ package:
 plugins:
   - serverless-dotenv-plugin
   - serverless-s3-sync
+  - serverless-pseudo-parameters
   - serverless-step-functions
   - serverless-webpack
 
@@ -78,6 +79,7 @@ provider:
         - logs:PutResourcePolicy
         - logs:DescribeResourcePolicies
         - logs:DescribeLogGroups
+        - states:StartExecution
       Resource:
         - !Join [':', ['arn:aws:states', !Ref AWS::Region, !Ref AWS::AccountId, 'stateMachine:*']]
 

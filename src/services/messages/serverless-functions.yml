@@ -71,7 +71,16 @@ sqsMessageProcessor:
   description:
     !Join [' ', ['Listens to SQS Queue', !GetAtt messagesSqsQueue.QueueName, 'to send a Message.']]
   environment:
-    SQS_PROCESS_USER_MESSAGE_QUEUE_NAME: !GetAtt userMessagesSqsQueue.QueueName
+    MESSAGE_STATE_MACHINE_ARN:
+      !Join [
+        ':',
+        [
+          'arn:aws:states',
+          !Ref AWS::Region,
+          !Ref AWS::AccountId,
+          'stateMachine:${self:service.name}-messageStateMachine',
+        ],
+      ]
   events:
     - sqs:
         arn: !GetAtt messagesSqsQueue.Arn
