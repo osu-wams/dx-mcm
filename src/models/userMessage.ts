@@ -130,8 +130,8 @@ class UserMessage {
         ReturnValues: 'NONE',
       };
 
-      const result = await putItem(params);
-      console.log('UserMessage.upsert succeeded:', result);
+      await putItem(params);
+      console.log('UserMessage.upsert succeeded:', props);
       return UserMessage.find(props.osuId, props.messageId, props.channelId);
     } catch (err) {
       console.error(`UserMessage.upsert failed:`, props, err);

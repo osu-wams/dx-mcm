@@ -71,8 +71,32 @@ sqsMessageProcessor:
   description:
     !Join [' ', ['Listens to SQS Queue', !GetAtt messagesSqsQueue.QueueName, 'to send a Message.']]
   environment:
-    SQS_PROCESS_USER_MESSAGE_QUEUE_NAME: !GetAtt userMessagesSqsQueue.QueueName
+    MESSAGE_STATE_MACHINE_ARN:
+      !Join [
+        ':',
+        [
+          'arn:aws:states',
+          !Ref AWS::Region,
+          !Ref AWS::AccountId,
+          'stateMachine:${self:service.name}-messageStateMachine',
+        ],
+      ]
   events:
     - sqs:
         arn: !GetAtt messagesSqsQueue.Arn
         batchSize: 1
+
+stepCreateUserMessage:
+  handler: src/services/messages/stepCreateUserMessage.handler
+  name: ${self:service.name}-messageCreateUserMessage
+  timeout: 300
+  environment:
+    SQS_PROCESS_USER_MESSAGE_QUEUE_NAME: !GetAtt userMessagesSqsQueue.QueueName
+
+stepGetChannels:
+  handler: src/services/messages/stepGetChannels.handler
+  name: ${self:service.name}-messageGetChannels
+
+stepGetUserPopulation:
+  handler: src/services/messages/stepGetUserPopulation.handler
+  name: ${self:service.name}-messageGetUserPopulation

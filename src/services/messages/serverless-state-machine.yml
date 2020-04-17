@@ -1,0 +1,74 @@
+name: ${self:service.name}-messageStateMachine
+id: messageStateMachine
+type: EXPRESS
+loggingConfig:
+  level: ALL
+  includeExecutionData: true
+  destinations:
+    - !GetAtt messageStateMachineLogGroup.Arn
+definition:
+  Comment: 'Processing a Message to get its target population and create new UserMessage records.'
+  StartAt: Process
+  States:
+    Process:
+      Type: Parallel
+      Comment: 'Adds Parallel task results to original data; { processedQueries:{ users: [],channels: [] } }'
+      Next: CreateUserMessage
+      ResultPath: '$.processedQueries'
+      Branches:
+        - StartAt: GetUserPopulation
+          States:
+            GetUserPopulation:
+              Type: Task
+              Comment: 'Branch returns only its data (users:[]) to parent parallel state for inclusion'
+              Resource: !GetAtt stepGetUserPopulation.Arn
+              TimeoutSeconds: 120
+              HeartbeatSeconds: 30
+              ResultPath: '$'
+              Retry:
+                - ErrorEquals:
+                    [
+                      'States.Timeout',
+                      'Lambda.ServiceException',
+                      'Lambda.AWSLambdaException',
+                      'Lambda.SdkClientException',
+                    ]
+                  IntervalSeconds: 1
+                  BackoffRate: 2
+                  MaxAttempts: 5
+              Catch:
+                - ErrorEquals: ['States.Runtime']
+                  Next: RuntimeError
+                - ErrorEquals: ['HandledError']
+                  Next: HandledError
+                - ErrorEquals: ['States.ALL']
+                  Next: CatchAllFallback
+              End: true
+            RuntimeError:
+              Type: Pass
+              Result: 'Task failed to execute at runtime, this could be due to an invalid JSON payload in InputPath or OutputPath'
+              ResultPath: '$.error'
+              End: true
+            HandledError:
+              Type: Pass
+              Result: 'Handled error preventing GetUserPopulation task from completing, Message is unable to be delivered.'
+              ResultPath: '$.error'
+              End: true
+            CatchAllFallback:
+              Type: Pass
+              Result: 'GetUserPopulation caught an unhandled error.'
+              ResultPath: '$.error'
+              End: true
+        - StartAt: GetChannels
+          States:
+            GetChannels:
+              Type: Task
+              Comment: 'Branch returns only its data (channels:[]) to parent parallel state for inclusion'
+              Resource: !GetAtt stepGetChannels.Arn
+              ResultPath: '$'
+              End: true
+    CreateUserMessage:
+      Type: Task
+      Comment: 'Given the Message and { processedQueries: { users: [], channels: [] } found in upstream processing, create a new UserMessage for each and publish to the SQS Queue.'
+      Resource: !GetAtt stepCreateUserMessage.Arn
+      End: true

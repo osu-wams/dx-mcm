@@ -66,9 +66,7 @@ Resources:
           KeyType: HASH
         - AttributeName: channelMessageId
           KeyType: RANGE
-      ProvisionedThroughput:
-        ReadCapacityUnits: 5
-        WriteCapacityUnits: 5
+      BillingMode: PAY_PER_REQUEST
       GlobalSecondaryIndexes:
         - IndexName: ${self:service.name}-UserMessageStatuses
           KeySchema:
@@ -83,9 +81,6 @@ Resources:
               - channelId
               - sendAt
             ProjectionType: INCLUDE
-          ProvisionedThroughput:
-            ReadCapacityUnits: 5
-            WriteCapacityUnits: 5
         - IndexName: ${self:service.name}-UserMessageChannels
           KeySchema:
             - AttributeName: osuId
@@ -99,9 +94,6 @@ Resources:
               - sendAt
               - status
             ProjectionType: INCLUDE
-          ProvisionedThroughput:
-            ReadCapacityUnits: 5
-            WriteCapacityUnits: 5
         - IndexName: ${self:service.name}-UserMessageSendAt
           KeySchema:
             - AttributeName: osuId
@@ -115,11 +107,13 @@ Resources:
               - channelId
               - status
             ProjectionType: INCLUDE
-          ProvisionedThroughput:
-            ReadCapacityUnits: 5
-            WriteCapacityUnits: 5
   staticBucket:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: ${self:service.name}-static
       AccessControl: PublicRead
+  messageStateMachineLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: ${self:service.name}-messageStateMachineLogGroup
+      RetentionInDays: 14

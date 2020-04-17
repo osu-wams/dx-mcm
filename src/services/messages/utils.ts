@@ -1,3 +1,4 @@
+import UserMessage from '@src/models/userMessage'; // eslint-disable-line no-unused-vars
 import Message, { Status } from '@src/models/message';
 import { SNSEventRecord } from 'aws-lambda'; // eslint-disable-line no-unused-vars, import/no-unresolved
 import { AWSError } from 'aws-sdk';
@@ -21,7 +22,7 @@ export const persistMessage = async (record: SNSEventRecord): Promise<Message | 
 };
 
 export const publishToQueue = async (
-  message: Message,
+  message: Message | UserMessage,
   queueUrl: string,
   messageGroupId?: string,
 ) => {
