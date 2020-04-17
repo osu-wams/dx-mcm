@@ -1,7 +1,7 @@
-import { SQS_PROCESS_USER_MESSAGE_QUEUE_NAME } from '@src/constants';
+import { MESSAGE_STATE_MACHINE_ARN } from '@src/constants';
 import { SQSEvent } from 'aws-lambda'; // eslint-disable-line no-unused-vars, import/no-unresolved
-import { validate, getQueueUrl } from '@src/services/sqsUtils';
-import { publishToQueue } from '@src/services/messages/utils';
+import { validate } from '@src/services/sqsUtils';
+import { startExecution } from '@src/stateMachine';
 import Message from '@src/models/message';
 
 export const handler = async (event: SQSEvent) => {
@@ -13,14 +13,12 @@ export const handler = async (event: SQSEvent) => {
   try {
     const record = records.shift()!;
     const message = new Message({ message: JSON.parse(record.body) });
-    const queueUrl = await getQueueUrl(SQS_PROCESS_USER_MESSAGE_QUEUE_NAME);
-    await publishToQueue(message, queueUrl);
-    /*
-    if (message && message.sendAt <= new Date().toISOString().slice(0, 10)) {
-      const queueUrl = await getQueueUrl(SQS_PROCESS_USER_MESSAGE_QUEUE_NAME);
-      await publishToQueue(message, queueUrl);
-    }
-    */
+    const response = await startExecution({
+      stateMachineArn: MESSAGE_STATE_MACHINE_ARN,
+      input: JSON.stringify(message),
+      name: message.id,
+    });
+    console.log(response);
   } catch (error) {
     /* istanbul ignore next */
     console.error(error);
