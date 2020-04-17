@@ -8292,6 +8292,11 @@ serverless-plugin-typescript@^1.1.9:
     globby "^9.2.0"
     lodash "^4.17.11"
 
+serverless-pseudo-parameters@^2.5.0:
+  version "2.5.0"
+  resolved "https://registry.yarnpkg.com/serverless-pseudo-parameters/-/serverless-pseudo-parameters-2.5.0.tgz#f30bf34db166e4b8b22144a8e65aca71b90dd1e6"
+  integrity sha512-A/O49AR8LL6jlnPSmnOTYgL1KqVgskeRla4sVDeS/r5dHFJlwOU5MgFilc7aaQP8NWAwRJANaIS9oiSE3I+VUA==
+
 serverless-s3-sync@^1.12.0:
   version "1.12.0"
   resolved "https://registry.yarnpkg.com/serverless-s3-sync/-/serverless-s3-sync-1.12.0.tgz#c8680d8e8cbdf1754732587f45ced6c2898c5b63"
