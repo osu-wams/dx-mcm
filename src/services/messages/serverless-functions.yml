@@ -89,6 +89,7 @@ sqsMessageProcessor:
 stepCreateUserMessage:
   handler: src/services/messages/stepCreateUserMessage.handler
   name: ${self:service.name}-messageCreateUserMessage
+  timeout: 300
   environment:
     SQS_PROCESS_USER_MESSAGE_QUEUE_NAME: !GetAtt userMessagesSqsQueue.QueueName
 
