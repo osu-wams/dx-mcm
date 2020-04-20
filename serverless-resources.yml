@@ -79,6 +79,7 @@ Resources:
               - channelMessageId
               - messageId
               - channelId
+              - deliveredAt
               - sendAt
             ProjectionType: INCLUDE
         - IndexName: ${self:service.name}-UserMessageChannels
@@ -91,6 +92,7 @@ Resources:
             NonKeyAttributes:
               - channelMessageId
               - messageId
+              - deliveredAt
               - sendAt
               - status
             ProjectionType: INCLUDE
@@ -106,6 +108,7 @@ Resources:
               - messageId
               - channelId
               - status
+              - deliveredAt
             ProjectionType: INCLUDE
   staticBucket:
     Type: AWS::S3::Bucket
