@@ -16,7 +16,6 @@ class Channel {
     this.deliver();
     this.userMessage.deliveredAt = this.deliveredAt;
     this.userMessage.status = this.deliveredStatus!;
-    console.log(this.userMessage);
     await UserMessage.upsert(this.userMessage);
   }
 }
