@@ -11,3 +11,19 @@ httpUserMessagesList:
           parameters:
             paths:
               osuId: true
+sqsUserMessageProcessor:
+  handler: src/services/userMessages/sqsUserMessageProcessor.handler
+  name: ${self:service.name}-userMessageProcessor
+  description:
+    !Join [
+      ' ',
+      [
+        'Listens to SQS Queue',
+        !GetAtt messagesSqsQueue.QueueName,
+        'to deliver a UserMessage to its intended Channel.',
+      ],
+    ]
+  events:
+    - sqs:
+        arn: !GetAtt userMessagesSqsQueue.Arn
+        batchSize: 1
