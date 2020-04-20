@@ -1,6 +1,6 @@
 const dynamoDbUserMessage = {
-  channelId: { S: '123' },
-  channelMessageId: { S: '123:message-123456789' },
+  channelId: { S: 'dashboard' },
+  channelMessageId: { S: 'dashboard:message-123456789' },
   content: { S: 'content' },
   contentShort: { S: 'contentShort' },
   deliveredAt: { S: '2020-01-01' },
@@ -21,8 +21,8 @@ const emptyDynamoDbUserMessage = {
   status: { S: undefined },
 };
 const userMessage = {
-  channelId: '123',
-  channelMessageId: '123:message-123456789',
+  channelId: 'dashboard',
+  channelMessageId: 'dashboard:message-123456789',
   content: 'content',
   contentShort: 'contentShort',
   deliveredAt: '2020-01-01',
@@ -32,8 +32,8 @@ const userMessage = {
   status: 'NEW',
 };
 const userMessageStatus = {
-  channelId: '123',
-  channelMessageId: '123:message-123456789',
+  channelId: 'dashboard',
+  channelMessageId: 'dashboard:message-123456789',
   deliveredAt: '2020-01-01',
   messageId: 'message-123456789',
   osuId: '123456789',
