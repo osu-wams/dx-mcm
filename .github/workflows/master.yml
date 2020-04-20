@@ -18,7 +18,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - name: yarn install, lint, test
         run: |
-          yarn install --frozen-lockfile
+          yarn install --frozen-lockfile --production=false
           yarn run lint
           yarn run test:coverage -w 1 --silent
         env:

@@ -2,3 +2,6 @@ s3Sync:
   - bucketName: ${self:service.name}-static
     localDir: dist/static
     acl: public-read
+
+webpack:
+  includeModules: true
