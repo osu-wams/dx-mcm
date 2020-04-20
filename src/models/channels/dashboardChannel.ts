@@ -1,4 +1,4 @@
-import Channel from '@src/models/channels/channel'; // eslint-disable-line no-unused-vars
+import Channel from './channel'; // eslint-disable-line no-unused-vars
 
 class DashboardChannel extends Channel {
   /**

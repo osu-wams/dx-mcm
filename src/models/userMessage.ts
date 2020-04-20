@@ -1,6 +1,8 @@
 import { DYNAMODB_TABLE_PREFIX } from '@src/constants';
 import { DynamoDB } from 'aws-sdk'; // eslint-disable-line no-unused-vars
 import { putItem, updateItem, query } from '@src/database';
+import { DashboardChannel } from '@src/models/channels';
+import type Channel from '@src/models/channels/channel'; // eslint-disable-line no-unused-vars
 
 export interface DynamoDBUserMessageItem extends DynamoDB.PutItemInputAttributeMap {
   channelId: { S: string };
@@ -39,6 +41,10 @@ export interface UserMessageStatus {
 }
 
 /* eslint-disable no-unused-vars */
+export enum ChannelId {
+  DASHBOARD = 'dashboard',
+}
+
 export enum Status {
   NEW = 'NEW',
   READ = 'READ',
@@ -47,6 +53,21 @@ export enum Status {
   DELIVERED = 'DELIVERED',
 }
 /* eslint-enable no-unused-vars */
+
+/**
+ * Get the channel class to process and deliver the UserMessage
+ * @param userMessage the user message to process and deliver
+ */
+export const getChannel = (userMessage: UserMessage): Channel => {
+  switch (userMessage.channelId.toLowerCase()) {
+    case ChannelId.DASHBOARD:
+      return new DashboardChannel(userMessage);
+    default:
+      throw new Error(
+        `Channel ${userMessage.channelId} not defined, unable to handle this channel.`,
+      );
+  }
+};
 
 /**
  * Generate the composite key value (<channelId>:<messageId>) to act as the
