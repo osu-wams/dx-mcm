@@ -1,6 +1,7 @@
 export const handler = async (event: any, _context: any, callback: any) => {
-  console.log(event);
-  callback(null, { channels: ['channel-1', 'channel-2'] });
+  // Placeholder for looking up or validating channelIds, for now the application
+  // will pass the data through.
+  callback(null, { channels: event.channelIds });
 };
 
 export default handler;

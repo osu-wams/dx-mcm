@@ -7,13 +7,16 @@ export interface DynamoDBMessageItem extends DynamoDB.PutItemInputAttributeMap {
   content: { S: string };
   contentShort: { S: string };
   id: { S: string }; // sort key
-  populationParams: { M: { affiliation: { S: string } } };
+  populationParams: {
+    M: { affiliation: { S: string }; osuIds: { SS: string[] } | { NULL: boolean } };
+  };
   sendAt: { S: string }; // partition key
   status: { S: string };
 }
 
 interface MessagePopulationParams {
   affiliation?: string;
+  osuIds?: string[];
 }
 
 interface MessageParams {
@@ -90,9 +93,10 @@ class Message {
       if (content) this.content = content.S || '';
       if (contentShort) this.contentShort = contentShort.S || '';
       if (populationParams && populationParams.M) {
-        const { affiliation } = populationParams.M;
+        const { affiliation, osuIds } = populationParams.M;
         this.populationParams = {
           affiliation: affiliation.S,
+          osuIds: osuIds ? osuIds.SS : undefined,
         };
       }
     }
@@ -202,18 +206,28 @@ class Message {
    * @returns - the Item for use in Dynamodb
    */
   static asDynamoDbItem = (props: Message): DynamoDBMessageItem => {
+    const {
+      sendAt,
+      id,
+      status,
+      populationParams: { affiliation, osuIds },
+      channelIds,
+      content,
+      contentShort,
+    } = props;
     return {
-      sendAt: { S: props.sendAt },
-      id: { S: props.id },
-      status: { S: props.status },
+      sendAt: { S: sendAt },
+      id: { S: id },
+      status: { S: status },
       populationParams: {
         M: {
-          affiliation: { S: props.populationParams.affiliation! },
+          affiliation: { S: affiliation! },
+          osuIds: osuIds ? { SS: osuIds } : { NULL: true },
         },
       },
-      channelIds: { SS: props.channelIds },
-      content: { S: props.content },
-      contentShort: { S: props.contentShort },
+      channelIds: { SS: channelIds },
+      content: { S: content },
+      contentShort: { S: contentShort },
     };
   };
 }

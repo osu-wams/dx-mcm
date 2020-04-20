@@ -3,7 +3,7 @@ const dynamoDbMessage = {
   content: { S: 'content' },
   contentShort: { S: 'contentShort' },
   id: { S: '123456789' },
-  populationParams: { M: { affiliation: { S: 'test' } } },
+  populationParams: { M: { affiliation: { S: 'test' }, osuIds: { SS: ['987654321'] } } },
   sendAt: { S: '2020-01-01' },
   status: { S: 'NEW' },
 };
@@ -21,7 +21,7 @@ const message = {
   content: 'content',
   contentShort: 'contentShort',
   id: '123456789',
-  populationParams: { affiliation: 'test' },
+  populationParams: { affiliation: 'test', osuIds: ['987654321'] },
   sendAt: '2020-01-01',
   status: 'NEW',
 };
