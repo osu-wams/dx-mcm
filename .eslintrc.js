@@ -24,6 +24,7 @@ module.exports = {
   },
   rules: {
     'import/extensions': 0,
+    'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
     'no-console': 0,
     '@typescript-eslint/restrict-plus-operands': 'error',
   },
