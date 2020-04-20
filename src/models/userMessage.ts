@@ -51,6 +51,7 @@ export enum Status {
   ARCHIVED = 'ARCHIVED',
   DELETED = 'DELETED',
   DELIVERED = 'DELIVERED',
+  ERROR = 'ERROR',
 }
 /* eslint-enable no-unused-vars */
 
