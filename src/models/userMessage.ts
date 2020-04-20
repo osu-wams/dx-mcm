@@ -7,6 +7,7 @@ export interface DynamoDBUserMessageItem extends DynamoDB.PutItemInputAttributeM
   channelMessageId: { S: string };
   content: { S: string };
   contentShort: { S: string };
+  deliveredAt: { S: string } | { NULL: boolean };
   messageId: { S: string };
   osuId: { S: string }; // sort key
   sendAt: { S: string }; // partition key
@@ -19,6 +20,7 @@ interface UserMessageParams {
     channelId: string;
     content: string;
     contentShort: string;
+    deliveredAt?: string;
     messageId: string;
     osuId: string;
     sendAt: string;
@@ -29,6 +31,7 @@ interface UserMessageParams {
 export interface UserMessageStatus {
   channelId: string;
   channelMessageId: string;
+  deliveredAt?: string;
   messageId: string;
   osuId: string;
   sendAt: string;
@@ -41,6 +44,7 @@ export enum Status {
   READ = 'READ',
   ARCHIVED = 'ARCHIVED',
   DELETED = 'DELETED',
+  DELIVERED = 'DELIVERED',
 }
 /* eslint-enable no-unused-vars */
 
@@ -64,6 +68,8 @@ class UserMessage {
 
   contentShort: string = '';
 
+  deliveredAt?: string = '';
+
   messageId: string = '';
 
   osuId: string = '';
@@ -84,8 +90,18 @@ class UserMessage {
 
   constructor(p: UserMessageParams) {
     if (p.userMessage) {
-      const { sendAt, messageId, osuId, status, channelId, content, contentShort } = p.userMessage;
+      const {
+        deliveredAt,
+        sendAt,
+        messageId,
+        osuId,
+        status,
+        channelId,
+        content,
+        contentShort,
+      } = p.userMessage;
       this.sendAt = sendAt;
+      this.deliveredAt = deliveredAt;
       this.messageId = messageId;
       this.status = status;
       this.osuId = osuId;
@@ -97,6 +113,7 @@ class UserMessage {
 
     if (p.dynamoDbUserMessage) {
       const {
+        deliveredAt,
         sendAt,
         channelMessageId: dbChannelMessageId,
         messageId,
@@ -106,6 +123,7 @@ class UserMessage {
         content,
         contentShort,
       } = p.dynamoDbUserMessage;
+      if (deliveredAt) this.deliveredAt = deliveredAt.S;
       if (sendAt) this.sendAt = sendAt.S || '';
       if (messageId) this.messageId = messageId.S || '';
       if (status) this.status = status.S || '';
@@ -210,6 +228,7 @@ class UserMessage {
       return results.Items.map((i) => ({
         channelId: i.channelId.S!,
         channelMessageId: i.channelMessageId.S!,
+        deliveredAt: i.deliveredAt?.S,
         messageId: i.messageId.S!,
         osuId: i.osuId.S!,
         sendAt: i.sendAt.S!,
@@ -262,6 +281,7 @@ class UserMessage {
       },
       content: { S: props.content },
       contentShort: { S: props.contentShort },
+      deliveredAt: props.deliveredAt ? { S: props.deliveredAt } : { NULL: true },
       messageId: { S: props.messageId },
       osuId: { S: props.osuId },
       sendAt: { S: props.sendAt },
