@@ -14,7 +14,6 @@ const emptyDynamoDbUserMessage = {
   channelMessageId: { S: undefined },
   content: { S: undefined },
   contentShort: { S: undefined },
-  deliveredAt: undefined,
   messageId: { S: undefined },
   osuId: { S: undefined },
   sendAt: { S: undefined },
