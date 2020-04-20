@@ -12,6 +12,20 @@ class Channel {
     this.deliveredAt = userMessage.deliveredAt;
   }
 
+  /**
+   * Process the UserMessage through the Channel.
+   * ! This method must be overridden by the subclass to ensure proper handling of the message
+   * ! happens for the target channel.
+   */
+  async process() {
+    throw new Error(
+      `Base class Channel#process called when it should be overridden by the subclass for (${this.userMessage.channelId}), unable to proceed.`,
+    );
+  }
+
+  /**
+   * Mark the UserMessage as having been delivered and update the record in the database.
+   */
   async publish() {
     this.deliver();
     this.userMessage.deliveredAt = this.deliveredAt;
