@@ -90,6 +90,7 @@ provider:
 stepFunctions:
   stateMachines:
     messageStateMachine: ${file(./src/services/messages/serverless-state-machine.yml)}
+    userMessageStateMachine: ${file(./src/services/userMessages/serverless-state-machine.yml)}
 
 functions:
   - ${file(./src/services/messages/serverless-functions.yml)}
