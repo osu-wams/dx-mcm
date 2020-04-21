@@ -77,6 +77,7 @@ export const getChannel = (userMessage: UserMessage): Channel => {
  * @param messageId the message id
  */
 const channelMessageId = (channelId: string, messageId: string): string => {
+  // TODO: Should this throw an error instead?
   if (channelId.length > 0 && messageId.length > 0) return `${channelId}:${messageId}`;
   return '';
 };
