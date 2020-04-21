@@ -1,6 +1,8 @@
+import { USER_MESSAGE_STATE_MACHINE_ARN } from '@src/constants';
 import { SQSEvent } from 'aws-lambda'; // eslint-disable-line no-unused-vars, import/no-unresolved
 import { validate } from '@src/services/sqsUtils';
-import UserMessage, { getChannel, Status } from '@src/models/userMessage';
+import { startExecution } from '@src/stateMachine';
+import UserMessage from '@src/models/userMessage';
 
 export const handler = async (event: SQSEvent) => {
   const [valid, records] = validate(event);
@@ -8,17 +10,18 @@ export const handler = async (event: SQSEvent) => {
     return;
   }
 
-  const record = records.shift()!;
-  const userMessage = new UserMessage({ userMessage: JSON.parse(record.body) });
-
   try {
-    const channel = getChannel(userMessage);
-    await channel.process();
-    console.log('Processed UserMessage -->  ', userMessage);
+    const record = records.shift()!;
+    const userMessage = new UserMessage({ userMessage: JSON.parse(record.body) });
+    const response = await startExecution({
+      stateMachineArn: USER_MESSAGE_STATE_MACHINE_ARN,
+      input: JSON.stringify(userMessage),
+      name: userMessage.channelMessageId!,
+    });
+    console.log(response);
   } catch (error) {
     /* istanbul ignore next */
     console.error(error);
-    await UserMessage.updateStatus(userMessage, Status.ERROR);
   }
 };
 

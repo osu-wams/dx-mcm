@@ -1,5 +1,15 @@
 [![codecov](https://codecov.io/gh/osu-wams/dx-mcm/branch/master/graph/badge.svg)](https://codecov.io/gh/osu-wams/dx-mcm)
 
+# Setup
+
+At this time, a multi-compile deployment requires a lot of RAM due to an issue with how serverless-webpack behaves. The problem is being
+addressed in a PR: https://github.com/serverless-heaven/serverless-webpack/pull/570. In the meantime, you must set the `NODE_OPTIONS` environment
+variable in your terminal before deploying or packaging the application.
+
+```
+$ export NODE_OPTIONS=--max_old_space_size=8192
+```
+
 # Deploy a developer-specific development stack
 
 Perform a complete build and deployment to a bespoke stack including the developers name. This feature provides each developer a way to work in isolation without having

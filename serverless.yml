@@ -90,9 +90,19 @@ provider:
 stepFunctions:
   stateMachines:
     messageStateMachine: ${file(./src/services/messages/serverless-state-machine.yml)}
+    userMessageStateMachine: ${file(./src/services/userMessages/serverless-state-machine.yml)}
 
 functions:
   - ${file(./src/services/messages/serverless-functions.yml)}
   - ${file(./src/services/userMessages/serverless-functions.yml)}
 
-resources: ${file(./serverless-resources.yml)}
+resources:
+  Resources:
+    apiSnsTopic: ${file(./serverless-resources.yml):apiSnsTopic}
+    messagesTable: ${file(./serverless-resources.yml):messagesTable}
+    userMessagesTable: ${file(./serverless-resources.yml):userMessagesTable}
+    staticBucket: ${file(./serverless-resources.yml):staticBucket}
+    messagesSqsQueue: ${file(./src/services/messages/serverless-resources.yml):messagesSqsQueue}
+    messageStateMachineLogGroup: ${file(./src/services/messages/serverless-resources.yml):messageStateMachineLogGroup}
+    userMessagesSqsQueue: ${file(./src/services/userMessages/serverless-resources.yml):userMessagesSqsQueue}
+    userMessageStateMachineLogGroup: ${file(./src/services/userMessages/serverless-resources.yml):userMessageStateMachineLogGroup}
