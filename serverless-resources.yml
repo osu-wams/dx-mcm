@@ -1,122 +1,109 @@
-Resources:
-  apiSnsTopic:
-    Type: AWS::SNS::Topic
-    Properties:
-      TopicName: ${self:service.name}-api
-  messagesSqsQueue:
-    Type: AWS::SQS::Queue
-    Properties:
-      QueueName: ${self:service.name}-messages.fifo
-      ContentBasedDeduplication: true
-      FifoQueue: true
-  userMessagesSqsQueue:
-    Type: AWS::SQS::Queue
-    Properties:
-      QueueName: ${self:service.name}-user-messages
-  messagesTable:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      TableName: ${self:service.name}-Messages
-      AttributeDefinitions:
-        - AttributeName: sendAt
-          AttributeType: S
-        - AttributeName: id
-          AttributeType: S
-        - AttributeName: status
-          AttributeType: S
-      KeySchema:
-        - AttributeName: sendAt
-          KeyType: HASH
-        - AttributeName: id
-          KeyType: RANGE
-      ProvisionedThroughput:
-        ReadCapacityUnits: 5
-        WriteCapacityUnits: 5
-      GlobalSecondaryIndexes:
-        - IndexName: ${self:service.name}-MessageStatuses
-          KeySchema:
-            - AttributeName: status
-              KeyType: HASH
-            - AttributeName: sendAt
-              KeyType: RANGE
-          Projection:
-            NonKeyAttributes:
-              - id
-            ProjectionType: INCLUDE
-          ProvisionedThroughput:
-            ReadCapacityUnits: 5
-            WriteCapacityUnits: 5
-  userMessagesTable:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      TableName: ${self:service.name}-UserMessages
-      AttributeDefinitions:
-        - AttributeName: osuId
-          AttributeType: S
-        - AttributeName: channelMessageId
-          AttributeType: S
-        - AttributeName: channelId
-          AttributeType: S
-        - AttributeName: sendAt
-          AttributeType: S
-        - AttributeName: status
-          AttributeType: S
-      KeySchema:
-        - AttributeName: osuId
-          KeyType: HASH
-        - AttributeName: channelMessageId
-          KeyType: RANGE
-      BillingMode: PAY_PER_REQUEST
-      GlobalSecondaryIndexes:
-        - IndexName: ${self:service.name}-UserMessageStatuses
-          KeySchema:
-            - AttributeName: osuId
-              KeyType: HASH
-            - AttributeName: status
-              KeyType: RANGE
-          Projection:
-            NonKeyAttributes:
-              - channelMessageId
-              - messageId
-              - channelId
-              - deliveredAt
-              - sendAt
-            ProjectionType: INCLUDE
-        - IndexName: ${self:service.name}-UserMessageChannels
-          KeySchema:
-            - AttributeName: osuId
-              KeyType: HASH
-            - AttributeName: channelId
-              KeyType: RANGE
-          Projection:
-            NonKeyAttributes:
-              - channelMessageId
-              - messageId
-              - deliveredAt
-              - sendAt
-              - status
-            ProjectionType: INCLUDE
-        - IndexName: ${self:service.name}-UserMessageSendAt
-          KeySchema:
-            - AttributeName: osuId
-              KeyType: HASH
-            - AttributeName: sendAt
-              KeyType: RANGE
-          Projection:
-            NonKeyAttributes:
-              - channelMessageId
-              - messageId
-              - channelId
-              - status
-              - deliveredAt
-            ProjectionType: INCLUDE
-  staticBucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: ${self:service.name}-static
-      AccessControl: PublicRead
-  messageStateMachineLogGroup:
-    Type: AWS::Logs::LogGroup
-    Properties:
-      LogGroupName: ${self:service.name}-messageStateMachineLogGroup
-      RetentionInDays: 14
+apiSnsTopic:
+  Type: AWS::SNS::Topic
+  Properties:
+    TopicName: ${self:service.name}-api
+
+messagesTable:
+  Type: AWS::DynamoDB::Table
+  Properties:
+    TableName: ${self:service.name}-Messages
+    AttributeDefinitions:
+      - AttributeName: sendAt
+        AttributeType: S
+      - AttributeName: id
+        AttributeType: S
+      - AttributeName: status
+        AttributeType: S
+    KeySchema:
+      - AttributeName: sendAt
+        KeyType: HASH
+      - AttributeName: id
+        KeyType: RANGE
+    ProvisionedThroughput:
+      ReadCapacityUnits: 5
+      WriteCapacityUnits: 5
+    GlobalSecondaryIndexes:
+      - IndexName: ${self:service.name}-MessageStatuses
+        KeySchema:
+          - AttributeName: status
+            KeyType: HASH
+          - AttributeName: sendAt
+            KeyType: RANGE
+        Projection:
+          NonKeyAttributes:
+            - id
+          ProjectionType: INCLUDE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+
+userMessagesTable:
+  Type: AWS::DynamoDB::Table
+  Properties:
+    TableName: ${self:service.name}-UserMessages
+    AttributeDefinitions:
+      - AttributeName: osuId
+        AttributeType: S
+      - AttributeName: channelMessageId
+        AttributeType: S
+      - AttributeName: channelId
+        AttributeType: S
+      - AttributeName: sendAt
+        AttributeType: S
+      - AttributeName: status
+        AttributeType: S
+    KeySchema:
+      - AttributeName: osuId
+        KeyType: HASH
+      - AttributeName: channelMessageId
+        KeyType: RANGE
+    BillingMode: PAY_PER_REQUEST
+    GlobalSecondaryIndexes:
+      - IndexName: ${self:service.name}-UserMessageStatuses
+        KeySchema:
+          - AttributeName: osuId
+            KeyType: HASH
+          - AttributeName: status
+            KeyType: RANGE
+        Projection:
+          NonKeyAttributes:
+            - channelMessageId
+            - messageId
+            - channelId
+            - deliveredAt
+            - sendAt
+          ProjectionType: INCLUDE
+      - IndexName: ${self:service.name}-UserMessageChannels
+        KeySchema:
+          - AttributeName: osuId
+            KeyType: HASH
+          - AttributeName: channelId
+            KeyType: RANGE
+        Projection:
+          NonKeyAttributes:
+            - channelMessageId
+            - messageId
+            - deliveredAt
+            - sendAt
+            - status
+          ProjectionType: INCLUDE
+      - IndexName: ${self:service.name}-UserMessageSendAt
+        KeySchema:
+          - AttributeName: osuId
+            KeyType: HASH
+          - AttributeName: sendAt
+            KeyType: RANGE
+        Projection:
+          NonKeyAttributes:
+            - channelMessageId
+            - messageId
+            - channelId
+            - status
+            - deliveredAt
+          ProjectionType: INCLUDE
+
+staticBucket:
+  Type: AWS::S3::Bucket
+  Properties:
+    BucketName: ${self:service.name}-static
+    AccessControl: PublicRead

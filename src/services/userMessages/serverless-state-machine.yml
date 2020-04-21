@@ -1,0 +1,39 @@
+name: ${self:service.name}-userMessageStateMachine
+id: userMessageStateMachine
+type: EXPRESS
+loggingConfig:
+  level: ALL
+  includeExecutionData: true
+  destinations:
+    - !GetAtt userMessageStateMachineLogGroup.Arn
+definition:
+  Comment: 'Processing a UserMessage to publish and deliver it to its intended channel.'
+  StartAt: Process
+  States:
+    Process:
+      Type: Parallel
+      Comment: ''
+      Next: PublishUserMessage
+      ResultPath: '$.processedQueries'
+      Branches:
+        - StartAt: GetUserPreferences
+          States:
+            GetUserPreferences:
+              Type: Task
+              Comment: ''
+              Resource: !GetAtt stepGetUserPreferences.Arn
+              ResultPath: '$'
+              End: true
+        - StartAt: ApplyFlowControl
+          States:
+            ApplyFlowControl:
+              Type: Task
+              Comment: ''
+              Resource: !GetAtt stepApplyFlowControl.Arn
+              ResultPath: '$'
+              End: true
+    PublishUserMessage:
+      Type: Task
+      Comment: ''
+      Resource: !GetAtt stepPublishUserMessage.Arn
+      End: true
