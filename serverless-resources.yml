@@ -46,11 +46,11 @@ userMessagesTable:
         AttributeType: S
       - AttributeName: channelMessageId
         AttributeType: S
-      - AttributeName: channelId
+      - AttributeName: channelSendAt
+        AttributeType: S
+      - AttributeName: statusSendAt
         AttributeType: S
       - AttributeName: sendAt
-        AttributeType: S
-      - AttributeName: status
         AttributeType: S
     KeySchema:
       - AttributeName: osuId
@@ -58,49 +58,36 @@ userMessagesTable:
       - AttributeName: channelMessageId
         KeyType: RANGE
     BillingMode: PAY_PER_REQUEST
-    GlobalSecondaryIndexes:
-      - IndexName: ${self:service.name}-UserMessageStatuses
+    LocalSecondaryIndexes:
+      - IndexName: ${self:service.name}-UserMessageByChannel
         KeySchema:
           - AttributeName: osuId
             KeyType: HASH
-          - AttributeName: status
+          - AttributeName: channelSendAt
             KeyType: RANGE
         Projection:
+          ProjectionType: INCLUDE
           NonKeyAttributes:
             - channelMessageId
-            - messageId
-            - channelId
-            - deliveredAt
-            - sendAt
-          ProjectionType: INCLUDE
-      - IndexName: ${self:service.name}-UserMessageChannels
-        KeySchema:
-          - AttributeName: osuId
-            KeyType: HASH
-          - AttributeName: channelId
-            KeyType: RANGE
-        Projection:
-          NonKeyAttributes:
-            - channelMessageId
-            - messageId
-            - deliveredAt
-            - sendAt
-            - status
-          ProjectionType: INCLUDE
-      - IndexName: ${self:service.name}-UserMessageSendAt
+      - IndexName: ${self:service.name}-UserMessageBySendAt
         KeySchema:
           - AttributeName: osuId
             KeyType: HASH
           - AttributeName: sendAt
             KeyType: RANGE
         Projection:
+          ProjectionType: INCLUDE
           NonKeyAttributes:
             - channelMessageId
-            - messageId
-            - channelId
-            - status
-            - deliveredAt
-          ProjectionType: INCLUDE
+    GlobalSecondaryIndexes:
+      - IndexName: ${self:service.name}-UserMessageStatuses
+        KeySchema:
+          - AttributeName: osuId
+            KeyType: HASH
+          - AttributeName: statusSendAt
+            KeyType: RANGE
+        Projection:
+          ProjectionType: ALL
 
 staticBucket:
   Type: AWS::S3::Bucket

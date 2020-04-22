@@ -36,4 +36,6 @@ definition:
       Type: Task
       Comment: ''
       Resource: !GetAtt stepPublishUserMessage.Arn
-      End: true
+      Next: SucceedState
+    SucceedState:
+      Type: Succeed
