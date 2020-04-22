@@ -3,10 +3,10 @@ import type { UserMessageStateMachineResult } from './types'; // eslint-disable-
 
 export const handler = async (
   event: UserMessageStateMachineResult,
-  _context: any,
+  context: any,
   callback: any,
 ) => {
-  console.log('Handling event -->  ', event);
+  console.log('Handling event, context -->  ', event, context);
 
   const userMessage = new UserMessage({ userMessage: event });
 
@@ -21,20 +21,20 @@ export const handler = async (
       console.log('Processed UserMessage -->  ', userMessage);
       callback(null, { userMessage });
     } else {
-      console.warn(
-        `Publishing UserMessage disallowed --> sendToChannel? = ${sendToChannel}, Allowed to sendUserMessages = ${sendUserMessages.join(
-          ', ',
-        )}  `,
-      );
+      const cause = `Publishing UserMessage disallowed --> sendToChannel? = ${sendToChannel}, Allowed to sendUserMessages = ${sendUserMessages.join(
+        ', ',
+      )}`;
+      console.warn(cause);
       // TODO: New Status to cause this to retry in the future? Set the sendTo date in the future? Log the error and chill?
       await UserMessage.updateStatus(userMessage, Status.ERROR);
-      callback({}, null);
+      callback(Error(cause));
     }
   } catch (error) {
     /* istanbul ignore next */
-    console.error('Publishing UserMessage failed -->  ', error);
+    const cause = `Publishing UserMessage failed due to error: ${error.mesage}`;
+    console.error(cause, error);
     await UserMessage.updateStatus(userMessage, Status.ERROR);
-    callback(error, null);
+    callback(error);
   }
 };
 

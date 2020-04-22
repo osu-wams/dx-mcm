@@ -1,6 +1,7 @@
 const dynamoDbUserMessage = {
   channelId: { S: 'dashboard' },
   channelMessageId: { S: 'dashboard:message-123456789' },
+  channelSendAt: { S: 'dashboard:2020-01-01' },
   content: { S: 'content' },
   contentShort: { S: 'contentShort' },
   deliveredAt: { S: '2020-01-01' },
@@ -8,31 +9,25 @@ const dynamoDbUserMessage = {
   osuId: { S: '123456789' },
   sendAt: { S: '2020-01-01' },
   status: { S: 'NEW' },
+  statusSendAt: { S: 'NEW:2020-01-01' },
 };
 const emptyDynamoDbUserMessage = {
   channelId: { S: undefined },
   channelMessageId: { S: undefined },
+  channelSendAt: { S: undefined },
   content: { S: undefined },
   contentShort: { S: undefined },
   messageId: { S: undefined },
   osuId: { S: undefined },
   sendAt: { S: undefined },
   status: { S: undefined },
+  statusSendAt: { S: undefined },
 };
 const userMessage = {
   channelId: 'dashboard',
   channelMessageId: 'dashboard:message-123456789',
   content: 'content',
   contentShort: 'contentShort',
-  deliveredAt: '2020-01-01',
-  messageId: 'message-123456789',
-  osuId: '123456789',
-  sendAt: '2020-01-01',
-  status: 'NEW',
-};
-const userMessageStatus = {
-  channelId: 'dashboard',
-  channelMessageId: 'dashboard:message-123456789',
   deliveredAt: '2020-01-01',
   messageId: 'message-123456789',
   osuId: '123456789',
@@ -51,10 +46,4 @@ const emptyUserMessage = {
   status: '',
 };
 
-export {
-  dynamoDbUserMessage,
-  emptyDynamoDbUserMessage,
-  emptyUserMessage,
-  userMessage,
-  userMessageStatus,
-};
+export { dynamoDbUserMessage, emptyDynamoDbUserMessage, emptyUserMessage, userMessage };

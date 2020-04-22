@@ -2,7 +2,7 @@ import { USER_MESSAGE_STATE_MACHINE_ARN } from '@src/constants';
 import { SQSEvent } from 'aws-lambda'; // eslint-disable-line no-unused-vars, import/no-unresolved
 import { validate } from '@src/services/sqsUtils';
 import { startExecution } from '@src/stateMachine';
-import UserMessage from '@src/models/userMessage';
+import UserMessage, { compositeKey } from '@src/models/userMessage';
 
 export const handler = async (event: SQSEvent) => {
   const [valid, records] = validate(event);
@@ -16,7 +16,7 @@ export const handler = async (event: SQSEvent) => {
     const response = await startExecution({
       stateMachineArn: USER_MESSAGE_STATE_MACHINE_ARN,
       input: JSON.stringify(userMessage),
-      name: userMessage.channelMessageId!,
+      name: compositeKey([userMessage.channelId, userMessage.messageId], '_'),
     });
     console.log(response);
   } catch (error) {

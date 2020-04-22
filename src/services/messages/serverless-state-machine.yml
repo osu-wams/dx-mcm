@@ -48,17 +48,19 @@ definition:
               Type: Pass
               Result: 'Task failed to execute at runtime, this could be due to an invalid JSON payload in InputPath or OutputPath'
               ResultPath: '$.error'
-              End: true
+              Next: FailState
             HandledError:
               Type: Pass
               Result: 'Handled error preventing GetUserPopulation task from completing, Message is unable to be delivered.'
               ResultPath: '$.error'
-              End: true
+              Next: FailState
             CatchAllFallback:
               Type: Pass
               Result: 'GetUserPopulation caught an unhandled error.'
               ResultPath: '$.error'
-              End: true
+              Next: FailState
+            FailState:
+              Type: Fail
         - StartAt: GetChannels
           States:
             GetChannels:
@@ -71,4 +73,6 @@ definition:
       Type: Task
       Comment: 'Given the Message and { processedQueries: { users: [], channels: [] } found in upstream processing, create a new UserMessage for each and publish to the SQS Queue.'
       Resource: !GetAtt stepCreateUserMessage.Arn
-      End: true
+      Next: SucceedState
+    SucceedState:
+      Type: Succeed
