@@ -2,7 +2,6 @@ import UserMessage, { Status } from '@src/models/userMessage';
 import {
   dynamoDbUserMessage,
   userMessage,
-  userMessageStatus,
   emptyUserMessage,
   emptyDynamoDbUserMessage,
 } from '@mocks/userMessage.mock';
@@ -106,8 +105,8 @@ describe('UserMessage', () => {
         ],
       });
       expect(await UserMessage.byStatus('123456789', Status.NEW)).toEqual([
-        userMessageStatus,
-        userMessageStatus,
+        userMessage,
+        userMessage,
       ]);
     });
     it('throws an error when there is a unhandled exception', async () => {
