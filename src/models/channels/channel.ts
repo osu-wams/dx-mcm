@@ -1,6 +1,6 @@
 import Deliverable from '@src/models/channels/deliverable';
 import { applyMixins } from '@src/models/utils';
-import UserMessage from '@src/models/userMessage'; // eslint-disable-line no-unused-vars
+import UserMessage, { compositeKey } from '@src/models/userMessage'; // eslint-disable-line no-unused-vars
 
 interface Channel extends Deliverable {}
 
@@ -30,6 +30,7 @@ class Channel {
     this.deliver();
     this.userMessage.deliveredAt = this.deliveredAt;
     this.userMessage.status = this.deliveredStatus!;
+    this.userMessage.statusSendAt = compositeKey([this.deliveredStatus!, this.userMessage.sendAt]);
     await UserMessage.upsert(this.userMessage);
   }
 }
