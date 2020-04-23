@@ -34,7 +34,7 @@ export const handler = async (event: MessageStateMachineResult, _context: any, c
     const persistedUserMessages = await Promise.all(
       userMessages.map(
         throat(50, (userMessage: UserMessage) => {
-          return UserMessage.upsert(userMessage);
+          return UserMessage.upsert(userMessage).then((um) => um.items[0]);
         }),
       ),
     );
