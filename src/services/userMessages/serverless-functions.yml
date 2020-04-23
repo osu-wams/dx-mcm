@@ -11,6 +11,15 @@ httpUserMessagesList:
           parameters:
             paths:
               osuId: true
+    - http:
+        private: true # forces header x-api-key to be present with a valid key from provider.apiKeys
+        method: get
+        path: /api/v1/userMessages/{osuId}/{lastKey}
+        request:
+          parameters:
+            paths:
+              osuId: true
+              lastKey: true
 
 sqsUserMessageProcessor:
   handler: src/services/userMessages/sqsUserMessageProcessor.handler

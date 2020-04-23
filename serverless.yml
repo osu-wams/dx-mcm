@@ -53,11 +53,11 @@ provider:
           ]
         - !Join [
             '',
-            [!GetAtt userMessagesTable.Arn, '/index/${self:service.name}-UserMessageChannels'],
+            [!GetAtt userMessagesTable.Arn, '/index/${self:service.name}-UserMessageByChannel'],
           ]
         - !Join [
             '',
-            [!GetAtt userMessagesTable.Arn, '/index/${self:service.name}-UserMessageSendAt'],
+            [!GetAtt userMessagesTable.Arn, '/index/${self:service.name}-UserMessageBySendAt'],
           ]
     - Effect: Allow
       Action:
