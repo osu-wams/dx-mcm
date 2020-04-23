@@ -1,5 +1,5 @@
 import { APIGatewayProxyEvent } from 'aws-lambda'; // eslint-disable-line no-unused-vars, import/no-unresolved
-import UserMessage, { UserMessageResults, ChannelId, channelExists } from '@src/models/userMessage'; // eslint-disable-line no-unused-vars
+import UserMessage, { UserMessageResults, ChannelId } from '@src/models/userMessage'; // eslint-disable-line no-unused-vars
 
 export const handler = async (event: APIGatewayProxyEvent) => {
   try {
