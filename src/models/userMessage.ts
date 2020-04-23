@@ -33,7 +33,7 @@ interface UserMessageParams {
   };
 }
 
-interface UserMessageResults {
+export interface UserMessageResults {
   items: UserMessage[];
   count: number;
   lastKey?: string;
@@ -188,7 +188,7 @@ class UserMessage {
     try {
       const params: AWS.DynamoDB.QueryInput = {
         TableName: UserMessage.TABLE_NAME,
-        IndexName: UserMessage.STATUS_INDEX_NAME,
+        IndexName: UserMessage.SEND_AT_INDEX_NAME,
         KeyConditionExpression: '#keyAttribute = :keyValue',
         ExpressionAttributeNames: {
           '#keyAttribute': 'osuId',
@@ -266,6 +266,37 @@ class UserMessage {
     }
   };
 
+  static byChannel = async (
+    osuId: string,
+    channelId: ChannelId,
+    lastKey?: string,
+  ): Promise<UserMessageResults> => {
+    try {
+      const params: AWS.DynamoDB.QueryInput = {
+        TableName: UserMessage.TABLE_NAME,
+        IndexName: UserMessage.CHANNEL_INDEX_NAME,
+        KeyConditionExpression:
+          '#keyAttribute = :keyValue AND begins_with(#rangeAttribute, :rangeValue)',
+        ExpressionAttributeNames: {
+          '#keyAttribute': 'osuId',
+          '#rangeAttribute': 'channelSendAt',
+        },
+        ExpressionAttributeValues: {
+          ':keyValue': { S: osuId },
+          ':rangeValue': { S: channelId },
+        },
+        ScanIndexForward: false,
+        Select: 'ALL_ATTRIBUTES',
+      };
+      if (lastKey) params.ExclusiveStartKey = urlSafeBase64Decode(lastKey) as AWS.DynamoDB.Key;
+
+      return UserMessage.asUserMessageResults(params);
+    } catch (err) {
+      console.error(`UserMessage.byChannel(${osuId}, ${channelId}) failed:`, err);
+      throw err;
+    }
+  };
+
   static updateStatus = async (props: UserMessage, status: string): Promise<UserMessageResults> => {
     try {
       const userMessage = props;
@@ -329,6 +360,7 @@ class UserMessage {
     params: AWS.DynamoDB.QueryInput,
   ): Promise<UserMessageResults> => {
     const results: AWS.DynamoDB.QueryOutput = await query(params);
+    console.log(results.Items);
     if (!results.Items)
       return {
         items: [],
