@@ -1,12 +1,24 @@
 import { APIGatewayProxyEvent } from 'aws-lambda'; // eslint-disable-line no-unused-vars, import/no-unresolved
-import UserMessage, { UserMessageResults } from '@src/models/userMessage'; // eslint-disable-line no-unused-vars
+import UserMessage, { UserMessageResults, ChannelId, channelExists } from '@src/models/userMessage'; // eslint-disable-line no-unused-vars
 
 export const handler = async (event: APIGatewayProxyEvent) => {
   try {
-    const { osuId, lastKey } = event.pathParameters ?? { osuId: undefined, lastKey: undefined };
+    const { osuId, lastKey, channelId } = event.pathParameters ?? {
+      osuId: undefined,
+      lastKey: undefined,
+      channelId: undefined,
+    };
     if (!osuId) throw new Error('Missing osuId in path.');
+    let userMessageResults: UserMessageResults;
+    if (channelId) {
+      const selectedChannel = ChannelId[channelId.toUpperCase() as keyof typeof ChannelId];
+      if (!selectedChannel) throw new Error('Missing valid channelId in path.');
 
-    const userMessageResults: UserMessageResults = await UserMessage.findAll(osuId, lastKey);
+      userMessageResults = await UserMessage.byChannel(osuId, selectedChannel, lastKey);
+    } else {
+      userMessageResults = await UserMessage.findAll(osuId, lastKey);
+    }
+
     if (!userMessageResults.count) throw new Error('No user messages found.');
 
     return {
