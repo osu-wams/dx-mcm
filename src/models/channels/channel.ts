@@ -1,5 +1,5 @@
 import Deliverable from '@src/models/channels/deliverable';
-import applyMixins from '@src/models/utils';
+import { applyMixins } from '@src/models/utils';
 import UserMessage from '@src/models/userMessage'; // eslint-disable-line no-unused-vars
 
 interface Channel extends Deliverable {}
