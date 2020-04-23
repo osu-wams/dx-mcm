@@ -6,7 +6,26 @@ httpUserMessagesList:
     - http:
         private: true # forces header x-api-key to be present with a valid key from provider.apiKeys
         method: get
-        path: /api/v1/userMessages/{osuId}
+        path: /api/v1/userMessages/channel/{channelId}/{osuId}
+        request:
+          parameters:
+            paths:
+              channelId: true
+              osuId: true
+    - http:
+        private: true # forces header x-api-key to be present with a valid key from provider.apiKeys
+        method: get
+        path: /api/v1/userMessages/channel/{channelId}/{osuId}/{lastKey}
+        request:
+          parameters:
+            paths:
+              channelId: true
+              osuId: true
+              lastKey: true
+    - http:
+        private: true # forces header x-api-key to be present with a valid key from provider.apiKeys
+        method: get
+        path: /api/v1/userMessages/user/{osuId}
         request:
           parameters:
             paths:
@@ -14,7 +33,7 @@ httpUserMessagesList:
     - http:
         private: true # forces header x-api-key to be present with a valid key from provider.apiKeys
         method: get
-        path: /api/v1/userMessages/{osuId}/{lastKey}
+        path: /api/v1/userMessages/user/{osuId}/{lastKey}
         request:
           parameters:
             paths:
