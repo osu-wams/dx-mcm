@@ -30,7 +30,7 @@ provider:
     ENV: ${env:ENV}
     SERVICE_NAME: ${self:service.name}
   apiKeys:
-    - ${self:service.name}-${env:AWS_APIGW_API_KEY}
+    - value: ${env:AWS_APIGW_API_KEY} # .env.{stage} file contains the API key
   tracing: ${file(./serverless.config.${opt:stage, 'development'}.yml):provider.tracing}
   iamRoleStatements:
     - Effect: Allow
