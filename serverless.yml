@@ -30,7 +30,8 @@ provider:
     ENV: ${env:ENV}
     SERVICE_NAME: ${self:service.name}
   apiKeys:
-    - value: ${env:AWS_APIGW_API_KEY} # .env.{stage} file contains the API key
+    - name: ${self:service.name}-api-key # .env.{stage} file contains the API key
+      value: ${env:AWS_APIGW_API_KEY}
   tracing: ${file(./serverless.config.${opt:stage, 'development'}.yml):provider.tracing}
   iamRoleStatements:
     - Effect: Allow
@@ -85,6 +86,8 @@ provider:
 
   apiGateway:
     apiKeySourceType: HEADER
+    description: OSU DX Multi-Channel Messaging API
+  apiName: ${self:service.name}
   usagePlan: ${file(./serverless.config.${opt:stage, 'development'}.yml):provider.usagePlan}
 
 stepFunctions:
