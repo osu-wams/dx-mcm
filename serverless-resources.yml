@@ -99,6 +99,8 @@ apiCloudFront:
   Type: AWS::CloudFront::Distribution
   Properties:
     DistributionConfig:
+      Aliases:
+        - ${env:AWS_CLOUDFRONT_ALIAS}
       Comment: OSU DX Multi-Channel Messaging API Distribution
       DefaultCacheBehavior:
         AllowedMethods:
@@ -138,3 +140,7 @@ apiCloudFront:
             ]
           OriginPath: '/${self:provider.stage}'
       PriceClass: PriceClass_All
+      ViewerCertificate:
+        AcmCertificateArn: ${env:AWS_CLOUDFRONT_CERT_ARN}
+        MinimumProtocolVersion: TLSv1
+        SslSupportMethod: sni-only
