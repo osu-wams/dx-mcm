@@ -1,8 +1,10 @@
 import throat from 'throat';
+import { responseBody } from '@src/services/httpUtils';
 import { APIGatewayProxyEvent } from 'aws-lambda'; // eslint-disable-line no-unused-vars, import/no-unresolved
 import Message, { MessageStatus, Status } from '@src/models/message'; // eslint-disable-line no-unused-vars
 
 export const handler = async (event: APIGatewayProxyEvent) => {
+  const action = 'messages-list';
   try {
     const { date } = event.pathParameters ?? { date: new Date().toISOString().slice(0, 10) };
     const messageStatuses: MessageStatus[] = await Message.byStatusBeforeDate(Status.NEW, date);
@@ -15,15 +17,16 @@ export const handler = async (event: APIGatewayProxyEvent) => {
 
     return {
       statusCode: 200,
-      body: JSON.stringify({
-        object: messages,
+      body: responseBody({
+        action,
+        object: { messages },
       }),
     };
   } catch (error) {
     console.dir(error, { depth: null, showHidden: true });
     return {
       statusCode: 500,
-      body: JSON.stringify({ error }),
+      body: responseBody({ error, action }),
     };
   }
 };
