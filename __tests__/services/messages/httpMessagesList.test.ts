@@ -18,7 +18,7 @@ describe('handler', () => {
     mockQuery.mockResolvedValue({ Items: [dynamoDbMessage] });
     const result = await handler(mockEvent());
     expect(result).toMatchObject({
-      body: JSON.stringify({ object: [message] }),
+      body: JSON.stringify({ action: 'messages-list', object: { messages: [message] } }),
       statusCode: 200,
     });
     expect(mockQuery).toHaveBeenCalled();
@@ -33,7 +33,7 @@ describe('handler', () => {
     mockQuery.mockResolvedValue({ Items: [dynamoDbMessage] });
     const result = await handler(mockEvent());
     expect(result).toMatchObject({
-      body: JSON.stringify({ object: [message] }),
+      body: JSON.stringify({ action: 'messages-list', object: { messages: [message] } }),
       statusCode: 200,
     });
     expect(mockQuery).toHaveBeenCalled();
