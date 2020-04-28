@@ -5,3 +5,7 @@ s3Sync:
 
 webpack:
   includeModules: true
+
+prune:
+  automatic: true
+  number: 5
