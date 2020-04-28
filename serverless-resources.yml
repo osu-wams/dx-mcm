@@ -94,3 +94,47 @@ staticBucket:
   Properties:
     BucketName: ${self:service.name}-static
     AccessControl: PublicRead
+
+apiCloudFront:
+  Type: AWS::CloudFront::Distribution
+  Properties:
+    DistributionConfig:
+      Comment: OSU DX Multi-Channel Messaging API Distribution
+      DefaultCacheBehavior:
+        AllowedMethods:
+          - HEAD
+          - GET
+          - OPTIONS
+          - PUT
+          - POST
+          - PATCH
+          - DELETE
+        CachedMethods:
+          - HEAD
+          - GET
+        Compress: false
+        DefaultTTL: 86400
+        ForwardedValues:
+          Cookies:
+            Forward: all
+          Headers:
+            - Authorization
+            - x-api-key
+          QueryString: true
+        TargetOriginId: ${self:service.name}-cloudfront
+        ViewerProtocolPolicy: https-only
+      Enabled: true
+      HttpVersion: http2
+      Origins:
+        - Id: ${self:service.name}-cloudfront
+          CustomOriginConfig:
+            OriginProtocolPolicy: https-only
+            OriginSSLProtocols:
+              - TLSv1.2
+          DomainName:
+            !Join [
+              '',
+              [!Ref ApiGatewayRestApi, '.execute-api.${self:provider.region}.amazonaws.com'],
+            ]
+          OriginPath: '/${self:provider.stage}'
+      PriceClass: PriceClass_All
