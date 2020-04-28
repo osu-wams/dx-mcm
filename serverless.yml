@@ -13,6 +13,7 @@ plugins:
   - serverless-pseudo-parameters
   - serverless-step-functions
   - serverless-webpack
+  - serverless-plugin-stack-outputs
 
 custom: ${file(./serverless-custom.yml)}
 
@@ -110,3 +111,7 @@ resources:
     messageStateMachineLogGroup: ${file(./src/services/messages/serverless-resources.yml):messageStateMachineLogGroup}
     userMessagesSqsQueue: ${file(./src/services/userMessages/serverless-resources.yml):userMessagesSqsQueue}
     userMessageStateMachineLogGroup: ${file(./src/services/userMessages/serverless-resources.yml):userMessageStateMachineLogGroup}
+  Outputs:
+    CloudFrontDistribution:
+      Description: URL to the API for testing or DNS CName
+      Value: !Join ['', ['https://', !GetAtt apiCloudFront.DomainName]]
