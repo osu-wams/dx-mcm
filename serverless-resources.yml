@@ -140,3 +140,7 @@ apiCloudFront:
             ]
           OriginPath: '/${self:provider.stage}'
       PriceClass: PriceClass_All
+      ViewerCertificate:
+        AcmCertificateArn: ${env:AWS_CLOUDFRONT_CERT_ARN}
+        MinimumProtocolVersion: TLSv1
+        SslSupportMethod: sni-only
