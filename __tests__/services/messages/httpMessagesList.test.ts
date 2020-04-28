@@ -17,8 +17,8 @@ describe('handler', () => {
   it('fetches messages that are currently ready to send', async () => {
     mockQuery.mockResolvedValue({ Items: [dynamoDbMessage] });
     const result = await handler(mockEvent());
-    expect(result).toMatchObject({
-      body: JSON.stringify({ action: 'messages-list', object: { messages: [message] } }),
+    expect({ ...result, body: JSON.parse(result.body) }).toMatchObject({
+      body: { action: 'messages-list', object: { messages: [message] } },
       statusCode: 200,
     });
     expect(mockQuery).toHaveBeenCalled();
@@ -32,8 +32,8 @@ describe('handler', () => {
     });
     mockQuery.mockResolvedValue({ Items: [dynamoDbMessage] });
     const result = await handler(mockEvent());
-    expect(result).toMatchObject({
-      body: JSON.stringify({ action: 'messages-list', object: { messages: [message] } }),
+    expect({ ...result, body: JSON.parse(result.body) }).toMatchObject({
+      body: { action: 'messages-list', object: { messages: [message] } },
       statusCode: 200,
     });
     expect(mockQuery).toHaveBeenCalled();

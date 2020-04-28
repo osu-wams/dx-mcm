@@ -16,12 +16,12 @@ describe('handler', () => {
   it('publishes pending messages to the queue', async () => {
     mockPublish.mockResolvedValue({ MessageId: 'test' });
     const result = await handler(mockEvent());
-    expect(result).toMatchObject({
-      body: JSON.stringify({
+    expect({ ...result, body: JSON.parse(result.body) }).toMatchObject({
+      body: {
         message: 'Message created.',
         action: '/api/v1/messages/action/create',
         object: { messageId: 'test' },
-      }),
+      },
       statusCode: 200,
     });
     expect(mockPublish).toHaveBeenCalled();
