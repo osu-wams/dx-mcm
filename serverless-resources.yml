@@ -99,6 +99,8 @@ apiCloudFront:
   Type: AWS::CloudFront::Distribution
   Properties:
     DistributionConfig:
+      Aliases:
+        - ${env:AWS_CLOUDFRONT_ALIAS}
       Comment: OSU DX Multi-Channel Messaging API Distribution
       DefaultCacheBehavior:
         AllowedMethods:
