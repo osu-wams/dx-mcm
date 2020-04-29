@@ -2,3 +2,10 @@ provider:
   tracing:
     apiGateway: true
     lambda: true
+  usagePlan:
+    quota:
+      limit: 5000
+      period: DAY
+    throttle:
+      burstLimit: 500
+      rateLimit: 100
