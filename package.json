@@ -5,9 +5,9 @@
   "author": "Josh Gum",
   "license": "MIT",
   "scripts": {
-    "deploy": "sls deploy -s development",
-    "deploy:prod": "sls deploy -s production",
-    "deploy:stage": "sls deploy -s stage",
+    "deploy": "sls deploy --stage development",
+    "deploy:production": "NODE_ENV=production sls deploy --stage production",
+    "deploy:stage": "NODE_ENV=stage sls deploy --stage stage",
     "repl": "DOTENV_CONFIG_PATH=./.env.repl ts-node -r tsconfig-paths/register -P tsconfig.repl.json",
     "lint": "eslint --ext .ts,.js 'src/**/*' 'mocks/**/*'",
     "test": "jest",
