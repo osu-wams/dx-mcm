@@ -13,10 +13,10 @@ $ export NODE_OPTIONS=--max_old_space_size=8192
 # Deploy a developer-specific development stack
 
 Perform a complete build and deployment to a bespoke stack including the developers name. This feature provides each developer a way to work in isolation without having
-any potential impacts on others work and testing.
+any potential impacts on others work and testing. The developer option helps to ensure the stack and some resources are globally unique (api key, domain alias, resource names, etc). **RECOMMENDED** Keep the value of ONID as short and unique to you.
 
 ```
-$ yarn deploy --developer=<YOUR_NAME_HERE>
+$ yarn deploy -v --developer=<ONID>
 ```
 
 # Development Workflow
