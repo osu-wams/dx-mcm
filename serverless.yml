@@ -1,5 +1,5 @@
 service:
-  name: osu-dx-mcm-${opt:stage, 'development'}${opt:developer, ''}
+  name: osu-dx-mcm-${opt:stage, 'development'}${file(./src/serverless.js):developerSuffix}
   description: OSU DX Multi-Channel Messaging Stack
 
 package:
@@ -32,7 +32,7 @@ provider:
     SERVICE_NAME: ${self:service.name}
   apiKeys:
     - name: ${self:service.name}-api-key # .env.{stage} file contains the API key
-      value: ${env:AWS_APIGW_API_KEY}
+      value: ${env:AWS_APIGW_API_KEY}${file(./src/serverless.js):developerSuffix} # ensure a unique key when using a developer stack
   tracing: ${file(./serverless.config.${opt:stage, 'development'}.yml):provider.tracing}
   iamRoleStatements:
     - Effect: Allow
