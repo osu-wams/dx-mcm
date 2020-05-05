@@ -40,6 +40,22 @@ httpUserMessagesList:
               osuId: true
               lastKey: true
 
+httpUserMessageRead:
+  handler: src/services/userMessages/httpUserMessageRead.handler
+  name: ${self:service.name}-userMessageRead
+  description: Mark a user message as being read for a user
+  events:
+    - http:
+        private: true # forces header x-api-key to be present with a valid key from provider.apiKeys
+        method: get
+        path: /api/v1/userMessages/read/{channelId}/{messageId}/{osuId}
+        request:
+          parameters:
+            paths:
+              channelId: true
+              messageId: true
+              osuId: true
+
 sqsUserMessageProcessor:
   handler: src/services/userMessages/sqsUserMessageProcessor.handler
   name: ${self:service.name}-userMessageProcessor
