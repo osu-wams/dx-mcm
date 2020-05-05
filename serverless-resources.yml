@@ -14,6 +14,8 @@ messagesTable:
         AttributeType: S
       - AttributeName: status
         AttributeType: S
+      - AttributeName: hash
+        AttributeType: S
     KeySchema:
       - AttributeName: sendAt
         KeyType: HASH
@@ -36,6 +38,16 @@ messagesTable:
         ProvisionedThroughput:
           ReadCapacityUnits: 5
           WriteCapacityUnits: 5
+    LocalSecondaryIndexes:
+      - IndexName: ${self:service.name}-MessageByHash
+        KeySchema:
+          - AttributeName: hash
+            KeyType: HASH
+        Projection:
+          ProjectionType: INCLUDE
+          NonKeyAttributes:
+            - sendAt
+            - id
 
 userMessagesTable:
   Type: AWS::DynamoDB::Table
