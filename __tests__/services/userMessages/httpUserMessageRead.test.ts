@@ -34,9 +34,9 @@ describe('handler', () => {
     expect({ ...result, body: JSON.parse(result.body) }).toMatchObject({
       body: {
         action: 'userMessage-read',
-        object: { userMessage },
+        message: 'Mark message as read failed.',
       },
-      statusCode: 200,
+      statusCode: 409,
     });
     expect(mockQuery).toHaveBeenCalled();
   });
