@@ -1,11 +1,13 @@
 import { DYNAMODB_TABLE_PREFIX } from '@src/constants';
 import { DynamoDB } from 'aws-sdk'; // eslint-disable-line no-unused-vars
 import { putItem, query } from '@src/database';
+import { urlSafeBase64Encode } from '@src/models/utils';
 
 export interface DynamoDBMessageItem extends DynamoDB.PutItemInputAttributeMap {
   channelIds: { SS: string[] };
   content: { S: string };
   contentShort: { S: string };
+  hash: { S: string };
   id: { S: string }; // sort key
   populationParams: {
     M: { affiliation: { S: string }; osuIds: { SS: string[] } | { NULL: boolean } };
@@ -25,6 +27,7 @@ interface MessageParams {
     channelIds: string[];
     content: string;
     contentShort: string;
+    hash?: string;
     id: string;
     populationParams: MessagePopulationParams;
     sendAt: string;
@@ -52,6 +55,8 @@ class Message {
 
   contentShort: string = '';
 
+  hash: string = '';
+
   id: string = '';
 
   populationParams: MessagePopulationParams = {};
@@ -64,9 +69,20 @@ class Message {
 
   static STATUS_INDEX_NAME: string = `${DYNAMODB_TABLE_PREFIX}-MessageStatuses`;
 
+  static HASH_INDEX_NAME: string = `${DYNAMODB_TABLE_PREFIX}-MessageByHash`;
+
   constructor(p: MessageParams) {
     if (p.message) {
-      const { sendAt, id, status, populationParams, channelIds, content, contentShort } = p.message;
+      const {
+        sendAt,
+        hash,
+        id,
+        status,
+        populationParams,
+        channelIds,
+        content,
+        contentShort,
+      } = p.message;
       this.sendAt = sendAt;
       this.id = id;
       this.status = status;
@@ -74,12 +90,23 @@ class Message {
       this.channelIds = channelIds;
       this.content = content;
       this.contentShort = contentShort;
+      this.hash =
+        hash ??
+        urlSafeBase64Encode({
+          sendAt,
+          status,
+          populationParams,
+          channelIds,
+          content,
+          contentShort,
+        });
     }
 
     if (p.dynamoDbMessage) {
       const {
         sendAt,
         id,
+        hash,
         status,
         populationParams,
         channelIds,
@@ -88,6 +115,7 @@ class Message {
       } = p.dynamoDbMessage;
       if (sendAt) this.sendAt = sendAt.S || '';
       if (id) this.id = id.S || '';
+      if (hash) this.hash = hash.S || '';
       if (status) this.status = status.S || '';
       if (channelIds) this.channelIds = channelIds.SS || [];
       if (content) this.content = content.S || '';
@@ -170,6 +198,27 @@ class Message {
     }
   };
 
+  static exists = async (props: Message): Promise<boolean> => {
+    try {
+      const params: AWS.DynamoDB.QueryInput = {
+        TableName: Message.HASH_INDEX_NAME,
+        KeyConditionExpression: '#hashAttribute = :hashValue',
+        ExpressionAttributeNames: {
+          '#hashAttribute': 'hash',
+        },
+        ExpressionAttributeValues: {
+          ':hashValue': { S: props.hash },
+        },
+        Select: 'COUNT',
+      };
+      const results: AWS.DynamoDB.QueryOutput = await query(params);
+      return (results.Count ?? 0) > 0;
+    } catch (err) {
+      console.error(`Message.exists(${props}) failed:`, err);
+      throw err;
+    }
+  };
+
   static byStatusBeforeDate = async (status: Status, sendAt: string): Promise<MessageStatus[]> => {
     try {
       const params: AWS.DynamoDB.QueryInput = {
@@ -209,6 +258,7 @@ class Message {
     const {
       sendAt,
       id,
+      hash,
       status,
       populationParams: { affiliation, osuIds },
       channelIds,
@@ -218,6 +268,7 @@ class Message {
     return {
       sendAt: { S: sendAt },
       id: { S: id },
+      hash: { S: hash },
       status: { S: status },
       populationParams: {
         M: {

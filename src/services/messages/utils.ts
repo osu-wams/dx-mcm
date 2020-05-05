@@ -8,17 +8,20 @@ export const persistMessage = async (record: SNSEventRecord): Promise<Message | 
   const { content, contentShort, channelIds, populationParams, sendAt } = JSON.parse(
     record.Sns.Message,
   );
-  const message = await Message.upsert({
-    id: record.Sns.MessageId,
-    status: Status.NEW,
-    sendAt,
-    populationParams,
-    channelIds,
-    content,
-    contentShort,
+  const message = new Message({
+    message: {
+      id: record.Sns.MessageId,
+      status: Status.NEW,
+      sendAt,
+      populationParams,
+      channelIds,
+      content,
+      contentShort,
+    },
   });
-  console.log('Created -->  ', message);
-  return message;
+  const newMessage = await Message.upsert(message);
+  console.log('Created -->  ', newMessage);
+  return newMessage;
 };
 
 export const publishToQueue = async (
