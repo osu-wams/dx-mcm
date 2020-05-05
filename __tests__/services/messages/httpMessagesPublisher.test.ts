@@ -13,14 +13,14 @@ beforeEach(() => {
 });
 
 describe('handler', () => {
-  it('publishes pending messages to the queue', async () => {
+  it('publishes an action to the queue', async () => {
     mockPublish.mockResolvedValue({ MessageId: 'test' });
     const result = await handler(mockEvent());
     expect({ ...result, body: JSON.parse(result.body) }).toMatchObject({
       body: {
-        message: 'Message created.',
+        message: 'Action published.',
         action: '/api/v1/messages/action/create',
-        object: { messageId: 'test' },
+        object: { id: 'test', payload: JSON.parse(mockEvent().body).payload },
       },
       statusCode: 200,
     });

@@ -27,9 +27,9 @@ export const handler = async (event: APIGatewayProxyEvent) => {
     return {
       statusCode: 200,
       body: responseBody({
-        message: 'Message created.',
+        message: 'Action published.',
         action,
-        object: { messageId: (published as SNS.PublishResponse).MessageId },
+        object: { id: (published as SNS.PublishResponse).MessageId, payload },
       }),
     };
   } catch (error) {
