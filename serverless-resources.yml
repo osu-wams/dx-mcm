@@ -115,6 +115,9 @@ apiCloudFront:
       Aliases:
         - ${file(./src/serverless.js):developerPrefix}${env:AWS_CLOUDFRONT_ALIAS} # optionally apply a developer prefix (<opt:developer>-) to the alias if command option provided
       Comment: OSU DX Multi-Channel Messaging API Distribution
+      CustomErrorResponses:
+        - ErrorCachingMinTTL: 60
+          ErrorCode: 500
       DefaultCacheBehavior:
         AllowedMethods:
           - HEAD
@@ -128,7 +131,9 @@ apiCloudFront:
           - HEAD
           - GET
         Compress: false
-        DefaultTTL: 86400
+        MinTTL: 0
+        DefaultTTL: 60
+        MaxTTL: 3153600
         ForwardedValues:
           Cookies:
             Forward: all

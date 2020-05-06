@@ -23,6 +23,9 @@ export const handler = async (event: APIGatewayProxyEvent) => {
 
     return {
       statusCode: 200,
+      headers: {
+        'Cache-Control': 'public,max-age=15',
+      },
       body: responseBody({
         action,
         object: { userMessageResults },
@@ -32,6 +35,9 @@ export const handler = async (event: APIGatewayProxyEvent) => {
     console.dir(error, { depth: null, showHidden: true });
     return {
       statusCode: 500,
+      headers: {
+        'Cache-Control': 'public,max-age=60,must-revalidate',
+      },
       body: responseBody({ error, action }),
     };
   }
