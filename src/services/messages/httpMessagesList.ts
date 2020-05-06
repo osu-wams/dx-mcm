@@ -1,5 +1,5 @@
 import throat from 'throat';
-import { responseBody } from '@src/services/httpUtils';
+import { responseBody, successResponse, errorResponse } from '@src/services/httpUtils';
 import { APIGatewayProxyEvent } from 'aws-lambda'; // eslint-disable-line no-unused-vars, import/no-unresolved
 import Message, { MessageStatus, Status } from '@src/models/message'; // eslint-disable-line no-unused-vars
 
@@ -15,19 +15,17 @@ export const handler = async (event: APIGatewayProxyEvent) => {
         .map(throat(5, (messageStatus) => Message.find(messageStatus.sendAt, messageStatus.id))),
     );
 
-    return {
-      statusCode: 200,
+    return successResponse({
       body: responseBody({
         action,
         object: { messages },
       }),
-    };
+    });
   } catch (error) {
     console.dir(error, { depth: null, showHidden: true });
-    return {
-      statusCode: 500,
+    return errorResponse({
       body: responseBody({ error, action }),
-    };
+    });
   }
 };
 

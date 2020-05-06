@@ -1,5 +1,10 @@
 import { SNS_TOPIC_ARN } from '@src/constants';
-import { validateSnsAction, responseBody } from '@src/services/httpUtils';
+import {
+  validateSnsAction,
+  responseBody,
+  successResponse,
+  errorResponse,
+} from '@src/services/httpUtils';
 import { publish } from '@src/messagePubSub';
 import { APIGatewayProxyEvent } from 'aws-lambda'; // eslint-disable-line no-unused-vars, import/no-unresolved
 import { AWSError, SNS } from 'aws-sdk'; // eslint-disable-line no-unused-vars
@@ -33,20 +38,18 @@ export const handler = async (event: APIGatewayProxyEvent) => {
     if (published === AWSError) {
       throw new Error(`httpMessagesPublisher failed to publish message -->  ${message}`);
     }
-    return {
-      statusCode: 200,
+    return successResponse({
       body: responseBody({
         message: 'Action published.',
         action,
         object: { id: (published as SNS.PublishResponse).MessageId, payload },
       }),
-    };
+    });
   } catch (error) {
     console.dir(error, { depth: null, showHidden: true });
-    return {
-      statusCode: 500,
+    return errorResponse({
       body: responseBody({ error, action }),
-    };
+    });
   }
 };
 

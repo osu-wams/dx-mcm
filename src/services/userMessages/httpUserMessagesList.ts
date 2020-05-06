@@ -1,5 +1,5 @@
 import { APIGatewayProxyEvent } from 'aws-lambda'; // eslint-disable-line no-unused-vars, import/no-unresolved
-import { responseBody } from '@src/services/httpUtils';
+import { responseBody, successResponse, errorResponse } from '@src/services/httpUtils';
 import UserMessage, { UserMessageResults, ChannelId } from '@src/models/userMessage'; // eslint-disable-line no-unused-vars
 
 export const handler = async (event: APIGatewayProxyEvent) => {
@@ -21,25 +21,17 @@ export const handler = async (event: APIGatewayProxyEvent) => {
       userMessageResults = await UserMessage.findAll(osuId, lastKey);
     }
 
-    return {
-      statusCode: 200,
-      headers: {
-        'Cache-Control': 'public,max-age=15',
-      },
+    return successResponse({
       body: responseBody({
         action,
         object: { userMessageResults },
       }),
-    };
+    });
   } catch (error) {
     console.dir(error, { depth: null, showHidden: true });
-    return {
-      statusCode: 500,
-      headers: {
-        'Cache-Control': 'public,max-age=60,must-revalidate',
-      },
+    return errorResponse({
       body: responseBody({ error, action }),
-    };
+    });
   }
 };
 
