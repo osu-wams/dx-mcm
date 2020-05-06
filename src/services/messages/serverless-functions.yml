@@ -37,6 +37,7 @@ snsMessagesCreate:
     !Join [' ', ['Listens to SNS Topic', !GetAtt apiSnsTopic.TopicName, 'to create new Messages.']]
   environment:
     SQS_PROCESS_MESSAGE_QUEUE_NAME: !GetAtt messagesSqsQueue.QueueName
+    SQS_ERROR_MESSAGE_QUEUE_NAME: !GetAtt messageErrorsSqsQueue.QueueName
   events:
     - sns:
         arn: !Ref apiSnsTopic

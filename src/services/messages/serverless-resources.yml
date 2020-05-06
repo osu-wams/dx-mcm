@@ -5,6 +5,11 @@ messagesSqsQueue:
     ContentBasedDeduplication: true
     FifoQueue: true
 
+messageErrorsSqsQueue:
+  Type: AWS::SQS::Queue
+  Properties:
+    QueueName: ${self:service.name}-message-errors
+
 messageStateMachineLogGroup:
   Type: AWS::Logs::LogGroup
   Properties:
