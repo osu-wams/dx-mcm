@@ -45,7 +45,6 @@ messagesTable:
         Projection:
           ProjectionType: INCLUDE
           NonKeyAttributes:
-            - sendAt
             - id
         ProvisionedThroughput:
           ReadCapacityUnits: 5
