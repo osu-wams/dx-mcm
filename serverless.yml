@@ -108,6 +108,7 @@ resources:
     userMessagesTable: ${file(./serverless-resources.yml):userMessagesTable}
     staticBucket: ${file(./serverless-resources.yml):staticBucket}
     messagesSqsQueue: ${file(./src/services/messages/serverless-resources.yml):messagesSqsQueue}
+    messageErrorsSqsQueue: ${file(./src/services/messages/serverless-resources.yml):messageErrorsSqsQueue}
     messageStateMachineLogGroup: ${file(./src/services/messages/serverless-resources.yml):messageStateMachineLogGroup}
     userMessagesSqsQueue: ${file(./src/services/userMessages/serverless-resources.yml):userMessagesSqsQueue}
     userMessageStateMachineLogGroup: ${file(./src/services/userMessages/serverless-resources.yml):userMessageStateMachineLogGroup}
