@@ -201,7 +201,8 @@ class Message {
   static exists = async (props: Message): Promise<boolean> => {
     try {
       const params: AWS.DynamoDB.QueryInput = {
-        TableName: Message.HASH_INDEX_NAME,
+        TableName: Message.TABLE_NAME,
+        IndexName: Message.HASH_INDEX_NAME,
         KeyConditionExpression: '#hashAttribute = :hashValue',
         ExpressionAttributeNames: {
           '#hashAttribute': 'hash',
