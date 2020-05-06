@@ -38,7 +38,6 @@ messagesTable:
         ProvisionedThroughput:
           ReadCapacityUnits: 5
           WriteCapacityUnits: 5
-    LocalSecondaryIndexes:
       - IndexName: ${self:service.name}-MessageByHash
         KeySchema:
           - AttributeName: hash
@@ -48,6 +47,9 @@ messagesTable:
           NonKeyAttributes:
             - sendAt
             - id
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
 
 userMessagesTable:
   Type: AWS::DynamoDB::Table
