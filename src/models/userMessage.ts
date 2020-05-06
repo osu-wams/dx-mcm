@@ -360,7 +360,7 @@ class UserMessage {
     params: AWS.DynamoDB.QueryInput,
   ): Promise<UserMessageResults> => {
     const results: AWS.DynamoDB.QueryOutput = await query(params);
-    console.log(results.Items);
+    console.log('Queried -->  ', params, results.Items);
     if (!results.Items)
       return {
         items: [],
