@@ -48,6 +48,7 @@ provider:
       Resource:
         - !GetAtt messagesTable.Arn
         - !Join ['', [!GetAtt messagesTable.Arn, '/index/${self:service.name}-MessageStatuses']]
+        - !Join ['', [!GetAtt messagesTable.Arn, '/index/${self:service.name}-MessageByHash']]
         - !GetAtt userMessagesTable.Arn
         - !Join [
             '',
@@ -70,6 +71,7 @@ provider:
         - sqs:GetQueueAttributes
       Resource:
         - !GetAtt messagesSqsQueue.Arn
+        - !GetAtt messageErrorsSqsQueue.Arn
         - !GetAtt userMessagesSqsQueue.Arn
     - Effect: Allow
       Action:
