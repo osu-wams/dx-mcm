@@ -1,8 +1,9 @@
-import { MESSAGE_STATE_MACHINE_ARN } from '@src/constants';
+import { MESSAGE_STATE_MACHINE_ARN, SQS_ERROR_MESSAGE_QUEUE_NAME } from '@src/constants';
 import { SQSEvent } from 'aws-lambda'; // eslint-disable-line no-unused-vars, import/no-unresolved
-import { validate } from '@src/services/sqsUtils';
 import { startExecution } from '@src/stateMachine';
-import Message from '@src/models/message';
+import Message, { Status } from '@src/models/message';
+import { getQueueUrl, validate } from '@src/services/sqsUtils';
+import { publishToQueue } from './utils';
 
 export const handler = async (event: SQSEvent) => {
   const [valid, records] = validate(event);
@@ -10,18 +11,24 @@ export const handler = async (event: SQSEvent) => {
     return;
   }
 
+  const record = records.shift()!;
+  const message = new Message({ message: JSON.parse(record.body) });
+
   try {
-    const record = records.shift()!;
-    const message = new Message({ message: JSON.parse(record.body) });
-    const response = await startExecution({
+    // startExecution.name must be unique and can not be reused within 90 days, otherwise
+    // the original response will be returned.
+    await startExecution({
       stateMachineArn: MESSAGE_STATE_MACHINE_ARN,
       input: JSON.stringify(message),
-      name: message.id,
+      name: `${message.id}-${new Date().toISOString().slice(0, 10)}`,
     });
-    console.log(response);
-  } catch (error) {
+    await Message.updateStatus(message, Status.PROCESSING);
+  } catch (err) {
     /* istanbul ignore next */
-    console.error(error);
+    console.error(err);
+    const queueUrl = await getQueueUrl(SQS_ERROR_MESSAGE_QUEUE_NAME);
+    publishToQueue({ error: err.message, object: event }, queueUrl);
+    await Message.updateStatus(message, Status.ERROR);
   }
 };
 
