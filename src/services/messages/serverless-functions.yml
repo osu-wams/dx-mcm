@@ -72,6 +72,7 @@ sqsMessageProcessor:
   description:
     !Join [' ', ['Listens to SQS Queue', !GetAtt messagesSqsQueue.QueueName, 'to send a Message.']]
   environment:
+    SQS_ERROR_MESSAGE_QUEUE_NAME: !GetAtt messageErrorsSqsQueue.QueueName
     MESSAGE_STATE_MACHINE_ARN:
       !Join [
         ':',
@@ -93,6 +94,7 @@ stepCreateUserMessage:
   timeout: 300
   environment:
     SQS_PROCESS_USER_MESSAGE_QUEUE_NAME: !GetAtt userMessagesSqsQueue.QueueName
+    SQS_ERROR_MESSAGE_QUEUE_NAME: !GetAtt messageErrorsSqsQueue.QueueName
 
 stepGetChannels:
   handler: src/services/messages/stepGetChannels.handler

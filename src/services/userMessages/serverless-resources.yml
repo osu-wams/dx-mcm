@@ -3,6 +3,11 @@ userMessagesSqsQueue:
   Properties:
     QueueName: ${self:service.name}-user-messages
 
+userMessageErrorsSqsQueue:
+  Type: AWS::SQS::Queue
+  Properties:
+    QueueName: ${self:service.name}-user-message-errors
+
 userMessageStateMachineLogGroup:
   Type: AWS::Logs::LogGroup
   Properties:
