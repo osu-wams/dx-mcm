@@ -1,4 +1,5 @@
 import { SNSEvent, SNSEventRecord } from 'aws-lambda'; // eslint-disable-line no-unused-vars, import/no-unresolved
+import Message from '@src/models/message';
 
 /**
  * Validate and return the SNS record associated to this event.
@@ -20,6 +21,23 @@ export const validate = (event: SNSEvent): [boolean, SNSEventRecord | undefined]
   }
 
   return [true, record];
+};
+
+export const parseMessage = (record: SNSEventRecord, status: string): Message => {
+  const { content, contentShort, channelIds, populationParams, sendAt } = JSON.parse(
+    record.Sns.Message,
+  );
+  return new Message({
+    message: {
+      id: record.Sns.MessageId,
+      status,
+      sendAt,
+      populationParams,
+      channelIds,
+      content,
+      contentShort,
+    },
+  });
 };
 
 export default validate;

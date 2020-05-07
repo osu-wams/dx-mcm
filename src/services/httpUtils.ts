@@ -1,5 +1,12 @@
 import { APIGatewayProxyEvent } from 'aws-lambda'; // eslint-disable-line no-unused-vars, import/no-unresolved
 
+interface IResponseArgs {
+  successCode?: number;
+  errorCode?: number;
+  cacheSeconds?: number;
+  body: string;
+}
+
 export interface IResponseBodyArgs {
   error?: Error;
   requestId?: string;
@@ -61,4 +68,33 @@ export const validateSnsAction = (event: APIGatewayProxyEvent) => {
   }
 
   return result;
+};
+
+/**
+ * A standard successful response from an API Gateway oriented lambda response
+ * @param args parameters for specifying status, caching, etc for the response
+ */
+export const successResponse = (args: IResponseArgs) => {
+  return {
+    statusCode: args.successCode ?? 200,
+    headers: {
+      'Cache-Control': `public,max-age=${args.cacheSeconds ?? 15}`,
+    },
+    body: args.body,
+  };
+};
+
+/**
+ * A standard error response from an API Gateway oriented lambda response.
+ * ! Error response are configured to be cached by Cloudfront with a MinTTL of 60 seconds
+ * @param args parameters for specifying status, caching, etc for the response
+ */
+export const errorResponse = (args: IResponseArgs) => {
+  return {
+    statusCode: args.errorCode ?? 500,
+    headers: {
+      'Cache-Control': 'public,max-age=60,must-revalidate',
+    },
+    body: args.body,
+  };
 };

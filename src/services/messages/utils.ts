@@ -1,28 +1,16 @@
 import UserMessage from '@src/models/userMessage'; // eslint-disable-line no-unused-vars
-import Message, { Status } from '@src/models/message';
-import { SNSEventRecord } from 'aws-lambda'; // eslint-disable-line no-unused-vars, import/no-unresolved
+import Message from '@src/models/message';
 import { AWSError } from 'aws-sdk';
 import { sendMessage } from '@src/messageQueue';
 
-export const persistMessage = async (record: SNSEventRecord): Promise<Message | undefined> => {
-  const { content, contentShort, channelIds, populationParams, sendAt } = JSON.parse(
-    record.Sns.Message,
-  );
-  const message = await Message.upsert({
-    id: record.Sns.MessageId,
-    status: Status.NEW,
-    sendAt,
-    populationParams,
-    channelIds,
-    content,
-    contentShort,
-  });
-  console.log('Created -->  ', message);
-  return message;
+export const persistMessage = async (message: Message): Promise<Message | undefined> => {
+  const newMessage = await Message.upsert(message);
+  console.log('Created -->  ', newMessage);
+  return newMessage;
 };
 
 export const publishToQueue = async (
-  message: Message | UserMessage,
+  message: Message | UserMessage | { error: string; message: Message | undefined },
   queueUrl: string,
   messageGroupId?: string,
 ) => {
