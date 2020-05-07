@@ -10,7 +10,7 @@ export const persistMessage = async (message: Message): Promise<Message | undefi
 };
 
 export const publishToQueue = async (
-  message: Message | UserMessage | { error: string; message: Message | undefined },
+  message: Message | UserMessage | { error: string; object?: any },
   queueUrl: string,
   messageGroupId?: string,
 ) => {
