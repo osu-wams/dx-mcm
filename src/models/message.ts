@@ -44,7 +44,9 @@ export interface MessageStatus {
 
 /* eslint-disable no-unused-vars */
 export enum Status {
+  ERROR = 'ERROR',
   NEW = 'NEW',
+  PROCESSING = 'PROCESSING',
   SENT = 'SENT',
 }
 /* eslint-enable no-unused-vars */
@@ -130,6 +132,12 @@ class Message {
       }
     }
   }
+
+  static updateStatus = async (props: Message, status: Status): Promise<Message | undefined> => {
+    const message = props;
+    message.status = status;
+    return Message.upsert(message);
+  };
 
   static upsert = async (props: Message): Promise<Message | undefined> => {
     // ! DynamoDb only supports 'ALL_OLD' or 'NONE' for return values from the
