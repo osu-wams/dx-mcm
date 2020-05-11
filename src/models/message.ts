@@ -2,6 +2,7 @@ import { DYNAMODB_TABLE_PREFIX } from '@src/constants';
 import { DynamoDB } from 'aws-sdk'; // eslint-disable-line no-unused-vars
 import { putItem, query } from '@src/database';
 import { urlSafeBase64Encode } from '@src/models/utils';
+import { UserData } from '../services/messages/types'; // eslint-disable-line no-unused-vars
 
 export interface DynamoDBMessageItem extends DynamoDB.PutItemInputAttributeMap {
   channelIds: { SS: string[] };
@@ -10,7 +11,7 @@ export interface DynamoDBMessageItem extends DynamoDB.PutItemInputAttributeMap {
   hash: { S: string };
   id: { S: string }; // sort key
   populationParams: {
-    M: { affiliation: { S: string }; osuIds: { SS: string[] } | { NULL: boolean } };
+    M: { affiliation: { S: string }; users: { SS: string[] } | { NULL: boolean } };
   };
   sendAt: { S: string }; // partition key
   status: { S: string };
@@ -18,7 +19,7 @@ export interface DynamoDBMessageItem extends DynamoDB.PutItemInputAttributeMap {
 
 interface MessagePopulationParams {
   affiliation?: string;
-  osuIds?: string[];
+  users?: UserData[];
 }
 
 interface MessageParams {
@@ -121,10 +122,10 @@ class Message {
       if (content) this.content = content.S || '';
       if (contentShort) this.contentShort = contentShort.S || '';
       if (populationParams && populationParams.M) {
-        const { affiliation, osuIds } = populationParams.M;
+        const { affiliation, users } = populationParams.M;
         this.populationParams = {
           affiliation: affiliation.S,
-          osuIds: osuIds ? osuIds.SS : undefined,
+          users: users ? users.SS?.map((u) => JSON.parse(u)) : undefined,
         };
       }
     }
@@ -261,7 +262,7 @@ class Message {
       id,
       hash,
       status,
-      populationParams: { affiliation, osuIds },
+      populationParams: { affiliation, users },
       channelIds,
       content,
       contentShort,
@@ -274,7 +275,7 @@ class Message {
       populationParams: {
         M: {
           affiliation: { S: affiliation! },
-          osuIds: osuIds ? { SS: osuIds } : { NULL: true },
+          users: users ? { SS: users.map((u) => JSON.stringify(u)) } : { NULL: true },
         },
       },
       channelIds: { SS: channelIds },

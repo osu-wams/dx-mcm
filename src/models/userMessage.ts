@@ -1,7 +1,7 @@
 import { DYNAMODB_TABLE_PREFIX } from '@src/constants';
 import { DynamoDB } from 'aws-sdk'; // eslint-disable-line no-unused-vars
 import { putItem, updateItem, query } from '@src/database';
-import { DashboardChannel } from '@src/models/channels';
+import { DashboardChannel, SmsChannel } from '@src/models/channels';
 import type Channel from '@src/models/channels/channel'; // eslint-disable-line no-unused-vars
 import { urlSafeBase64Encode, urlSafeBase64Decode } from './utils';
 
@@ -15,6 +15,7 @@ export interface DynamoDBUserMessageItem extends DynamoDB.PutItemInputAttributeM
   messageId: { S: string };
   osuId: { S: string }; // sort key
   sendAt: { S: string }; // partition key
+  smsNumber: { S: string } | { NULL: boolean };
   status: { S: string };
   statusSendAt: { S: string };
 }
@@ -27,8 +28,9 @@ interface UserMessageParams {
     contentShort: string;
     deliveredAt?: string;
     messageId: string;
-    osuId: string;
+    osuId: string; // convert to complex object
     sendAt: string;
+    smsNumber?: string;
     status: string;
   };
 }
@@ -42,6 +44,7 @@ export interface UserMessageResults {
 /* eslint-disable no-unused-vars */
 export enum ChannelId {
   DASHBOARD = 'dashboard',
+  SMS = 'sms',
 }
 
 export enum Status {
@@ -62,6 +65,8 @@ export const getChannel = (userMessage: UserMessage): Channel => {
   switch (userMessage.channelId.toLowerCase()) {
     case ChannelId.DASHBOARD:
       return new DashboardChannel(userMessage);
+    case ChannelId.SMS:
+      return new SmsChannel(userMessage);
     default:
       throw new Error(
         `Channel ${userMessage.channelId} not defined, unable to handle this channel.`,
@@ -95,6 +100,8 @@ class UserMessage {
 
   sendAt: string = '';
 
+  smsNumber?: string = '';
+
   status: string = Status.NEW;
 
   statusSendAt?: string;
@@ -119,6 +126,7 @@ class UserMessage {
         messageId,
         osuId,
         sendAt,
+        smsNumber,
         status,
       } = p.userMessage;
       this.sendAt = sendAt;
@@ -130,6 +138,7 @@ class UserMessage {
       this.content = content;
       this.contentShort = contentShort;
       this.channelMessageId = compositeKey([this.channelId, this.messageId]);
+      this.smsNumber = smsNumber;
       this.statusSendAt = compositeKey([this.status, this.sendAt]);
       this.channelSendAt = compositeKey([this.channelId, this.sendAt]);
     }
@@ -145,6 +154,7 @@ class UserMessage {
         messageId,
         osuId,
         sendAt,
+        smsNumber,
         status,
         statusSendAt,
       } = p.dynamoDbUserMessage;
@@ -158,6 +168,7 @@ class UserMessage {
       if (contentShort) this.contentShort = contentShort.S || '';
       if (channelMessageId) this.channelMessageId = channelMessageId.S || '';
       if (channelSendAt) this.channelSendAt = channelSendAt.S || '';
+      if (smsNumber) this.smsNumber = smsNumber.S;
       if (statusSendAt) this.statusSendAt = statusSendAt.S || '';
     }
   }
@@ -349,6 +360,7 @@ class UserMessage {
       messageId: { S: props.messageId },
       osuId: { S: props.osuId },
       sendAt: { S: props.sendAt },
+      smsNumber: props.smsNumber ? { S: props.smsNumber } : { NULL: true },
       status: { S: props.status },
       statusSendAt: {
         S: props.statusSendAt ?? compositeKey([props.status, props.sendAt]),

@@ -8,6 +8,7 @@ const dynamoDbUserMessage = {
   messageId: { S: 'message-123456789' },
   osuId: { S: '123456789' },
   sendAt: { S: '2020-01-01' },
+  smsNumber: { S: '1111111111' },
   status: { S: 'NEW' },
   statusSendAt: { S: 'NEW:2020-01-01' },
 };
@@ -20,6 +21,7 @@ const emptyDynamoDbUserMessage = {
   messageId: { S: undefined },
   osuId: { S: undefined },
   sendAt: { S: undefined },
+  smsNumber: { S: undefined },
   status: { S: undefined },
   statusSendAt: { S: undefined },
 };
@@ -33,6 +35,7 @@ const userMessage = {
   messageId: 'message-123456789',
   osuId: '123456789',
   sendAt: '2020-01-01',
+  smsNumber: '1111111111',
   status: 'NEW',
   statusSendAt: 'NEW:2020-01-01',
 };
@@ -46,6 +49,7 @@ const emptyUserMessage = {
   messageId: '',
   osuId: '',
   sendAt: '',
+  smsNumber: '',
   status: '',
   statusSendAt: '',
 };
