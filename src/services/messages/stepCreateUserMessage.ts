@@ -23,7 +23,7 @@ export const handler = async (event: MessageStateMachineResult, _context: any, c
                 contentShort: event.contentShort,
                 messageId: event.id,
                 osuId: u.id,
-                smsNumber: u.phone,
+                smsNumber: u.phone ?? '',
                 sendAt: event.sendAt,
                 status: event.status,
               },

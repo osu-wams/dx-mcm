@@ -9,5 +9,5 @@ export interface MessageStateMachineResult extends Message {
 
 export interface UserData {
   id: string;
-  phone: string;
+  phone?: string;
 }

@@ -7,7 +7,14 @@ const dynamoDbMessage = {
       'eyJzZW5kQXQiOiIyMDIwLTAxLTAxIiwic3RhdHVzIjoiTkVXIiwicG9wdWxhdGlvblBhcmFtcyI6eyJhZmZpbGlhdGlvbiI6InRlc3QiLCJvc3VJZHMiOlsiOTg3NjU0MzIxIl19LCJjaGFubmVsSWRzIjpbIjEyMyJdLCJjb250ZW50IjoiY29udGVudCIsImNvbnRlbnRTaG9ydCI6ImNvbnRlbnRTaG9ydCJ9',
   },
   id: { S: '123456789' },
-  populationParams: { M: { affiliation: { S: 'test' }, osuIds: { SS: ['987654321'] } } },
+  // populationParams: { M: { affiliation: { S: 'test' }, osuIds: { SS: ['987654321'] } } },
+  populationParams: {
+    M: {
+      affiliation: { S: 'test' },
+      users: { SS: [JSON.stringify({ id: '987654321', phone: '+15412345678' })] },
+      // users: { SS: ['987654321'] },
+    },
+  },
   sendAt: { S: '2020-01-01' },
   status: { S: 'NEW' },
 };
@@ -28,7 +35,8 @@ const message = {
   hash:
     'eyJzZW5kQXQiOiIyMDIwLTAxLTAxIiwic3RhdHVzIjoiTkVXIiwicG9wdWxhdGlvblBhcmFtcyI6eyJhZmZpbGlhdGlvbiI6InRlc3QiLCJvc3VJZHMiOlsiOTg3NjU0MzIxIl19LCJjaGFubmVsSWRzIjpbIjEyMyJdLCJjb250ZW50IjoiY29udGVudCIsImNvbnRlbnRTaG9ydCI6ImNvbnRlbnRTaG9ydCJ9',
   id: '123456789',
-  populationParams: { affiliation: 'test', osuIds: ['987654321'] },
+  populationParams: { affiliation: 'test', users: [{ id: '987654321', phone: '+15412345678' }] },
+  // populationParams: { affiliation: 'test', osuIds: ['987654321'] },
   sendAt: '2020-01-01',
   status: 'NEW',
 };

@@ -168,7 +168,7 @@ class UserMessage {
       if (contentShort) this.contentShort = contentShort.S || '';
       if (channelMessageId) this.channelMessageId = channelMessageId.S || '';
       if (channelSendAt) this.channelSendAt = channelSendAt.S || '';
-      if (smsNumber) this.smsNumber = smsNumber.S;
+      if (smsNumber) this.smsNumber = smsNumber.S || '';
       if (statusSendAt) this.statusSendAt = statusSendAt.S || '';
     }
   }
