@@ -1,7 +1,6 @@
 import throat from 'throat';
 import { SQS_PROCESS_USER_MESSAGE_QUEUE_NAME, SQS_ERROR_MESSAGE_QUEUE_NAME } from '@src/constants';
-import { getQueueUrl } from '@src/services/sqsUtils';
-import { publishToQueue } from '@src/services/messages/utils';
+import { getQueueUrl, publishToQueue } from '@src/services/sqsUtils';
 import UserMessage from '@src/models/userMessage';
 import Message, { Status } from '@src/models/message';
 import { MessageStateMachineResult, UserData } from './types'; // eslint-disable-line no-unused-vars
