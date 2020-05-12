@@ -38,7 +38,7 @@ provider:
     - Effect: Allow
       Action:
         - sns:Publish
-      Resource: !Ref apiSnsTopic
+      Resource: '*'
     - Effect: Allow
       Action:
         - dynamodb:GetItem

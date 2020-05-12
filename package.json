@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "dotenv": "^8.2.0",
+    "libphonenumber-js": "^1.7.51",
     "throat": "^5.0.0"
   },
   "devDependencies": {

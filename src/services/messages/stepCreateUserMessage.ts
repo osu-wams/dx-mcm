@@ -3,26 +3,27 @@ import { SQS_PROCESS_USER_MESSAGE_QUEUE_NAME } from '@src/constants';
 import { getQueueUrl } from '@src/services/sqsUtils';
 import { publishToQueue } from '@src/services/messages/utils';
 import UserMessage from '@src/models/userMessage';
-import type { MessageStateMachineResult } from './types'; // eslint-disable-line no-unused-vars
+import type { MessageStateMachineResult, UserData } from './types'; // eslint-disable-line no-unused-vars
 
 export const handler = async (event: MessageStateMachineResult, _context: any, callback: any) => {
   try {
     console.log('Handling event -->  ', event);
 
     const channels: string[] = event.processedQueries.find((v) => v.channels)?.channels ?? [];
-    const users: string[] = event.processedQueries.find((v) => v.users)?.users ?? [];
+    const users: UserData[] = event.processedQueries.find((v) => v.users)?.users ?? [];
 
     const userMessages: UserMessage[] = channels
       .map((c: string) =>
         users.map(
-          (u: string) =>
+          (u: UserData) =>
             new UserMessage({
               userMessage: {
                 channelId: c,
                 content: event.content,
                 contentShort: event.contentShort,
                 messageId: event.id,
-                osuId: u,
+                osuId: u.id,
+                smsNumber: u.phone ?? '',
                 sendAt: event.sendAt,
                 status: event.status,
               },
