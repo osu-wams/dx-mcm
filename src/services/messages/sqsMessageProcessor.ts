@@ -2,8 +2,7 @@ import { MESSAGE_STATE_MACHINE_ARN, SQS_ERROR_MESSAGE_QUEUE_NAME } from '@src/co
 import { SQSEvent } from 'aws-lambda'; // eslint-disable-line no-unused-vars, import/no-unresolved
 import { startExecution } from '@src/stateMachine';
 import Message, { Status } from '@src/models/message';
-import { getQueueUrl, validate } from '@src/services/sqsUtils';
-import { publishToQueue } from './utils';
+import { getQueueUrl, validate, publishToQueue } from '@src/services/sqsUtils';
 
 export const handler = async (event: SQSEvent) => {
   const [valid, records] = validate(event);
