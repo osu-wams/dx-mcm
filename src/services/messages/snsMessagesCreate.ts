@@ -1,9 +1,14 @@
 import { SQS_ERROR_MESSAGE_QUEUE_NAME, SQS_PROCESS_MESSAGE_QUEUE_NAME } from '@src/constants';
 import { SNSEvent } from 'aws-lambda'; // eslint-disable-line no-unused-vars, import/no-unresolved
 import { validate, parseMessage } from '@src/services/snsUtils';
-import { getQueueUrl } from '@src/services/sqsUtils';
-import { persistMessage, publishToQueue } from '@src/services/messages/utils';
+import { getQueueUrl, publishToQueue } from '@src/services/sqsUtils';
 import Message, { Status } from '@src/models/message';
+
+export const persistMessage = async (message: Message): Promise<Message | undefined> => {
+  const newMessage = await Message.upsert(message);
+  console.log('Created -->  ', newMessage);
+  return newMessage;
+};
 
 export const handler = async (event: SNSEvent) => {
   const [valid, record] = validate(event);
