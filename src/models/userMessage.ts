@@ -50,6 +50,7 @@ export enum ChannelId {
 export enum Status {
   NEW = 'NEW',
   READ = 'READ',
+  PROCESSING = 'PROCESSING',
   ARCHIVED = 'ARCHIVED',
   DELETED = 'DELETED',
   DELIVERED = 'DELIVERED',
