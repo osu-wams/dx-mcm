@@ -73,6 +73,7 @@ provider:
         - !GetAtt messagesSqsQueue.Arn
         - !GetAtt messageErrorsSqsQueue.Arn
         - !GetAtt userMessagesSqsQueue.Arn
+        - !GetAtt userMessageErrorsSqsQueue.Arn
     - Effect: Allow
       Action:
         - logs:CreateLogDelivery
@@ -113,6 +114,7 @@ resources:
     messageErrorsSqsQueue: ${file(./src/services/messages/serverless-resources.yml):messageErrorsSqsQueue}
     messageStateMachineLogGroup: ${file(./src/services/messages/serverless-resources.yml):messageStateMachineLogGroup}
     userMessagesSqsQueue: ${file(./src/services/userMessages/serverless-resources.yml):userMessagesSqsQueue}
+    userMessageErrorsSqsQueue: ${file(./src/services/userMessages/serverless-resources.yml):userMessageErrorsSqsQueue}
     userMessageStateMachineLogGroup: ${file(./src/services/userMessages/serverless-resources.yml):userMessageStateMachineLogGroup}
   Outputs:
     CloudFrontDistribution:

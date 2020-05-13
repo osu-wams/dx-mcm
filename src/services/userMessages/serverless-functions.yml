@@ -96,3 +96,5 @@ stepPublishUserMessage:
   handler: src/services/userMessages/stepPublishUserMessage.handler
   name: ${self:service.name}-publishUserMessage
   timeout: 300
+  environment:
+    SQS_ERROR_USER_MESSAGE_QUEUE_NAME: !GetAtt userMessageErrorsSqsQueue.QueueName

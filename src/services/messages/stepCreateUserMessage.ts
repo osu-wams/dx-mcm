@@ -1,18 +1,17 @@
 import throat from 'throat';
-import { SQS_PROCESS_USER_MESSAGE_QUEUE_NAME } from '@src/constants';
-import { getQueueUrl } from '@src/services/sqsUtils';
-import { publishToQueue } from '@src/services/messages/utils';
+import { SQS_PROCESS_USER_MESSAGE_QUEUE_NAME, SQS_ERROR_MESSAGE_QUEUE_NAME } from '@src/constants';
+import { getQueueUrl, publishToQueue } from '@src/services/sqsUtils';
 import UserMessage from '@src/models/userMessage';
-import type { MessageStateMachineResult, UserData } from './types'; // eslint-disable-line no-unused-vars
+import Message, { Status } from '@src/models/message';
+import { MessageStateMachineResult, UserData } from './types'; // eslint-disable-line no-unused-vars
 
-export const handler = async (event: MessageStateMachineResult, _context: any, callback: any) => {
+const buildUserMessages = (
+  event: MessageStateMachineResult,
+  channels: string[],
+  users: UserData[],
+): UserMessage[] => {
   try {
-    console.log('Handling event -->  ', event);
-
-    const channels: string[] = event.processedQueries.find((v) => v.channels)?.channels ?? [];
-    const users: UserData[] = event.processedQueries.find((v) => v.users)?.users ?? [];
-
-    const userMessages: UserMessage[] = channels
+    return channels
       .map((c: string) =>
         users.map(
           (u: UserData) =>
@@ -31,27 +30,59 @@ export const handler = async (event: MessageStateMachineResult, _context: any, c
         ),
       )
       .flat();
+  } catch (err) {
+    console.error(err);
+    throw new Error(`buildUserMessages failed: ${err.message}`);
+  }
+};
 
-    const persistedUserMessages = await Promise.all(
+const persistUserMessages = (userMessages: UserMessage[]): Promise<UserMessage[]> => {
+  try {
+    return Promise.all(
       userMessages.map(
         throat(50, (userMessage: UserMessage) => {
           return UserMessage.upsert(userMessage).then((um) => um.items[0]);
         }),
       ),
     );
-    const filteredUserMessages = persistedUserMessages.filter(Boolean) as UserMessage[];
+  } catch (err) {
+    console.error(err);
+    throw new Error(`persistUserMessages failed: ${err.message}`);
+  }
+};
 
+const publishUserMessagesToQueue = async (userMessages: UserMessage[]): Promise<void[]> => {
+  try {
     const queueUrl = await getQueueUrl(SQS_PROCESS_USER_MESSAGE_QUEUE_NAME);
-    await Promise.all(
-      filteredUserMessages.map(
+    return Promise.all(
+      userMessages.map(
         throat(50, (userMessage: UserMessage) => {
           return publishToQueue(userMessage!, queueUrl);
         }),
       ),
     );
+  } catch (err) {
+    console.error(err);
+    throw new Error(`publishUserMessagesToQueue failed: ${err.message}`);
+  }
+};
+
+export const handler = async (event: MessageStateMachineResult, _context: any, callback: any) => {
+  const message = { ...event };
+  try {
+    const channels: string[] = message.processedQueries.find((v) => v.channels)?.channels ?? [];
+    const users: UserData[] = message.processedQueries.find((v) => v.users)?.users ?? [];
+    const userMessages: UserMessage[] = buildUserMessages(message, channels, users);
+    const persistedUserMessages = await persistUserMessages(userMessages);
+    const filteredUserMessages = persistedUserMessages.filter(Boolean) as UserMessage[];
+    await publishUserMessagesToQueue(filteredUserMessages);
+    await Message.updateStatus(message, Status.SENT);
     callback(null, { userMessages });
   } catch (err) {
     console.error('Creating UserMessages failed -->  ', err);
+    const queueUrl = await getQueueUrl(SQS_ERROR_MESSAGE_QUEUE_NAME);
+    publishToQueue({ error: err.message, object: event }, queueUrl);
+    await Message.updateStatus(message, Status.ERROR);
     callback(err, null);
   }
 };
