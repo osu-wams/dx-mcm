@@ -108,15 +108,15 @@ dailyInvoker:
   handler: src/services/messages/snsInvokeMessageProcess.handler
   description: 'lambda that fires off daily to publish an SNS topic that invokes the snsMessageProcess lambda'
   environment:
-    API_KEY: ${env:AWS_APIGW_API_KEY}${file(../../serverless.js):developerSuffix} # ensure a unique key when using a developer stack
-    APP_URL: https://${file(./src/serverless.js):developerPrefix}${env:AWS_CLOUDFRONT_ALIAS}/api/v1/messages/action/process
+    API_KEY: '${env:AWS_APIGW_API_KEY}${file(./src/serverless.js):developerSuffix}' # ensure a unique key when using a developer stack
+    APP_URL: 'https://${file(./src/serverless.js):developerPrefix}${env:AWS_CLOUDFRONT_ALIAS}/api/v1/messages/action/process'
     #memorySize: 128 # MB
     #timeout: 30 # seconds
     # CloudWatch Event Configuration:
     # Uncomment and configure your endpoints and scheduled rate here:
-    events:
-      - schedule:
-          name: ${self:service.name}-snsInvokeMessageProcess
-          description: 'Trigger dailyInvoker at 12:00 every day'
-          rate: cron(0 12 * * ? *)
-          enabled: true
+  events:
+    - schedule:
+        name: ${self:service.name}-snsInvokeMessageProcess
+        description: 'Trigger dailyInvoker at 12:00 every day'
+        rate: cron(0 12 * * ? *)
+        enabled: true

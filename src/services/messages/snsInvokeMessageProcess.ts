@@ -7,7 +7,7 @@ export const handler = (_event: any, _context: any, _callback: any) => {
     axios({
       method: 'post', // you can set what request you want to be
       url: process.env.APP_URL,
-      data: {},
+      data: { payload: {} },
       headers: {
         'x-api-key': process.env.API_KEY,
       },
