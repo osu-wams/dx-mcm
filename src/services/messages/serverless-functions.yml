@@ -104,19 +104,15 @@ stepGetUserPopulation:
   handler: src/services/messages/stepGetUserPopulation.handler
   name: ${self:service.name}-messageGetUserPopulation
 
-dailyInvoker:
-  handler: src/services/messages/snsInvokeMessageProcess.handler
-  description: 'lambda that fires off daily to publish an SNS topic that invokes the snsMessageProcess lambda'
+cronInvokeMessageProcess:
+  handler: src/services/messages/cronInvokeMessageProcess.handler
+  description: 'Lambda that fires off daily to post to the API to initiate processing messages ready to be sent'
   environment:
-    API_KEY: '${env:AWS_APIGW_API_KEY}${file(./src/serverless.js):developerSuffix}' # ensure a unique key when using a developer stack
+    API_KEY: '${env:AWS_APIGW_API_KEY}${file(./src/serverless.js):developerSuffix}'
     APP_URL: 'https://${file(./src/serverless.js):developerPrefix}${env:AWS_CLOUDFRONT_ALIAS}/api/v1/messages/action/process'
-    #memorySize: 128 # MB
-    #timeout: 30 # seconds
-    # CloudWatch Event Configuration:
-    # Uncomment and configure your endpoints and scheduled rate here:
   events:
     - schedule:
-        name: ${self:service.name}-snsInvokeMessageProcess
-        description: 'Trigger dailyInvoker at 12:00 every day'
-        rate: cron(0 12 * * ? *)
+        name: ${self:service.name}-cronInvokeMessageProcess
+        description: 'Trigger cronIinvokeMessageProcess lambda at 12:00am Pacific Time every day'
+        rate: cron(0 17 * * ? *)
         enabled: true
