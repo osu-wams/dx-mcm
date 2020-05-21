@@ -47,21 +47,9 @@ provider:
         - dynamodb:Query
       Resource:
         - !GetAtt messagesTable.Arn
-        - !Join ['', [!GetAtt messagesTable.Arn, '/index/${self:service.name}-MessageStatuses']]
-        - !Join ['', [!GetAtt messagesTable.Arn, '/index/${self:service.name}-MessageByHash']]
+        - !Join ['', [!GetAtt messagesTable.Arn, '/index/*']]
         - !GetAtt userMessagesTable.Arn
-        - !Join [
-            '',
-            [!GetAtt userMessagesTable.Arn, '/index/${self:service.name}-UserMessageStatuses'],
-          ]
-        - !Join [
-            '',
-            [!GetAtt userMessagesTable.Arn, '/index/${self:service.name}-UserMessageByChannel'],
-          ]
-        - !Join [
-            '',
-            [!GetAtt userMessagesTable.Arn, '/index/${self:service.name}-UserMessageBySendAt'],
-          ]
+        - !Join ['', [!GetAtt userMessagesTable.Arn, '/index/*']]
     - Effect: Allow
       Action:
         - sqs:SendMessage

@@ -65,6 +65,8 @@ userMessagesTable:
         AttributeType: S
       - AttributeName: sendAt
         AttributeType: S
+      - AttributeName: status
+        AttributeType: S
     KeySchema:
       - AttributeName: osuId
         KeyType: HASH
@@ -98,6 +100,14 @@ userMessagesTable:
           - AttributeName: osuId
             KeyType: HASH
           - AttributeName: statusSendAt
+            KeyType: RANGE
+        Projection:
+          ProjectionType: ALL
+      - IndexName: ${self:service.name}-UserMessageAllByStatus
+        KeySchema:
+          - AttributeName: status
+            KeyType: HASH
+          - AttributeName: sendAt
             KeyType: RANGE
         Projection:
           ProjectionType: ALL
