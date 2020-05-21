@@ -10,9 +10,12 @@ export const handler = async (event: SNSEvent) => {
   if (!valid || !record) {
     return;
   }
-  const { sendAt } = JSON.parse(record.Sns.Message);
+  const { sendAt }: { sendAt?: string } = JSON.parse(record.Sns.Message);
   try {
-    const messageStatuses: MessageStatus[] = await Message.byStatusBeforeDate(Status.NEW, sendAt);
+    const messageStatuses: MessageStatus[] = await Message.byStatusBeforeDate(
+      Status.NEW,
+      sendAt ?? new Date().toISOString().slice(0, 10),
+    );
 
     const messages: (Message | undefined)[] = await Promise.all(
       messageStatuses
