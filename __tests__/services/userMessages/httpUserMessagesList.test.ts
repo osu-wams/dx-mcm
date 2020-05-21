@@ -2,6 +2,7 @@ import { handler } from '@src/services/userMessages/httpUserMessagesList';
 import { dynamoDbUserMessage, userMessage } from '@mocks/userMessage.mock';
 import * as event from '../../../events/lambda.http.userMessagesList.json';
 import * as channelEvent from '../../../events/lambda.http.userMessagesListByChannelId.json';
+import * as statusEvent from '../../../events/lambda.http.userMessagesListByStatus.json';
 
 const mockEvent = jest.fn();
 const mockQuery = jest.fn();
@@ -44,6 +45,22 @@ describe('handler', () => {
     });
     expect(mockQuery).toHaveBeenCalled();
   });
+  it('fetches user messages in a particular status', async () => {
+    mockQuery.mockResolvedValue({ Items: [dynamoDbUserMessage], Count: 1 });
+    mockEvent.mockReturnValue({
+      ...statusEvent,
+      pathParameters: { status: 'error' },
+    });
+    const result = await handler(mockEvent());
+    expect({ ...result, body: JSON.parse(result.body) }).toMatchObject({
+      body: {
+        action: 'userMessages-list',
+        object: { userMessageResults: { items: [userMessage], count: 1 } },
+      },
+      statusCode: 200,
+    });
+    expect(mockQuery).toHaveBeenCalled();
+  });
   it('should respond with an error when an invalid channel id is provided', async () => {
     mockEvent.mockReturnValue({
       ...channelEvent,
@@ -52,6 +69,17 @@ describe('handler', () => {
     const result = await handler(mockEvent());
     expect({ ...result, body: JSON.parse(result.body) }).toMatchObject({
       body: { action: 'userMessages-list', message: 'Missing valid channelId in path.' },
+      statusCode: 500,
+    });
+  });
+  it('should respond with an error when an invalid status is provided', async () => {
+    mockEvent.mockReturnValue({
+      ...statusEvent,
+      pathParameters: { status: 'invalid-status' },
+    });
+    const result = await handler(mockEvent());
+    expect({ ...result, body: JSON.parse(result.body) }).toMatchObject({
+      body: { action: 'userMessages-list', message: 'Missing valid status in path.' },
       statusCode: 500,
     });
   });

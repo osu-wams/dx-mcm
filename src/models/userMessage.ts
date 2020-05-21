@@ -111,6 +111,8 @@ class UserMessage {
 
   static STATUS_INDEX_NAME: string = `${DYNAMODB_TABLE_PREFIX}-UserMessageStatuses`;
 
+  static ALL_BY_STATUS_INDEX_NAME: string = `${DYNAMODB_TABLE_PREFIX}-UserMessageAllByStatus`;
+
   static CHANNEL_INDEX_NAME: string = `${DYNAMODB_TABLE_PREFIX}-UserMessageByChannel`;
 
   static SEND_AT_INDEX_NAME: string = `${DYNAMODB_TABLE_PREFIX}-UserMessageBySendAt`;
@@ -274,6 +276,30 @@ class UserMessage {
       return UserMessage.asUserMessageResults(params);
     } catch (err) {
       console.error(`UserMessage.byStatus(${osuId}, ${status}) failed:`, err);
+      throw err;
+    }
+  };
+
+  static allByStatus = async (status: Status, lastKey?: string): Promise<UserMessageResults> => {
+    try {
+      const params: AWS.DynamoDB.QueryInput = {
+        TableName: UserMessage.TABLE_NAME,
+        IndexName: UserMessage.ALL_BY_STATUS_INDEX_NAME,
+        KeyConditionExpression: '#keyAttribute = :keyValue',
+        ExpressionAttributeNames: {
+          '#keyAttribute': 'status',
+        },
+        ExpressionAttributeValues: {
+          ':keyValue': { S: status },
+        },
+        ScanIndexForward: false,
+        Select: 'ALL_ATTRIBUTES',
+      };
+      if (lastKey) params.ExclusiveStartKey = urlSafeBase64Decode(lastKey) as AWS.DynamoDB.Key;
+
+      return UserMessage.asUserMessageResults(params);
+    } catch (err) {
+      console.error(`UserMessage.allByStatus(${status}) failed:`, err);
       throw err;
     }
   };
