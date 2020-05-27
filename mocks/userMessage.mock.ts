@@ -11,6 +11,7 @@ const dynamoDbUserMessage = {
   smsNumber: { S: '1111111111' },
   status: { S: 'NEW' },
   statusSendAt: { S: 'NEW:2020-01-01' },
+  title: { S: 'title' },
 };
 const emptyDynamoDbUserMessage = {
   channelId: { S: undefined },
@@ -24,6 +25,7 @@ const emptyDynamoDbUserMessage = {
   smsNumber: { S: undefined },
   status: { S: undefined },
   statusSendAt: { S: undefined },
+  title: { S: undefined },
 };
 const userMessage = {
   channelId: 'dashboard',
@@ -38,6 +40,7 @@ const userMessage = {
   smsNumber: '1111111111',
   status: 'NEW',
   statusSendAt: 'NEW:2020-01-01',
+  title: 'title',
 };
 const emptyUserMessage = {
   channelId: '',
@@ -52,6 +55,7 @@ const emptyUserMessage = {
   smsNumber: '',
   status: '',
   statusSendAt: '',
+  title: '',
 };
 
 export { dynamoDbUserMessage, emptyDynamoDbUserMessage, emptyUserMessage, userMessage };

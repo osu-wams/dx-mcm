@@ -17,6 +17,7 @@ const dynamoDbMessage = {
   },
   sendAt: { S: '2020-01-01' },
   status: { S: 'NEW' },
+  title: { S: 'title' },
 };
 const emptyDynamoDbMessage = {
   channelIds: { SS: undefined },
@@ -27,6 +28,7 @@ const emptyDynamoDbMessage = {
   populationParams: { M: undefined },
   sendAt: { S: undefined },
   status: { S: undefined },
+  title: { S: undefined },
 };
 const message = {
   channelIds: ['123'],
@@ -39,6 +41,7 @@ const message = {
   // populationParams: { affiliation: 'test', osuIds: ['987654321'] },
   sendAt: '2020-01-01',
   status: 'NEW',
+  title: 'title',
 };
 const messageStatus = {
   id: '123456789',
@@ -54,6 +57,7 @@ const emptyMessage = {
   populationParams: {},
   sendAt: '',
   status: '',
+  title: '',
 };
 
 export { dynamoDbMessage, emptyDynamoDbMessage, emptyMessage, message, messageStatus };
