@@ -15,6 +15,7 @@ export interface DynamoDBMessageItem extends DynamoDB.PutItemInputAttributeMap {
   };
   sendAt: { S: string }; // partition key
   status: { S: string };
+  title: { S: string };
 }
 
 interface MessagePopulationParams {
@@ -33,6 +34,7 @@ interface MessageParams {
     populationParams: MessagePopulationParams;
     sendAt: string;
     status: string;
+    title: string;
   };
 }
 
@@ -68,6 +70,8 @@ class Message {
 
   status: string = Status.NEW;
 
+  title: string = '';
+
   static TABLE_NAME: string = `${DYNAMODB_TABLE_PREFIX}-Messages`;
 
   static STATUS_INDEX_NAME: string = `${DYNAMODB_TABLE_PREFIX}-MessageStatuses`;
@@ -85,6 +89,7 @@ class Message {
         channelIds,
         content,
         contentShort,
+        title,
       } = p.message;
       this.sendAt = sendAt;
       this.id = id;
@@ -93,6 +98,7 @@ class Message {
       this.channelIds = channelIds;
       this.content = content;
       this.contentShort = contentShort;
+      this.title = title;
       this.hash =
         hash ??
         urlSafeBase64Encode({
@@ -102,6 +108,7 @@ class Message {
           channelIds,
           content,
           contentShort,
+          title,
         });
     }
 
@@ -115,6 +122,7 @@ class Message {
         channelIds,
         content,
         contentShort,
+        title,
       } = p.dynamoDbMessage;
       if (sendAt) this.sendAt = sendAt.S || '';
       if (id) this.id = id.S || '';
@@ -123,6 +131,7 @@ class Message {
       if (channelIds) this.channelIds = channelIds.SS || [];
       if (content) this.content = content.S || '';
       if (contentShort) this.contentShort = contentShort.S || '';
+      if (title) this.title = title.S || '';
       if (populationParams && populationParams.M) {
         const { affiliation, users } = populationParams.M;
         this.populationParams = {
@@ -274,6 +283,7 @@ class Message {
       channelIds,
       content,
       contentShort,
+      title,
     } = props;
     return {
       sendAt: { S: sendAt },
@@ -289,6 +299,7 @@ class Message {
       channelIds: { SS: channelIds },
       content: { S: content },
       contentShort: { S: contentShort },
+      title: { S: title },
     };
   };
 }
