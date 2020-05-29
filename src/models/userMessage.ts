@@ -18,6 +18,7 @@ export interface DynamoDBUserMessageItem extends DynamoDB.PutItemInputAttributeM
   smsNumber: { S: string } | { NULL: boolean };
   status: { S: string };
   statusSendAt: { S: string };
+  title: { S: string };
 }
 
 interface UserMessageParams {
@@ -32,6 +33,7 @@ interface UserMessageParams {
     sendAt: string;
     smsNumber?: string;
     status: string;
+    title: string;
   };
 }
 
@@ -107,6 +109,8 @@ class UserMessage {
 
   statusSendAt?: string;
 
+  title: string = '';
+
   static TABLE_NAME: string = `${DYNAMODB_TABLE_PREFIX}-UserMessages`;
 
   static STATUS_INDEX_NAME: string = `${DYNAMODB_TABLE_PREFIX}-UserMessageStatuses`;
@@ -131,6 +135,7 @@ class UserMessage {
         sendAt,
         smsNumber,
         status,
+        title,
       } = p.userMessage;
       this.sendAt = sendAt;
       this.deliveredAt = deliveredAt;
@@ -142,6 +147,7 @@ class UserMessage {
       this.contentShort = contentShort;
       this.channelMessageId = compositeKey([this.channelId, this.messageId]);
       this.smsNumber = smsNumber;
+      this.title = title;
       this.statusSendAt = compositeKey([this.status, this.sendAt]);
       this.channelSendAt = compositeKey([this.channelId, this.sendAt]);
     }
@@ -160,6 +166,7 @@ class UserMessage {
         smsNumber,
         status,
         statusSendAt,
+        title,
       } = p.dynamoDbUserMessage;
       if (deliveredAt) this.deliveredAt = deliveredAt.S;
       if (sendAt) this.sendAt = sendAt.S || '';
@@ -173,6 +180,7 @@ class UserMessage {
       if (channelSendAt) this.channelSendAt = channelSendAt.S || '';
       if (smsNumber) this.smsNumber = smsNumber.S || '';
       if (statusSendAt) this.statusSendAt = statusSendAt.S || '';
+      if (title) this.title = title.S || '';
     }
   }
 
@@ -392,6 +400,7 @@ class UserMessage {
       statusSendAt: {
         S: props.statusSendAt ?? compositeKey([props.status, props.sendAt]),
       },
+      title: { S: props.title },
     };
   };
 

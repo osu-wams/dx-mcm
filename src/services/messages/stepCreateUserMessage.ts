@@ -25,6 +25,7 @@ const buildUserMessages = (
                 smsNumber: u.phone ?? '',
                 sendAt: event.sendAt,
                 status: event.status,
+                title: event.title,
               },
             }),
         ),

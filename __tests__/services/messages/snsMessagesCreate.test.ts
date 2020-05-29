@@ -37,7 +37,7 @@ describe('handler', () => {
               'https://sns.us-west-2.amazonaws.com/SimpleNotificationService-ac565b8b1a6c5d002d285f9598aa1d9b.pem',
             MessageId: '95df01b4-ee98-5cb9-9903-4c221d41eb5e',
             Message:
-              '{ "sendAt": "2020-01-01", "populationParams": {"affiliation": "undergrad" }, "channelIds": ["test"], "content": "long content", "contentShort": "short"}',
+              '{ "sendAt": "2020-01-01", "populationParams": {"affiliation": "undergrad" }, "channelIds": ["test"], "content": "long content", "contentShort": "short", "title": "title"}',
             MessageAttributes: {
               action: {
                 Type: 'String',
