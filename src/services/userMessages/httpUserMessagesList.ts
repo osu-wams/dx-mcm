@@ -24,6 +24,13 @@ export const handler = async (event: APIGatewayProxyEvent) => {
       userMessageResults = await UserMessage.allByStatus(selectedStatus, lastKey);
     } else {
       userMessageResults = await UserMessage.findAll(osuId!, lastKey);
+      return successResponse({
+        cacheSeconds: 0,
+        body: responseBody({
+          action,
+          object: { userMessageResults },
+        }),
+      });
     }
 
     return successResponse({
