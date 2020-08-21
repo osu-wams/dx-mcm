@@ -3,7 +3,7 @@ import { SQS_PROCESS_USER_MESSAGE_QUEUE_NAME, SQS_ERROR_MESSAGE_QUEUE_NAME } fro
 import { getQueueUrl, publishToQueue } from '@src/services/sqsUtils';
 import UserMessage from '@src/models/userMessage';
 import Message, { Status } from '@src/models/message';
-import { MessageStateMachineResult, UserData } from './types'; // eslint-disable-line no-unused-vars
+import { MessageStateMachineResult, UserData } from '../types'; // eslint-disable-line no-unused-vars
 
 const buildUserMessages = (
   event: MessageStateMachineResult,
@@ -71,7 +71,9 @@ const publishUserMessagesToQueue = async (userMessages: UserMessage[]): Promise<
 export const handler = async (event: MessageStateMachineResult, _context: any, callback: any) => {
   const message = { ...event };
   try {
+    // message.processedQueries[].channels as a result from stepGetChannels
     const channels: string[] = message.processedQueries.find((v) => v.channels)?.channels ?? [];
+    // message.processedQueries[].users as a result from stepGetUserPopulation
     const users: UserData[] = message.processedQueries.find((v) => v.users)?.users ?? [];
     const userMessages: UserMessage[] = buildUserMessages(message, channels, users);
     const persistedUserMessages = await persistUserMessages(userMessages);
