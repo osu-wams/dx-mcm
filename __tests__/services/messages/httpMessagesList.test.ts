@@ -5,6 +5,7 @@ import * as event from '../../../events/lambda.http.messagesList.json';
 const mockEvent = jest.fn();
 const mockQuery = jest.fn();
 jest.mock('@src/database', () => ({
+  // @ts-ignore
   ...jest.requireActual('@src/database'),
   query: () => mockQuery(),
 }));

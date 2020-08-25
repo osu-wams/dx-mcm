@@ -7,6 +7,7 @@ import * as statusEvent from '../../../events/lambda.http.userMessagesListByStat
 const mockEvent = jest.fn();
 const mockQuery = jest.fn();
 jest.mock('@src/database', () => ({
+  // @ts-ignore
   ...jest.requireActual('@src/database'),
   query: () => mockQuery(),
 }));

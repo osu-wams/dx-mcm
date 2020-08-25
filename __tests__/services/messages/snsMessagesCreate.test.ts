@@ -2,12 +2,12 @@ import { handler } from '@src/services/messages/snsMessagesCreate';
 import { dynamoDbMessage, message } from '@mocks/message.mock';
 
 const mockEvent = jest.fn();
-const mockCreateTable = jest.fn();
 const mockQuery = jest.fn();
 const mockPutItem = jest.fn();
 jest.mock('@src/database', () => ({
+  // @ts-ignore
   ...jest.requireActual('@src/database'),
-  createTable: () => mockCreateTable(),
+  createTable: () => jest.fn(),
   query: () => mockQuery(),
   putItem: () => mockPutItem(),
 }));
@@ -15,6 +15,7 @@ jest.mock('@src/database', () => ({
 const mockGetQueueUrl = jest.fn();
 const mockSendMessage = jest.fn();
 jest.mock('@src/messageQueue', () => ({
+  // @ts-ignore
   ...jest.requireActual('@src/messageQueue'),
   sendMessage: () => mockSendMessage(),
   getQueueUrl: () => mockGetQueueUrl(),
