@@ -48,6 +48,6 @@
   },
   "pathParameters": null,
   "stageVariables": null,
-  "body": "{\"payload\":{ \"sendAt\": \"2020-01-01\", \"populationParams\": {\"affiliation\": \"undergrad\" }, \"channelIds\": [\"test\"], \"content\": \"long content\", \"contentShort\": \"short\", \"title\": \"title\"}}",
+  "body": "{\"payload\":{ \"sendAt\": \"2020-01-01\", \"populationParams\": {\"affiliations\": [\"undergrad\"] }, \"channelIds\": [\"test\"], \"content\": \"long content\", \"contentShort\": \"short\", \"title\": \"title\"}}",
   "isBase64Encoded": true
 }

@@ -66,9 +66,9 @@ snsMessagesProcess:
         filterPolicy:
           action:
             - /api/v1/messages/action/process
-sqsMessageProcessor:
-  handler: src/services/messages/sqsMessageProcessor.handler
-  name: ${self:service.name}-messageProcessor
+sqsMessageExecuteStateMachine:
+  handler: src/services/messages/sqsMessageExecuteStateMachine.handler
+  name: ${self:service.name}-messageExecuteStateMachine
   description:
     !Join [' ', ['Listens to SQS Queue', !GetAtt messagesSqsQueue.QueueName, 'to send a Message.']]
   environment:
@@ -89,7 +89,7 @@ sqsMessageProcessor:
         batchSize: 1
 
 stepCreateUserMessage:
-  handler: src/services/messages/stepCreateUserMessage.handler
+  handler: src/services/messages/stateMachine/stepCreateUserMessage.handler
   name: ${self:service.name}-messageCreateUserMessage
   timeout: 300
   environment:
@@ -97,12 +97,17 @@ stepCreateUserMessage:
     SQS_ERROR_MESSAGE_QUEUE_NAME: !GetAtt messageErrorsSqsQueue.QueueName
 
 stepGetChannels:
-  handler: src/services/messages/stepGetChannels.handler
+  handler: src/services/messages/stateMachine/stepGetChannels.handler
   name: ${self:service.name}-messageGetChannels
 
 stepGetUserPopulation:
-  handler: src/services/messages/stepGetUserPopulation.handler
+  handler: src/services/messages/stateMachine/stepGetUserPopulation.handler
   name: ${self:service.name}-messageGetUserPopulation
+  timeout: 300
+  environment:
+    GROUPER_HOST: ${env:GROUPER_HOST}
+    GROUPER_USERNAME: ${env:GROUPER_USERNAME}
+    GROUPER_PASSWORD: ${env:GROUPER_PASSWORD}
 
 cronInvokeMessageProcess:
   handler: src/services/messages/cronInvokeMessageProcess.handler

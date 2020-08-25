@@ -11,15 +11,15 @@ export interface DynamoDBMessageItem extends DynamoDB.PutItemInputAttributeMap {
   hash: { S: string };
   id: { S: string }; // sort key
   populationParams: {
-    M: { affiliation: { S: string }; users: { SS: string[] } | { NULL: boolean } };
+    M: { affiliations: { SS: string[] }; users: { SS: string[] } | { NULL: boolean } };
   };
   sendAt: { S: string }; // partition key
   status: { S: string };
   title: { S: string };
 }
 
-interface MessagePopulationParams {
-  affiliation?: string;
+export interface MessagePopulationParams {
+  affiliations?: string[];
   users?: UserData[];
 }
 
@@ -133,9 +133,9 @@ class Message {
       if (contentShort) this.contentShort = contentShort.S || '';
       if (title) this.title = title.S || '';
       if (populationParams && populationParams.M) {
-        const { affiliation, users } = populationParams.M;
+        const { affiliations, users } = populationParams.M;
         this.populationParams = {
-          affiliation: affiliation.S,
+          affiliations: affiliations.SS,
           users: users ? users.SS?.map((u) => JSON.parse(u)) : undefined,
         };
       }
@@ -279,7 +279,7 @@ class Message {
       id,
       hash,
       status,
-      populationParams: { affiliation, users },
+      populationParams: { affiliations, users },
       channelIds,
       content,
       contentShort,
@@ -292,7 +292,7 @@ class Message {
       status: { S: status },
       populationParams: {
         M: {
-          affiliation: { S: affiliation! },
+          affiliations: { SS: affiliations! },
           users: users ? { SS: users.map((u) => JSON.stringify(u)) } : { NULL: true },
         },
       },

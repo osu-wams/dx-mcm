@@ -10,4 +10,6 @@ export interface MessageStateMachineResult extends Message {
 export interface UserData {
   id: string;
   phone?: string;
+  osuId?: string;
+  onid?: string;
 }

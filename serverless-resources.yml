@@ -55,7 +55,7 @@ userMessagesTable:
   Properties:
     TableName: ${self:service.name}-UserMessages
     AttributeDefinitions:
-      - AttributeName: osuId
+      - AttributeName: id
         AttributeType: S
       - AttributeName: channelMessageId
         AttributeType: S
@@ -68,7 +68,7 @@ userMessagesTable:
       - AttributeName: status
         AttributeType: S
     KeySchema:
-      - AttributeName: osuId
+      - AttributeName: id
         KeyType: HASH
       - AttributeName: channelMessageId
         KeyType: RANGE
@@ -76,7 +76,7 @@ userMessagesTable:
     LocalSecondaryIndexes:
       - IndexName: ${self:service.name}-UserMessageByChannel
         KeySchema:
-          - AttributeName: osuId
+          - AttributeName: id
             KeyType: HASH
           - AttributeName: channelSendAt
             KeyType: RANGE
@@ -86,7 +86,7 @@ userMessagesTable:
             - channelMessageId
       - IndexName: ${self:service.name}-UserMessageBySendAt
         KeySchema:
-          - AttributeName: osuId
+          - AttributeName: id
             KeyType: HASH
           - AttributeName: sendAt
             KeyType: RANGE
@@ -97,7 +97,7 @@ userMessagesTable:
     GlobalSecondaryIndexes:
       - IndexName: ${self:service.name}-UserMessageStatuses
         KeySchema:
-          - AttributeName: osuId
+          - AttributeName: id
             KeyType: HASH
           - AttributeName: statusSendAt
             KeyType: RANGE

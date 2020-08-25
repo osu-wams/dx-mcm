@@ -1,4 +1,4 @@
-import { handler } from '@src/services/messages/sqsMessageProcessor';
+import { handler } from '@src/services/messages/sqsMessageExecuteStateMachine';
 import { message } from '@mocks/message.mock';
 
 const mockQuery = jest.fn();
