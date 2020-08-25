@@ -30,3 +30,4 @@ jobs:
         env:
           CI: true
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+          GITHUB_NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
