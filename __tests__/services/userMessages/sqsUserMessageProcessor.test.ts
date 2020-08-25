@@ -35,7 +35,7 @@ describe('handler', () => {
           messageId: '11d6ee51-4cc7-4302-9e22-7cd8afdaadf5',
           receiptHandle: 'AQEBBX8nesZEXmkhsmZeyIE8iQAMig7qw...',
           body:
-            '{ "sendAt": "2020-01-01", "channelId": "dashboard", "content": "content", "contentShort": "contentShort", "messageId":"message-123456789", "osuId":"111111111", "status":"NEW", "title":"title"}',
+            '{ "sendAt": "2020-01-01", "channelId": "dashboard", "content": "content", "contentShort": "contentShort", "id":"111111111", "messageId":"message-123456789", "osuId":"111111111", "status":"NEW", "title":"title"}',
           attributes: {
             ApproximateReceiveCount: '1',
             SentTimestamp: '1573251510774',

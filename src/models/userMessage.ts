@@ -12,9 +12,11 @@ export interface DynamoDBUserMessageItem extends DynamoDB.PutItemInputAttributeM
   content: { S: string };
   contentShort: { S: string };
   deliveredAt: { S: string } | { NULL: boolean };
+  id: { S: string };
   messageId: { S: string };
-  osuId: { S: string }; // sort key
-  sendAt: { S: string }; // partition key
+  onid: { S: string } | { NULL: boolean };
+  osuId: { S: string } | { NULL: boolean };
+  sendAt: { S: string };
   smsNumber: { S: string } | { NULL: boolean };
   status: { S: string };
   statusSendAt: { S: string };
@@ -28,8 +30,10 @@ interface UserMessageParams {
     content: string;
     contentShort: string;
     deliveredAt?: string;
+    id: string;
     messageId: string;
-    osuId: string; // convert to complex object
+    onid?: string;
+    osuId?: string;
     sendAt: string;
     smsNumber?: string;
     status: string;
@@ -97,9 +101,13 @@ class UserMessage {
 
   deliveredAt?: string = '';
 
+  id: string = '';
+
   messageId: string = '';
 
-  osuId: string = '';
+  onid?: string = '';
+
+  osuId?: string = '';
 
   sendAt: string = '';
 
@@ -130,7 +138,9 @@ class UserMessage {
         content,
         contentShort,
         deliveredAt,
+        id,
         messageId,
+        onid,
         osuId,
         sendAt,
         smsNumber,
@@ -139,8 +149,10 @@ class UserMessage {
       } = p.userMessage;
       this.sendAt = sendAt;
       this.deliveredAt = deliveredAt;
+      this.id = id;
       this.messageId = messageId;
       this.status = status;
+      this.onid = onid;
       this.osuId = osuId;
       this.channelId = channelId;
       this.content = content;
@@ -160,7 +172,9 @@ class UserMessage {
         content,
         contentShort,
         deliveredAt,
+        id,
         messageId,
+        onid,
         osuId,
         sendAt,
         smsNumber,
@@ -172,6 +186,8 @@ class UserMessage {
       if (sendAt) this.sendAt = sendAt.S || '';
       if (messageId) this.messageId = messageId.S || '';
       if (status) this.status = status.S || '';
+      if (id) this.id = id.S || '';
+      if (onid) this.onid = onid.S || '';
       if (osuId) this.osuId = osuId.S || '';
       if (channelId) this.channelId = channelId.S || '';
       if (content) this.content = content.S || '';
@@ -199,24 +215,24 @@ class UserMessage {
 
       await putItem(params);
       console.log('UserMessage.upsert succeeded:', props);
-      return UserMessage.find(props.osuId, props.messageId, props.channelId);
+      return UserMessage.find(props.id, props.messageId, props.channelId);
     } catch (err) {
       console.error(`UserMessage.upsert failed:`, props, err);
       throw err;
     }
   };
 
-  static findAll = async (osuId: string, lastKey?: string): Promise<UserMessageResults> => {
+  static findAll = async (id: string, lastKey?: string): Promise<UserMessageResults> => {
     try {
       const params: AWS.DynamoDB.QueryInput = {
         TableName: UserMessage.TABLE_NAME,
         IndexName: UserMessage.SEND_AT_INDEX_NAME,
         KeyConditionExpression: '#keyAttribute = :keyValue',
         ExpressionAttributeNames: {
-          '#keyAttribute': 'osuId',
+          '#keyAttribute': 'id',
         },
         ExpressionAttributeValues: {
-          ':keyValue': { S: osuId },
+          ':keyValue': { S: id },
         },
         ScanIndexForward: false,
         Select: 'ALL_ATTRIBUTES',
@@ -225,13 +241,13 @@ class UserMessage {
 
       return UserMessage.asUserMessageResults(params);
     } catch (err) {
-      console.error(`UserMessage.findAll(${osuId}) failed:`, err);
+      console.error(`UserMessage.findAll(${id}) failed:`, err);
       throw err;
     }
   };
 
   static find = async (
-    osuId: string,
+    id: string,
     messageId: string,
     channelId: string,
   ): Promise<UserMessageResults> => {
@@ -240,11 +256,11 @@ class UserMessage {
         TableName: UserMessage.TABLE_NAME,
         KeyConditionExpression: '#keyAttribute = :keyValue AND #rangeAttribute = :rangeValue',
         ExpressionAttributeNames: {
-          '#keyAttribute': 'osuId',
+          '#keyAttribute': 'id',
           '#rangeAttribute': UserMessage.COMPOSITE_KEY_NAME,
         },
         ExpressionAttributeValues: {
-          ':keyValue': { S: osuId },
+          ':keyValue': { S: id },
           ':rangeValue': { S: compositeKey([channelId, messageId]) },
         },
         Select: 'ALL_ATTRIBUTES',
@@ -252,13 +268,13 @@ class UserMessage {
 
       return UserMessage.asUserMessageResults(params);
     } catch (err) {
-      console.error(`UserMessage.find(${osuId}, ${messageId}, ${channelId}) failed:`, err);
+      console.error(`UserMessage.find(${id}, ${messageId}, ${channelId}) failed:`, err);
       throw err;
     }
   };
 
   static byStatus = async (
-    osuId: string,
+    id: string,
     status: Status,
     lastKey?: string,
   ): Promise<UserMessageResults> => {
@@ -269,11 +285,11 @@ class UserMessage {
         KeyConditionExpression:
           '#keyAttribute = :keyValue AND begins_with(#rangeAttribute, :rangeValue)',
         ExpressionAttributeNames: {
-          '#keyAttribute': 'osuId',
+          '#keyAttribute': 'id',
           '#rangeAttribute': 'statusSendAt',
         },
         ExpressionAttributeValues: {
-          ':keyValue': { S: osuId },
+          ':keyValue': { S: id },
           ':rangeValue': { S: status },
         },
         ScanIndexForward: false,
@@ -283,7 +299,7 @@ class UserMessage {
 
       return UserMessage.asUserMessageResults(params);
     } catch (err) {
-      console.error(`UserMessage.byStatus(${osuId}, ${status}) failed:`, err);
+      console.error(`UserMessage.byStatus(${id}, ${status}) failed:`, err);
       throw err;
     }
   };
@@ -313,7 +329,7 @@ class UserMessage {
   };
 
   static byChannel = async (
-    osuId: string,
+    id: string,
     channelId: ChannelId,
     lastKey?: string,
   ): Promise<UserMessageResults> => {
@@ -324,11 +340,11 @@ class UserMessage {
         KeyConditionExpression:
           '#keyAttribute = :keyValue AND begins_with(#rangeAttribute, :rangeValue)',
         ExpressionAttributeNames: {
-          '#keyAttribute': 'osuId',
+          '#keyAttribute': 'id',
           '#rangeAttribute': 'channelSendAt',
         },
         ExpressionAttributeValues: {
-          ':keyValue': { S: osuId },
+          ':keyValue': { S: id },
           ':rangeValue': { S: channelId },
         },
         ScanIndexForward: false,
@@ -338,7 +354,7 @@ class UserMessage {
 
       return UserMessage.asUserMessageResults(params);
     } catch (err) {
-      console.error(`UserMessage.byChannel(${osuId}, ${channelId}) failed:`, err);
+      console.error(`UserMessage.byChannel(${id}, ${channelId}) failed:`, err);
       throw err;
     }
   };
@@ -349,7 +365,7 @@ class UserMessage {
       const params: AWS.DynamoDB.UpdateItemInput = {
         TableName: UserMessage.TABLE_NAME,
         Key: {
-          osuId: { S: userMessage.osuId.toString() },
+          id: { S: userMessage.id.toString() },
           [UserMessage.COMPOSITE_KEY_NAME]: {
             S: compositeKey([userMessage.channelId, userMessage.messageId]),
           },
@@ -367,7 +383,7 @@ class UserMessage {
       userMessage.status = status;
       userMessage.statusSendAt = compositeKey([props.status, props.sendAt]);
       console.log('UserMessage.updateStatus succeeded:', userMessage);
-      return UserMessage.find(userMessage.osuId, userMessage.messageId, userMessage.channelId);
+      return UserMessage.find(userMessage.id, userMessage.messageId, userMessage.channelId);
     } catch (err) {
       console.error(`UserMessage.updateStatus failed:`, err);
       throw err;
@@ -393,7 +409,9 @@ class UserMessage {
       contentShort: { S: props.contentShort },
       deliveredAt: props.deliveredAt ? { S: props.deliveredAt } : { NULL: true },
       messageId: { S: props.messageId },
-      osuId: { S: props.osuId },
+      id: { S: props.id },
+      onid: props.onid ? { S: props.onid } : { NULL: true },
+      osuId: props.osuId ? { S: props.osuId } : { NULL: true },
       sendAt: { S: props.sendAt },
       smsNumber: props.smsNumber ? { S: props.smsNumber } : { NULL: true },
       status: { S: props.status },

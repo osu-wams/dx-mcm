@@ -103,6 +103,11 @@ stepGetChannels:
 stepGetUserPopulation:
   handler: src/services/messages/stateMachine/stepGetUserPopulation.handler
   name: ${self:service.name}-messageGetUserPopulation
+  timeout: 300
+  environment:
+    GROUPER_HOST: ${env:GROUPER_HOST}
+    GROUPER_USERNAME: ${env:GROUPER_USERNAME}
+    GROUPER_PASSWORD: ${env:GROUPER_PASSWORD}
 
 cronInvokeMessageProcess:
   handler: src/services/messages/cronInvokeMessageProcess.handler
