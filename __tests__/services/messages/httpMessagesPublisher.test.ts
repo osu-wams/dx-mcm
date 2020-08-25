@@ -4,6 +4,7 @@ import * as event from '../../../events/lambda.http.messagesPublisher.json';
 const mockEvent = jest.fn();
 const mockPublish = jest.fn();
 jest.mock('@src/messagePubSub', () => ({
+  // @ts-ignore
   ...jest.requireActual('@src/messagePubSub'),
   publish: () => mockPublish(),
 }));

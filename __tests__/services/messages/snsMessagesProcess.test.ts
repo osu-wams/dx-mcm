@@ -2,19 +2,19 @@ import { handler } from '@src/services/messages/snsMessagesProcess';
 import { dynamoDbMessage } from '@mocks/message.mock';
 import * as event from '../../../events/lambda.sns.messagesProcess.json';
 
-const mockCreateTable = jest.fn();
 const mockQuery = jest.fn();
-const mockPutItem = jest.fn();
 jest.mock('@src/database', () => ({
+  // @ts-ignore
   ...jest.requireActual('@src/database'),
-  createTable: () => mockCreateTable(),
+  createTable: () => jest.fn(),
   query: () => mockQuery(),
-  putItem: () => mockPutItem(),
+  putItem: () => jest.fn(),
 }));
 
 const mockGetQueueUrl = jest.fn();
 const mockSendMessage = jest.fn();
 jest.mock('@src/messageQueue', () => ({
+  // @ts-ignore
   ...jest.requireActual('@src/messageQueue'),
   sendMessage: () => mockSendMessage(),
   getQueueUrl: () => mockGetQueueUrl(),

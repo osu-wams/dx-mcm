@@ -4,6 +4,7 @@ import { message } from '@mocks/message.mock';
 const mockQuery = jest.fn();
 const mockPutItem = jest.fn();
 jest.mock('@src/database', () => ({
+  // @ts-ignore
   ...jest.requireActual('@src/database'),
   query: () => mockQuery(),
   putItem: () => mockPutItem(),
@@ -12,6 +13,7 @@ jest.mock('@src/database', () => ({
 const mockGetQueueUrl = jest.fn();
 const mockSendMessage = jest.fn();
 jest.mock('@src/messageQueue', () => ({
+  // @ts-ignore
   ...jest.requireActual('@src/messageQueue'),
   sendMessage: () => mockSendMessage(),
   getQueueUrl: () => mockGetQueueUrl(),
@@ -19,6 +21,7 @@ jest.mock('@src/messageQueue', () => ({
 
 const mockStartExecution = jest.fn();
 jest.mock('@src/stateMachine', () => ({
+  // @ts-ignore
   ...jest.requireActual('@src/stateMachine'),
   startExecution: () => mockStartExecution(),
 }));

@@ -4,11 +4,11 @@ import * as event from '../../../events/lambda.http.userMessageRead.json';
 
 const mockEvent = jest.fn();
 const mockQuery = jest.fn();
-const mockUpdateItem = jest.fn();
 jest.mock('@src/database', () => ({
+  // @ts-ignore
   ...jest.requireActual('@src/database'),
   query: () => mockQuery(),
-  updateItem: () => mockUpdateItem(),
+  updateItem: () => jest.fn(),
 }));
 
 beforeEach(() => {

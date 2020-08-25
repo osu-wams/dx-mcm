@@ -6,13 +6,13 @@ import {
   emptyDynamoDbUserMessage,
 } from '@mocks/userMessage.mock';
 
-const mockCreateTable = jest.fn();
 const mockQuery = jest.fn();
 const mockPutItem = jest.fn();
 const mockUpdateItem = jest.fn();
 jest.mock('@src/database', () => ({
+  // @ts-ignore
   ...jest.requireActual('@src/database'),
-  createTable: () => mockCreateTable(),
+  createTable: () => jest.fn(),
   query: () => mockQuery(),
   putItem: () => mockPutItem(),
   updateItem: () => mockUpdateItem(),
