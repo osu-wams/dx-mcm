@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { Client, getMembers } from '@osu-wams/grouper';
+import { uniqWith, isEqual } from 'lodash';
 import type { UserData } from '@src/services/messages/types';
 import { MessagePopulationParams } from '@src/models/message';
 import { Subject } from '@osu-wams/grouper/dist/types';
@@ -8,6 +9,11 @@ const affiliationLookup: { [key: string]: string } = {
   undergrad: 'osu:ref:stu:level:01',
 };
 
+/**
+ * Return a unique array of Users found in a Grouper group
+ * @param client Grouper client
+ * @param affiliation the affiliation to query
+ */
 const getMembersInAffiliation = async (
   client: Client,
   affiliation: string,
@@ -21,7 +27,8 @@ const getMembersInAffiliation = async (
     while (fetchMembers && pageNumber < 10) {
       // eslint-disable-next-line
       const results = await getMembers(client, [affiliation], ['id'], { pageNumber, pageSize });
-      if (results.length > 0) {
+      const pageSubjectCount = results.reduce((p, v) => p + (v.subjects ?? []).length, 0);
+      if (pageSubjectCount > 0) {
         pageNumber += 1;
         const subjects = results.map((r) => r.subjects ?? []).flat();
         members.push(...subjects);
@@ -29,7 +36,10 @@ const getMembersInAffiliation = async (
         fetchMembers = false;
       }
     }
-    return members.map((m) => ({ id: m.id, onid: m.id }));
+    return uniqWith(
+      members.map(({ id }) => ({ id, onid: id })),
+      isEqual,
+    );
   } catch (err) {
     console.error(err);
     throw new Error(`getMembersInAffiliation failed: ${err.message}`);
@@ -44,7 +54,7 @@ const getAllMembers = async (client: Client, affiliations: string[]): Promise<Us
       const m = await getMembersInAffiliation(client, affiliations[i]);
       userData.push(...m);
     }
-    return userData;
+    return uniqWith(userData, isEqual);
   } catch (err) {
     console.error(err);
     throw new Error(`getAllMembers failed: ${err.message}`);
