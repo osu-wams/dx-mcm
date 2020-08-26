@@ -1,7 +1,7 @@
 import { parsePhoneNumberFromString, ParseError, isValidNumber } from 'libphonenumber-js';
 import { publish } from '@src/messagePubSub';
-import Channel, { Environments } from './channel'; // eslint-disable-line no-unused-vars
 import { ENV } from '@src/constants';
+import Channel, { Environments } from './channel'; // eslint-disable-line no-unused-vars
 
 /**
  * Overview of things to note about phone numbers:
