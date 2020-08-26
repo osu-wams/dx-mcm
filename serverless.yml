@@ -1,6 +1,5 @@
 service:
   name: osu-dx-mcm-${opt:stage, 'development'}${file(./src/serverless.js):developerSuffix}
-  description: OSU DX Multi-Channel Messaging Stack
 
 package:
   individually: true
@@ -30,6 +29,13 @@ provider:
   environment:
     ENV: ${env:ENV}
     SERVICE_NAME: ${self:service.name}
+  vpc:
+    securityGroupIds:
+      - !Ref LambdaSecurityGroup
+    subnetIds:
+      - !Ref PrivateSubnetA
+      - !Ref PrivateSubnetB
+      - !Ref PrivateSubnetC
   apiKeys:
     - name: ${self:service.name}-api-key # .env.{stage} file contains the API key
       value: ${env:AWS_APIGW_API_KEY}${file(./src/serverless.js):developerSuffix} # ensure a unique key when using a developer stack
@@ -104,6 +110,25 @@ resources:
     userMessagesSqsQueue: ${file(./src/services/userMessages/serverless-resources.yml):userMessagesSqsQueue}
     userMessageErrorsSqsQueue: ${file(./src/services/userMessages/serverless-resources.yml):userMessageErrorsSqsQueue}
     userMessageStateMachineLogGroup: ${file(./src/services/userMessages/serverless-resources.yml):userMessageStateMachineLogGroup}
+    Vpc: ${file(./serverless-vpc-resources.yml):Vpc}
+    PrivateSubnetA: ${file(./serverless-vpc-resources.yml):PrivateSubnetA}
+    PrivateSubnetB: ${file(./serverless-vpc-resources.yml):PrivateSubnetB}
+    PrivateSubnetC: ${file(./serverless-vpc-resources.yml):PrivateSubnetC}
+    PublicSubnetD: ${file(./serverless-vpc-resources.yml):PublicSubnetD}
+    Eip: ${file(./serverless-vpc-resources.yml):Eip}
+    NatGateway: ${file(./serverless-vpc-resources.yml):NatGateway}
+    PrivateRouteTable: ${file(./serverless-vpc-resources.yml):PrivateRouteTable}
+    PrivateRoute: ${file(./serverless-vpc-resources.yml):PrivateRoute}
+    SubnetRouteTableAssociationPrivateA: ${file(./serverless-vpc-resources.yml):SubnetRouteTableAssociationPrivateA}
+    SubnetRouteTableAssociationPrivateB: ${file(./serverless-vpc-resources.yml):SubnetRouteTableAssociationPrivateB}
+    SubnetRouteTableAssociationPrivateC: ${file(./serverless-vpc-resources.yml):SubnetRouteTableAssociationPrivateC}
+    InternetGateway: ${file(./serverless-vpc-resources.yml):InternetGateway}
+    VPCGatewayAttachment: ${file(./serverless-vpc-resources.yml):VPCGatewayAttachment}
+    PublicRouteTable: ${file(./serverless-vpc-resources.yml):PublicRouteTable}
+    PublicRoute: ${file(./serverless-vpc-resources.yml):PublicRoute}
+    SubnetRouteTableAssociationPublicD: ${file(./serverless-vpc-resources.yml):SubnetRouteTableAssociationPublicD}
+    LambdaSecurityGroup: ${file(./serverless-vpc-resources.yml):LambdaSecurityGroup}
+
   Outputs:
     CloudFrontDistribution:
       Description: URL to the API for testing or DNS CName
