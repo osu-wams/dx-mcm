@@ -7,6 +7,7 @@ import { Subject } from '@osu-wams/grouper/dist/types';
 
 const affiliationLookup: { [key: string]: string } = {
   undergrad: 'osu:ref:stu:level:01',
+  teaching: 'osu:ref:stu:cert:next:cg11',
 };
 
 /**
