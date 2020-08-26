@@ -1,11 +1,22 @@
 import Deliverable from '@src/models/channels/deliverable';
 import { applyMixins } from '@src/models/utils';
 import UserMessage, { compositeKey } from '@src/models/userMessage'; // eslint-disable-line no-unused-vars
+import { ENV } from '@src/constants';
+
+export enum Environments {
+  Development = 'development', // eslint-disable-line no-unused-vars
+  Stage = 'stage', // eslint-disable-line no-unused-vars
+  Production = 'production', // eslint-disable-line no-unused-vars
+}
 
 interface Channel extends Deliverable {}
 
 class Channel {
   userMessage: UserMessage;
+
+  toEnvironments: Environments[] = [Environments.Development];
+
+  typeName: string = 'Channel';
 
   constructor(userMessage: UserMessage) {
     this.userMessage = userMessage;
@@ -19,7 +30,7 @@ class Channel {
    */
   async process() {
     throw new Error(
-      `Base class Channel#process called when it should be overridden by the subclass for (${this.userMessage.channelId}), unable to proceed.`,
+      `Base class ${this.typeName}#process called when it should be overridden by the subclass for (${this.userMessage.channelId}), unable to proceed.`,
     );
   }
 
@@ -27,11 +38,24 @@ class Channel {
    * Mark the UserMessage as having been delivered and update the record in the database.
    */
   async publish() {
-    this.deliver();
-    this.userMessage.deliveredAt = this.deliveredAt;
-    this.userMessage.status = this.deliveredStatus!;
-    this.userMessage.statusSendAt = compositeKey([this.deliveredStatus!, this.userMessage.sendAt]);
-    await UserMessage.upsert(this.userMessage);
+    if (this.toEnvironments.some((e) => e === ENV.toLowerCase())) {
+      this.setDelivered();
+      this.userMessage.deliveredAt = this.deliveredAt;
+      this.userMessage.status = this.deliveredStatus!;
+      this.userMessage.statusSendAt = compositeKey([
+        this.deliveredStatus!,
+        this.userMessage.sendAt,
+      ]);
+      await UserMessage.upsert(this.userMessage);
+    } else {
+      console.info(
+        `${this.typeName}#publish : toEnvironments[${this.toEnvironments.join(
+          ',',
+        )}] did not include ${ENV}, UserMessage will not be delivered. If this is unexpected, updated ${
+          this.typeName
+        }.toEnvironments to include the missing value and reprocess messages.`,
+      );
+    }
   }
 }
 
