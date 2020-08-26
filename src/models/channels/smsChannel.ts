@@ -1,6 +1,7 @@
 import { parsePhoneNumberFromString, ParseError, isValidNumber } from 'libphonenumber-js';
 import { publish } from '@src/messagePubSub';
-import Channel from './channel'; // eslint-disable-line no-unused-vars
+import Channel, { Environments } from './channel'; // eslint-disable-line no-unused-vars
+import { ENV } from '@src/constants';
 
 /**
  * Overview of things to note about phone numbers:
@@ -11,6 +12,10 @@ import Channel from './channel'; // eslint-disable-line no-unused-vars
  * Apigee phone numbers are typically in +15411234567
  */
 class SmsChannel extends Channel {
+  toEnvironments = [Environments.Production];
+
+  typeName = 'SmsChannel';
+
   /**
    * Process then publish the UserMessage to this channel.
    */
@@ -46,8 +51,18 @@ class SmsChannel extends Channel {
         };
         console.debug(`UserMessage sent via SMS:`, message);
 
-        await publish(message);
-        await super.publish();
+        if (this.toEnvironments.some((e) => e === ENV.toLowerCase())) {
+          await publish(message);
+          await super.publish();
+        } else {
+          console.info(
+            `${this.typeName}#publish : toEnvironments[${this.toEnvironments.join(
+              ',',
+            )}] did not include ${ENV}, SMS and UserMessage will not be delivered. If this is unexpected, updated ${
+              this.typeName
+            }.toEnvironments to include the missing value and reprocess messages.`,
+          );
+        }
       } catch (error) {
         if (error instanceof ParseError) {
           // Not a phone number, non-existent country, etc.
