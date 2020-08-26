@@ -5,25 +5,30 @@ import UserMessage, { UserMessageResults, ChannelId, Status } from '@src/models/
 export const handler = async (event: APIGatewayProxyEvent) => {
   const action = 'userMessages-list';
   try {
-    const { osuId, lastKey, channelId, status } = event.pathParameters ?? {
-      osuId: undefined,
+    const { id, lastKey, channelId, status } = event.pathParameters ?? {
+      id: undefined,
       lastKey: undefined,
       channelId: undefined,
       status: undefined,
     };
-    if (!osuId && !status) throw new Error('Missing osuId in path.');
+    if (!id && !status) throw new Error('Missing id ({onid}-{osuId}) in path.');
+
+    // @ts-ignore unused var osuId
+    const [onid, osuId] = (id ?? '').split('-'); // eslint-disable-line no-unused-vars
 
     let userMessageResults: UserMessageResults;
     if (channelId) {
+      // TODO: make byChannel more intelligent to handle osuId and onid, or make two calls and have to deal with lastKey?!
       const selectedChannel = ChannelId[channelId.toUpperCase() as keyof typeof ChannelId];
       if (!selectedChannel) throw new Error('Missing valid channelId in path.');
-      userMessageResults = await UserMessage.byChannel(osuId!, selectedChannel, lastKey);
+      userMessageResults = await UserMessage.byChannel(onid, selectedChannel, lastKey);
     } else if (status) {
       const selectedStatus = Status[status.toUpperCase() as keyof typeof Status];
       if (!selectedStatus) throw new Error('Missing valid status in path.');
       userMessageResults = await UserMessage.allByStatus(selectedStatus, lastKey);
     } else {
-      userMessageResults = await UserMessage.findAll(osuId!, lastKey);
+      // TODO: make findAll more intelligent to handle osuId and onid, or make two calls and have to deal with lastKey?!
+      userMessageResults = await UserMessage.findAll(onid, lastKey);
       return successResponse({
         cacheSeconds: 0,
         body: responseBody({
