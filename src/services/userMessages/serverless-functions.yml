@@ -6,38 +6,38 @@ httpUserMessagesList:
     - http:
         private: true # forces header x-api-key to be present with a valid key from provider.apiKeys
         method: get
-        path: /api/v1/userMessages/channel/{channelId}/{id}
+        path: /api/v1/userMessages/channel/{channelId}/{userId}
         request:
           parameters:
             paths:
               channelId: true
-              id: true
+              userId: true
     - http:
         private: true # forces header x-api-key to be present with a valid key from provider.apiKeys
         method: get
-        path: /api/v1/userMessages/channel/{channelId}/{id}/{lastKey}
+        path: /api/v1/userMessages/channel/{channelId}/{userId}/{lastKey}
         request:
           parameters:
             paths:
               channelId: true
-              id: true
+              userId: true
               lastKey: true
     - http:
         private: true # forces header x-api-key to be present with a valid key from provider.apiKeys
         method: get
-        path: /api/v1/userMessages/user/{id}
+        path: /api/v1/userMessages/user/{userId}
         request:
           parameters:
             paths:
-              id: true
+              userId: true
     - http:
         private: true # forces header x-api-key to be present with a valid key from provider.apiKeys
         method: get
-        path: /api/v1/userMessages/user/{id}/{lastKey}
+        path: /api/v1/userMessages/user/{userId}/{lastKey}
         request:
           parameters:
             paths:
-              id: true
+              userId: true
               lastKey: true
     - http:
         private: true # forces header x-api-key to be present with a valid key from provider.apiKeys
@@ -65,13 +65,13 @@ httpUserMessageRead:
     - http:
         private: true # forces header x-api-key to be present with a valid key from provider.apiKeys
         method: get
-        path: /api/v1/userMessages/read/{channelId}/{messageId}/{id}
+        path: /api/v1/userMessages/read/{channelId}/{messageId}/{userId}
         request:
           parameters:
             paths:
               channelId: true
               messageId: true
-              id: true
+              userId: true
 
 sqsUserMessageProcessor:
   handler: src/services/userMessages/sqsUserMessageProcessor.handler
