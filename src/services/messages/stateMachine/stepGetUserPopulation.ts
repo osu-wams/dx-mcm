@@ -89,8 +89,8 @@ export const handler = async (event: any, _context: any, callback: any) => {
 
     const affiliationStems = affiliations?.map((a) => affiliationLookup[a]);
     const foundInGrouper = await getAllMembers(c, affiliationStems ?? []);
-    console.log('usersFoundInGrouper', foundInGrouper);
-    // foundUsers.push(...foundInGrouper);
+    console.info('usersFoundInGrouper', foundInGrouper);
+    foundUsers.push(...foundInGrouper);
   } catch (err) {
     console.error('stepGetUserPopulation error when using Grouper API', err);
   }
