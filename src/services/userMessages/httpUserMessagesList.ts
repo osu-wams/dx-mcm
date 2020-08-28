@@ -5,16 +5,21 @@ import UserMessage, { UserMessageResults, ChannelId, Status } from '@src/models/
 export const handler = async (event: APIGatewayProxyEvent) => {
   const action = 'userMessages-list';
   try {
-    const { id, lastKey, channelId, status } = event.pathParameters ?? {
-      id: undefined,
+    const { userId, lastKey, channelId, status } = event.pathParameters ?? {
+      userId: undefined,
       lastKey: undefined,
       channelId: undefined,
       status: undefined,
     };
-    if (!id && !status) throw new Error('Missing id ({onid}-{osuId}) in path.');
+    if (!userId && !status)
+      throw new Error(
+        `Missing userId ({onid}-{osuId}) in path. Path parameters: ${JSON.stringify(
+          event.pathParameters,
+        )}`,
+      );
 
     // @ts-ignore unused var osuId
-    const [onid, osuId] = (id ?? '').split('-'); // eslint-disable-line no-unused-vars
+    const [onid, osuId] = (userId ?? '').split('-'); // eslint-disable-line no-unused-vars
 
     let userMessageResults: UserMessageResults;
     if (channelId) {

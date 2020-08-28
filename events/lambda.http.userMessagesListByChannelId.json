@@ -47,7 +47,7 @@
     "stage": "$default"
   },
   "pathParameters": {
-    "id": "bobross-111111111",
+    "userId": "bobross-111111111",
     "channelId": "dashboard"
   },
   "stageVariables": null,
