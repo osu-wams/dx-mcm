@@ -24,6 +24,8 @@ messagesTable:
     ProvisionedThroughput:
       ReadCapacityUnits: 5
       WriteCapacityUnits: 5
+    PointInTimeRecoverySpecification:
+      PointInTimeRecoveryEnabled: true
     GlobalSecondaryIndexes:
       - IndexName: ${self:service.name}-MessageStatuses
         KeySchema:
@@ -73,6 +75,8 @@ userMessagesTable:
       - AttributeName: channelMessageId
         KeyType: RANGE
     BillingMode: PAY_PER_REQUEST
+    PointInTimeRecoverySpecification:
+      PointInTimeRecoveryEnabled: true
     LocalSecondaryIndexes:
       - IndexName: ${self:service.name}-UserMessageByChannel
         KeySchema:
