@@ -47,7 +47,7 @@
     "stage": "$default"
   },
   "pathParameters": {
-    "osuId": "111111111",
+    "osuId": "bobross-111111111",
     "channelId": "channelId",
     "messageId": "messageId"
   },

@@ -19,7 +19,7 @@ beforeEach(() => {
 describe('handler', () => {
   it('fetches user messages for a specific user', async () => {
     mockQuery.mockResolvedValue({ Items: [dynamoDbUserMessage], Count: 1 });
-    mockEvent.mockReturnValue({ ...event, pathParameters: { id: 'bobross-111111111' } });
+    mockEvent.mockReturnValue({ ...event, pathParameters: { userId: 'bobross-111111111' } });
     const result = await handler(mockEvent());
     expect({ ...result, body: JSON.parse(result.body) }).toMatchObject({
       body: {
@@ -34,7 +34,7 @@ describe('handler', () => {
     mockQuery.mockResolvedValue({ Items: [dynamoDbUserMessage], Count: 1 });
     mockEvent.mockReturnValue({
       ...channelEvent,
-      pathParameters: { id: 'bobross-111111111', channelId: 'dashboard' },
+      pathParameters: { userId: 'bobross-111111111', channelId: 'dashboard' },
     });
     const result = await handler(mockEvent());
     expect({ ...result, body: JSON.parse(result.body) }).toMatchObject({
@@ -65,7 +65,7 @@ describe('handler', () => {
   it('should respond with an error when an invalid channel id is provided', async () => {
     mockEvent.mockReturnValue({
       ...channelEvent,
-      pathParameters: { id: 'bobross-111111111', channelId: 'invalid-channel' },
+      pathParameters: { userId: 'bobross-111111111', channelId: 'invalid-channel' },
     });
     const result = await handler(mockEvent());
     expect({ ...result, body: JSON.parse(result.body) }).toMatchObject({
@@ -85,10 +85,13 @@ describe('handler', () => {
     });
   });
   it('should respond with an error when no osuId is provided', async () => {
-    mockEvent.mockReturnValue({ ...channelEvent, pathParameters: { osuId: undefined } });
+    mockEvent.mockReturnValue({ ...channelEvent, pathParameters: { userId: undefined } });
     const result = await handler(mockEvent());
     expect({ ...result, body: JSON.parse(result.body) }).toMatchObject({
-      body: { action: 'userMessages-list', message: 'Missing id ({onid}-{osuId}) in path.' },
+      body: {
+        action: 'userMessages-list',
+        message: 'Missing userId ({onid}-{osuId}) in path. Path parameters: {}',
+      },
       statusCode: 500,
     });
   });
@@ -96,7 +99,10 @@ describe('handler', () => {
     mockEvent.mockReturnValue({ ...channelEvent, pathParameters: undefined });
     const result = await handler(mockEvent());
     expect({ ...result, body: JSON.parse(result.body) }).toMatchObject({
-      body: { action: 'userMessages-list', message: 'Missing id ({onid}-{osuId}) in path.' },
+      body: {
+        action: 'userMessages-list',
+        message: 'Missing userId ({onid}-{osuId}) in path. Path parameters: undefined',
+      },
       statusCode: 500,
     });
   });

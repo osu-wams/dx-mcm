@@ -1,0 +1,13 @@
+{
+  "payload": {
+    "populationParams": {
+      "affiliations": ["bogus"],
+      "users": [{ "id": "bobross" }]
+    },
+    "channelIds": ["dashboard"],
+    "content": "This is where all of the content of the message belong, it can be long and complete and oh so good.",
+    "contentShort": "hey hey hey..",
+    "sendAt": "2020-02-19",
+    "title": "Hey hey hey, we got the messages!"
+  }
+}
