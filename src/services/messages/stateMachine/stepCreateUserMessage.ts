@@ -22,6 +22,7 @@ const buildUserMessages = (
                 contentShort: event.contentShort,
                 messageId: event.id,
                 id: u.id,
+                imageUrl: event.imageUrl,
                 osuId: u.osuId ?? '',
                 onid: u.onid ?? '',
                 smsNumber: u.phone ?? '',

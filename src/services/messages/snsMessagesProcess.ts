@@ -14,7 +14,7 @@ export const handler = async (event: SNSEvent) => {
   try {
     const messageStatuses: MessageStatus[] = await Message.byStatusBeforeDate(
       Status.NEW,
-      sendAt ?? new Date().toISOString().slice(0, 10),
+      sendAt ?? `${new Date().toISOString().slice(0, 16)}:00.000Z`,
     );
 
     const messages: (Message | undefined)[] = await Promise.all(

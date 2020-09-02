@@ -6,7 +6,7 @@ class Deliverable {
   deliveredStatus?: string;
 
   setDelivered() {
-    this.deliveredAt = new Date().toISOString().slice(0, 10);
+    this.deliveredAt = new Date().toISOString();
     this.deliveredStatus = Status.DELIVERED;
   }
 }

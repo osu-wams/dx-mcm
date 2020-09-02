@@ -3,7 +3,7 @@
     {
       "messageId": "11d6ee51-4cc7-4302-9e22-7cd8afdaadf5",
       "receiptHandle": "AQEBBX8nesZEXmkhsmZeyIE8iQAMig7qw...",
-      "body": "{ \"sendAt\": \"2020-01-01\", \"populationParams\": {\"affiliations\": [\"undergrad\"] }, \"channelIds\": [\"test\"], \"content\": \"long content\", \"contentShort\": \"short\", \"title\": \"title\"}",
+      "body": "{ \"sendAt\": \"2020-01-01T16:20:00.000Z\", \"populationParams\": {\"affiliations\": [\"undergrad\"] }, \"channelIds\": [\"test\"], \"content\": \"long content\", \"contentShort\": \"short\", \"title\": \"title\", \"imageUrl\": \"https://blah.png\"}",
       "attributes": {
         "ApproximateReceiveCount": "1",
         "SentTimestamp": "1573251510774",

@@ -38,7 +38,7 @@ describe('handler', () => {
               'https://sns.us-west-2.amazonaws.com/SimpleNotificationService-ac565b8b1a6c5d002d285f9598aa1d9b.pem',
             MessageId: '95df01b4-ee98-5cb9-9903-4c221d41eb5e',
             Message:
-              '{ "sendAt": "2020-01-01", "populationParams": {"affiliation": "undergrad" }, "channelIds": ["test"], "content": "long content", "contentShort": "short", "title": "title"}',
+              '{ "sendAt": "2020-01-01T16:20:00.000Z", "populationParams": {"affiliation": "undergrad" }, "channelIds": ["test"], "content": "long content", "contentShort": "short", "title": "title", "imageUrl": "https://blah.png"}',
             MessageAttributes: {
               action: {
                 Type: 'String',
@@ -69,9 +69,9 @@ describe('handler', () => {
     expect(mockSendMessage).toHaveBeenCalled();
   });
   it('creates a new record that is not yet ready to be sent', async () => {
-    mockPutItem.mockResolvedValue({ ...message, sendAt: '2121-01-01' });
+    mockPutItem.mockResolvedValue({ ...message, sendAt: '2121-01-01T16:20:00.000Z' });
     mockQuery.mockResolvedValueOnce({ Items: [], Count: 0 }).mockResolvedValueOnce({
-      Items: [{ ...dynamoDbMessage, sendAt: { S: '2121-01-01' } }],
+      Items: [{ ...dynamoDbMessage, sendAt: { S: '2121-01-01T16:20:00.000Z' } }],
       Count: 1,
     });
     await handler(mockEvent());

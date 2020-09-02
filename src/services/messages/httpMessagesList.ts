@@ -6,7 +6,9 @@ import Message, { MessageStatus, Status } from '@src/models/message'; // eslint-
 export const handler = async (event: APIGatewayProxyEvent) => {
   const action = 'messages-list';
   try {
-    const { date } = event.pathParameters ?? { date: new Date().toISOString().slice(0, 10) };
+    const { date } = event.pathParameters ?? {
+      date: `${new Date().toISOString().slice(0, 16)}:00.000Z`,
+    };
     const messageStatuses: MessageStatus[] = await Message.byStatusBeforeDate(Status.NEW, date);
 
     const messages: (Message | undefined)[] = await Promise.all(

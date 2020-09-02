@@ -81,7 +81,7 @@ describe('UserMessage', () => {
         Items: [dynamoDbUserMessage, dynamoDbUserMessage],
         Count: 2,
         LastEvaluatedKey: {
-          osuId: dynamoDbUserMessage.osuId,
+          id: dynamoDbUserMessage.id,
           statusSendAt: dynamoDbUserMessage.statusSendAt,
           channelMessageId: dynamoDbUserMessage.channelMessageId,
         },
@@ -90,7 +90,7 @@ describe('UserMessage', () => {
         count: 2,
         items: [userMessage, userMessage],
         lastKey:
-          'eyJvc3VJZCI6eyJTIjoiMTIzNDU2Nzg5In0sInN0YXR1c1NlbmRBdCI6eyJTIjoiTkVXOjIwMjAtMDEtMDEifSwiY2hhbm5lbE1lc3NhZ2VJZCI6eyJTIjoiZGFzaGJvYXJkOm1lc3NhZ2UtMTIzNDU2Nzg5In19',
+          'eyJpZCI6eyJTIjoiMTIzNDU2Nzg5In0sInN0YXR1c1NlbmRBdCI6eyJTIjoiTkVXOjIwMjAtMDEtMDFUMTY6MjA6MDAuMDAwWiJ9LCJjaGFubmVsTWVzc2FnZUlkIjp7IlMiOiJkYXNoYm9hcmQ6bWVzc2FnZS0xMjM0NTY3ODkifX0.',
       });
     });
     it('throws an error when there is a unhandled exception', async () => {

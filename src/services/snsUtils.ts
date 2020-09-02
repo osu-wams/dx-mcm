@@ -24,12 +24,19 @@ export const validate = (event: SNSEvent): [boolean, SNSEventRecord | undefined]
 };
 
 export const parseMessage = (record: SNSEventRecord, status: string): Message => {
-  const { content, contentShort, channelIds, populationParams, sendAt, title } = JSON.parse(
-    record.Sns.Message,
-  );
+  const {
+    content,
+    contentShort,
+    channelIds,
+    populationParams,
+    sendAt,
+    title,
+    imageUrl,
+  } = JSON.parse(record.Sns.Message);
   return new Message({
     message: {
       id: record.Sns.MessageId,
+      imageUrl,
       status,
       sendAt,
       populationParams,

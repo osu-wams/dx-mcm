@@ -28,7 +28,7 @@ describe('handler', () => {
     mockEvent.mockReturnValue({
       ...event,
       pathParameters: {
-        sendAt: '2020-05-01',
+        sendAt: '2020-05-01T16:20:00.000Z',
       },
     });
     mockQuery.mockResolvedValue({ Items: [dynamoDbMessage] });

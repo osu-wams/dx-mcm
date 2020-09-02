@@ -13,6 +13,7 @@ export interface DynamoDBUserMessageItem extends DynamoDB.PutItemInputAttributeM
   contentShort: { S: string };
   deliveredAt: { S: string } | { NULL: boolean };
   id: { S: string };
+  imageUrl: { S: string } | { NULL: boolean };
   messageId: { S: string };
   onid: { S: string } | { NULL: boolean };
   osuId: { S: string } | { NULL: boolean };
@@ -31,6 +32,7 @@ interface UserMessageParams {
     contentShort: string;
     deliveredAt?: string;
     id: string;
+    imageUrl?: string;
     messageId: string;
     onid?: string;
     osuId?: string;
@@ -103,6 +105,8 @@ class UserMessage {
 
   id: string = '';
 
+  imageUrl?: string = '';
+
   messageId: string = '';
 
   onid?: string = '';
@@ -139,6 +143,7 @@ class UserMessage {
         contentShort,
         deliveredAt,
         id,
+        imageUrl,
         messageId,
         onid,
         osuId,
@@ -150,6 +155,7 @@ class UserMessage {
       this.sendAt = sendAt;
       this.deliveredAt = deliveredAt;
       this.id = id;
+      this.imageUrl = imageUrl;
       this.messageId = messageId;
       this.status = status;
       this.onid = onid;
@@ -173,6 +179,7 @@ class UserMessage {
         contentShort,
         deliveredAt,
         id,
+        imageUrl,
         messageId,
         onid,
         osuId,
@@ -187,6 +194,7 @@ class UserMessage {
       if (messageId) this.messageId = messageId.S || '';
       if (status) this.status = status.S || '';
       if (id) this.id = id.S || '';
+      if (imageUrl) this.imageUrl = imageUrl.S || '';
       if (onid) this.onid = onid.S || '';
       if (osuId) this.osuId = osuId.S || '';
       if (channelId) this.channelId = channelId.S || '';
@@ -410,6 +418,7 @@ class UserMessage {
       deliveredAt: props.deliveredAt ? { S: props.deliveredAt } : { NULL: true },
       messageId: { S: props.messageId },
       id: { S: props.id },
+      imageUrl: props.imageUrl ? { S: props.imageUrl } : { NULL: true },
       onid: props.onid ? { S: props.onid } : { NULL: true },
       osuId: props.osuId ? { S: props.osuId } : { NULL: true },
       sendAt: { S: props.sendAt },

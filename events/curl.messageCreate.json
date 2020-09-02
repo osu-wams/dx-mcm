@@ -7,7 +7,8 @@
     "channelIds": ["dashboard"],
     "content": "This is where all of the content of the message belong, it can be long and complete and oh so good.",
     "contentShort": "hey hey hey..",
-    "sendAt": "2020-02-19",
+    "imageUrl": "https://oregonstate.edu",
+    "sendAt": "2020-02-19T12:15:00.000Z",
     "title": "Hey hey hey, we got the messages!"
   }
 }
