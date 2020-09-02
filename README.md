@@ -58,10 +58,10 @@ $ yarn test
 
 Use `curl` for testing purposes, here are some helpful commands;
 
-## Send a new UserMessage to a specific OSU ID
+## Send a new UserMessage to a specific ONID
 
-Be sure to replace `<API_KEY_HERE>` and `<OSU_ID_HERE>` with valid values.
+Be sure to replace `<API_KEY_HERE>` and `<ONID_HERE>` with valid values.
 
 ```
-curl -k --header "x-api-key: <API_KEY_HERE>" --request POST --data '{"payload": { "populationParams": {"affiliations": ["undergrad"], "users": [{"id": "<OSU_ID_HERE>"}]}, "channelIds": ["dashboard"], "content": "This is a full content of the message.", "contentShort": "This is the full...", "sendAt": "2020-02-19", "title": "The title here..."}}' https://dev.mcm.oregonstate.edu/api/v1/messages/action/create
+curl -k --header "x-api-key: <API_KEY_HERE>" --request POST --data '{"payload": { "populationParams": {"affiliations": ["undergrad"], "users": [{"id": "<ONID_HERE>"}]}, "channelIds": ["dashboard"], "content": "This is a full content of the message.", "contentShort": "This is the full...", "sendAt": "2020-02-19T16:20:00.000Z", "title": "The title here...", "imageUrl": "https://blah.png"}}' https://dev.mcm.oregonstate.edu/api/v1/messages/action/create
 ```

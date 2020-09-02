@@ -7,14 +7,15 @@ const dynamoDbMessage = {
       'eyJzZW5kQXQiOiIyMDIwLTAxLTAxIiwic3RhdHVzIjoiTkVXIiwicG9wdWxhdGlvblBhcmFtcyI6eyJhZmZpbGlhdGlvbiI6InRlc3QiLCJvc3VJZHMiOlsiOTg3NjU0MzIxIl19LCJjaGFubmVsSWRzIjpbIjEyMyJdLCJjb250ZW50IjoiY29udGVudCIsImNvbnRlbnRTaG9ydCI6ImNvbnRlbnRTaG9ydCJ9',
   },
   id: { S: '123456789' },
+  imageUrl: { S: 'https://blah.png' },
   populationParams: {
     M: {
       affiliations: { SS: ['test'] },
-      users: { SS: [JSON.stringify({ id: '987654321', phone: '+15412345678' })] },
+      users: { SS: [JSON.stringify({ id: 'bobross', phone: '+15412345678' })] },
       // users: { SS: ['987654321'] },
     },
   },
-  sendAt: { S: '2020-01-01' },
+  sendAt: { S: '2020-01-01T16:20:00.000Z' },
   status: { S: 'NEW' },
   title: { S: 'title' },
 };
@@ -24,6 +25,7 @@ const emptyDynamoDbMessage = {
   contentShort: { S: undefined },
   hash: { S: undefined },
   id: { S: undefined },
+  imageUrl: { S: undefined },
   populationParams: { M: undefined },
   sendAt: { S: undefined },
   status: { S: undefined },
@@ -36,14 +38,15 @@ const message = {
   hash:
     'eyJzZW5kQXQiOiIyMDIwLTAxLTAxIiwic3RhdHVzIjoiTkVXIiwicG9wdWxhdGlvblBhcmFtcyI6eyJhZmZpbGlhdGlvbiI6InRlc3QiLCJvc3VJZHMiOlsiOTg3NjU0MzIxIl19LCJjaGFubmVsSWRzIjpbIjEyMyJdLCJjb250ZW50IjoiY29udGVudCIsImNvbnRlbnRTaG9ydCI6ImNvbnRlbnRTaG9ydCJ9',
   id: '123456789',
-  populationParams: { affiliations: ['test'], users: [{ id: '987654321', phone: '+15412345678' }] },
-  sendAt: '2020-01-01',
+  imageUrl: 'https://blah.png',
+  populationParams: { affiliations: ['test'], users: [{ id: 'bobross', phone: '+15412345678' }] },
+  sendAt: '2020-01-01T16:20:00.000Z',
   status: 'NEW',
   title: 'title',
 };
 const messageStatus = {
   id: '123456789',
-  sendAt: '2020-01-01',
+  sendAt: '2020-01-01T16:20:00.000Z',
   status: 'NEW',
 };
 const emptyMessage = {
@@ -52,6 +55,7 @@ const emptyMessage = {
   contentShort: '',
   hash: '',
   id: '',
+  imageUrl: '',
   populationParams: {},
   sendAt: '',
   status: '',

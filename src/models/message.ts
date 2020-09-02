@@ -10,6 +10,7 @@ export interface DynamoDBMessageItem extends DynamoDB.PutItemInputAttributeMap {
   contentShort: { S: string };
   hash: { S: string };
   id: { S: string }; // sort key
+  imageUrl: { S: string } | { NULL: boolean };
   populationParams: {
     M: { affiliations: { SS: string[] }; users: { SS: string[] } | { NULL: boolean } };
   };
@@ -31,6 +32,7 @@ interface MessageParams {
     contentShort: string;
     hash?: string;
     id: string;
+    imageUrl?: string;
     populationParams: MessagePopulationParams;
     sendAt: string;
     status: string;
@@ -64,6 +66,8 @@ class Message {
 
   id: string = '';
 
+  imageUrl?: string = '';
+
   populationParams: MessagePopulationParams = {};
 
   sendAt: string = '';
@@ -84,6 +88,7 @@ class Message {
         sendAt,
         hash,
         id,
+        imageUrl,
         status,
         populationParams,
         channelIds,
@@ -93,6 +98,7 @@ class Message {
       } = p.message;
       this.sendAt = sendAt;
       this.id = id;
+      this.imageUrl = imageUrl;
       this.status = status;
       this.populationParams = populationParams;
       this.channelIds = channelIds;
@@ -116,6 +122,7 @@ class Message {
       const {
         sendAt,
         id,
+        imageUrl,
         hash,
         status,
         populationParams,
@@ -126,6 +133,7 @@ class Message {
       } = p.dynamoDbMessage;
       if (sendAt) this.sendAt = sendAt.S || '';
       if (id) this.id = id.S || '';
+      if (imageUrl) this.imageUrl = imageUrl.S || '';
       if (hash) this.hash = hash.S || '';
       if (status) this.status = status.S || '';
       if (channelIds) this.channelIds = channelIds.SS || [];
@@ -277,6 +285,7 @@ class Message {
     const {
       sendAt,
       id,
+      imageUrl,
       hash,
       status,
       populationParams: { affiliations, users },
@@ -288,6 +297,7 @@ class Message {
     return {
       sendAt: { S: sendAt },
       id: { S: id },
+      imageUrl: imageUrl ? { S: imageUrl } : { NULL: true },
       hash: { S: hash },
       status: { S: status },
       populationParams: {

@@ -28,7 +28,7 @@ export const handler = async (event: SNSEvent) => {
       await publishToQueue(errorMessage, queueUrl);
     } else {
       const persistedMessage = await persistMessage(message);
-      if (persistedMessage && persistedMessage.sendAt <= new Date().toISOString().slice(0, 10)) {
+      if (persistedMessage && persistedMessage.sendAt <= new Date().toISOString()) {
         const queueUrl = await getQueueUrl(SQS_PROCESS_MESSAGE_QUEUE_NAME);
         await publishToQueue(persistedMessage, queueUrl, persistedMessage.id);
       }
