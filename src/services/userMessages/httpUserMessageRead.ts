@@ -5,19 +5,25 @@ import UserMessage, { Status } from '@src/models/userMessage'; // eslint-disable
 export const handler = async (event: APIGatewayProxyEvent) => {
   const action = 'userMessage-read';
   try {
-    const { osuId, channelId, messageId } = event.pathParameters ?? {
-      osuId: undefined,
+    const { userId, channelId, messageId } = event.pathParameters ?? {
+      userId: undefined,
       channelId: undefined,
       messageId: undefined,
     };
-    if (!osuId) throw new Error('Missing osuId in path.');
-    if (!channelId) throw new Error('Missing channelId in path.');
-    if (!messageId) throw new Error('Missing messageId in path.');
+    const params = JSON.stringify(event.pathParameters);
+    if (!userId)
+      throw new Error(`Missing userId ({onid}-{osuId}) in path. Path parameters: ${params}`);
+    if (!channelId) throw new Error(`Missing channelId in path. Path parameters: ${params}`);
+    if (!messageId) throw new Error(`Missing messageId in path. Path parameters: ${params}`);
 
-    const userMessageResults = await UserMessage.find(osuId, messageId, channelId);
+    // @ts-ignore unused var osuId
+    const [onid, osuId] = (userId ?? '').split('-'); // eslint-disable-line no-unused-vars
+
+    // TODO: make find more intelligent to handle osuId and onid, or make two calls and have to deal with lastKey?!
+    const userMessageResults = await UserMessage.find(onid, messageId, channelId);
     if (userMessageResults.count !== 1) {
       console.error(
-        `Marking UserMessage read failed, found ${userMessageResults.count} records for osuId:${osuId}, messageId:${messageId}, channelId:${channelId}`,
+        `Marking UserMessage read failed, found ${userMessageResults.count} records for userId:${userId}, messageId:${messageId}, channelId:${channelId}`,
       );
       return {
         statusCode: 409,

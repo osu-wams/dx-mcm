@@ -40,14 +40,18 @@ describe('handler', () => {
     });
     expect(mockQuery).toHaveBeenCalled();
   });
-  it('should respond with an error when no osuId is provided', async () => {
+  it('should respond with an error when no userId is provided', async () => {
     mockEvent.mockReturnValue({
       ...event,
-      pathParameters: { ...event.pathParameters, osuId: undefined },
+      pathParameters: { ...event.pathParameters, userId: undefined },
     });
     const result = await handler(mockEvent());
     expect({ ...result, body: JSON.parse(result.body) }).toMatchObject({
-      body: { action: 'userMessage-read', message: 'Missing osuId in path.' },
+      body: {
+        action: 'userMessage-read',
+        message:
+          'Missing userId ({onid}-{osuId}) in path. Path parameters: {"channelId":"channelId","messageId":"messageId"}',
+      },
       statusCode: 500,
     });
   });
@@ -58,7 +62,11 @@ describe('handler', () => {
     });
     const result = await handler(mockEvent());
     expect({ ...result, body: JSON.parse(result.body) }).toMatchObject({
-      body: { action: 'userMessage-read', message: 'Missing channelId in path.' },
+      body: {
+        action: 'userMessage-read',
+        message:
+          'Missing channelId in path. Path parameters: {"userId":"bobross-111111111","messageId":"messageId"}',
+      },
       statusCode: 500,
     });
   });
@@ -69,7 +77,11 @@ describe('handler', () => {
     });
     const result = await handler(mockEvent());
     expect({ ...result, body: JSON.parse(result.body) }).toMatchObject({
-      body: { action: 'userMessage-read', message: 'Missing messageId in path.' },
+      body: {
+        action: 'userMessage-read',
+        message:
+          'Missing messageId in path. Path parameters: {"userId":"bobross-111111111","channelId":"channelId"}',
+      },
       statusCode: 500,
     });
   });
@@ -77,7 +89,10 @@ describe('handler', () => {
     mockEvent.mockReturnValue({ ...event, pathParameters: undefined });
     const result = await handler(mockEvent());
     expect({ ...result, body: JSON.parse(result.body) }).toMatchObject({
-      body: { action: 'userMessage-read', message: 'Missing osuId in path.' },
+      body: {
+        action: 'userMessage-read',
+        message: 'Missing userId ({onid}-{osuId}) in path. Path parameters: undefined',
+      },
       statusCode: 500,
     });
   });
