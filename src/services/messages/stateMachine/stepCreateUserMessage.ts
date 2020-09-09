@@ -20,7 +20,7 @@ const buildUserMessages = (
                 channelId: c,
                 content: event.content,
                 contentShort: event.contentShort,
-                messageId: event.id,
+                messageId: event.id!,
                 id: u.id,
                 imageUrl: event.imageUrl,
                 osuId: u.osuId ?? '',
