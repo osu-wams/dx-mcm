@@ -79,20 +79,22 @@ const getAllMembers = async (client: Client, affiliations: string[]): Promise<Us
 export const handler = async (event: any, _context: any, callback: any) => {
   const { users, affiliations }: MessagePopulationParams = event.populationParams;
   const foundUsers: UserData[] = users ?? [];
+  const affiliationStems = affiliations?.map((a) => affiliationLookup[a]).filter(Boolean);
 
-  try {
-    const c = new Client({
-      host: process.env.GROUPER_HOST?.toString() ?? '',
-      username: process.env.GROUPER_USERNAME,
-      password: process.env.GROUPER_PASSWORD,
-    });
+  if (affiliationStems?.length) {
+    try {
+      const c = new Client({
+        host: process.env.GROUPER_HOST?.toString() ?? '',
+        username: process.env.GROUPER_USERNAME,
+        password: process.env.GROUPER_PASSWORD,
+      });
 
-    const affiliationStems = affiliations?.map((a) => affiliationLookup[a]);
-    const foundInGrouper = await getAllMembers(c, affiliationStems ?? []);
-    console.info('usersFoundInGrouper', foundInGrouper);
-    foundUsers.push(...foundInGrouper);
-  } catch (err) {
-    console.error('stepGetUserPopulation error when using Grouper API', err);
+      const foundInGrouper = await getAllMembers(c, affiliationStems ?? []);
+      console.info('usersFoundInGrouper', foundInGrouper);
+      foundUsers.push(...foundInGrouper);
+    } catch (err) {
+      console.error('stepGetUserPopulation error when using Grouper API', err);
+    }
   }
 
   // Return a unique array of user ids and phones by spreading a Set
