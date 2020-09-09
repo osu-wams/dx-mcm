@@ -31,7 +31,7 @@ interface MessageParams {
     content: string;
     contentShort: string;
     hash?: string;
-    id: string;
+    id?: string;
     imageUrl?: string;
     populationParams: MessagePopulationParams;
     sendAt: string;
@@ -64,7 +64,7 @@ class Message {
 
   hash: string = '';
 
-  id: string = '';
+  id?: string = '';
 
   imageUrl?: string = '';
 
@@ -81,6 +81,8 @@ class Message {
   static STATUS_INDEX_NAME: string = `${DYNAMODB_TABLE_PREFIX}-MessageStatuses`;
 
   static HASH_INDEX_NAME: string = `${DYNAMODB_TABLE_PREFIX}-MessageByHash`;
+
+  static ID_INDEX_NAME: string = `${DYNAMODB_TABLE_PREFIX}-MessageId`;
 
   constructor(p: MessageParams) {
     if (p.message) {
@@ -171,7 +173,7 @@ class Message {
 
       const result = await putItem(params);
       console.log('Message.upsert succeeded:', result);
-      return Message.find(props.sendAt, props.id);
+      return Message.find(props.sendAt, props.id!);
     } catch (err) {
       console.error(`Message.upsert failed:`, props, err);
       throw err;
@@ -246,6 +248,29 @@ class Message {
     }
   };
 
+  static findById = async (id: string): Promise<Message | undefined> => {
+    try {
+      const params: AWS.DynamoDB.QueryInput = {
+        TableName: Message.TABLE_NAME,
+        IndexName: Message.ID_INDEX_NAME,
+        KeyConditionExpression: '#idAttribute = :idValue',
+        ExpressionAttributeNames: {
+          '#idAttribute': 'id',
+        },
+        ExpressionAttributeValues: {
+          ':idValue': { S: id },
+        },
+        Select: 'ALL_ATTRIBUTES',
+      };
+      const results: AWS.DynamoDB.QueryOutput = await query(params);
+      if (!results.Items) return undefined;
+      return new Message({ dynamoDbMessage: results.Items.shift() });
+    } catch (err) {
+      console.error(`Message.findById(${id}) failed:`, err);
+      throw err;
+    }
+  };
+
   static byStatusBeforeDate = async (status: Status, sendAt: string): Promise<MessageStatus[]> => {
     try {
       const params: AWS.DynamoDB.QueryInput = {
@@ -296,7 +321,7 @@ class Message {
     } = props;
     return {
       sendAt: { S: sendAt },
-      id: { S: id },
+      id: { S: id! },
       imageUrl: imageUrl ? { S: imageUrl } : { NULL: true },
       hash: { S: hash },
       status: { S: status },
