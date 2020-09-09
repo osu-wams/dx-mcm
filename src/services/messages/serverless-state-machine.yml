@@ -22,7 +22,7 @@ definition:
               Type: Task
               Comment: 'Branch returns only its data (users:[]) to parent parallel state for inclusion'
               Resource: !GetAtt stepGetUserPopulation.Arn
-              TimeoutSeconds: 120
+              TimeoutSeconds: 240
               HeartbeatSeconds: 30
               ResultPath: '$'
               Retry:
