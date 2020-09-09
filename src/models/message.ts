@@ -51,6 +51,7 @@ export enum Status {
   ERROR = 'ERROR',
   NEW = 'NEW',
   PROCESSING = 'PROCESSING',
+  CANCELLED = 'CANCELLED',
   SENT = 'SENT',
 }
 /* eslint-enable no-unused-vars */
