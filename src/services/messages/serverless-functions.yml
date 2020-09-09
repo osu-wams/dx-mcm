@@ -1,3 +1,12 @@
+httpMessageApi:
+  handler: src/services/messages/api/main.handler
+  name: ${self:service.name}-messageApi
+  description: Message API endpoint
+  events:
+    - http:
+        private: true # forces header x-api-key to be present with a valid key from provider.apiKeys
+        method: ANY
+        path: /api/v1/message/{proxy+}
 httpMessagesList:
   handler: src/services/messages/httpMessagesList.handler
   name: ${self:service.name}-messagesList
