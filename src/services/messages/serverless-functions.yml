@@ -120,13 +120,13 @@ stepGetUserPopulation:
 
 cronInvokeMessageProcess:
   handler: src/services/messages/cronInvokeMessageProcess.handler
-  description: 'Lambda that fires off daily to post to the API to initiate processing messages ready to be sent'
+  description: 'Lambda that fires off post to the API to initiate processing messages ready to be sent'
   environment:
     API_KEY: '${env:AWS_APIGW_API_KEY}${file(./src/serverless.js):developerSuffix}'
     APP_URL: 'https://${file(./src/serverless.js):developerPrefix}${env:AWS_CLOUDFRONT_ALIAS}/api/v1/messages/action/process'
   events:
     - schedule:
         name: ${self:service.name}-cronInvokeMessageProcess
-        description: 'Trigger cronIinvokeMessageProcess lambda at 12:00am Pacific Time every day'
-        rate: cron(0 17 * * ? *)
+        description: 'Trigger cronInvokeMessageProcess lambda every minute'
+        rate: rate(1 minute)
         enabled: true
