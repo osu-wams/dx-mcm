@@ -195,7 +195,7 @@ class Message {
         Select: 'ALL_ATTRIBUTES',
       };
       const results: AWS.DynamoDB.QueryOutput = await query(params);
-      if (!results.Items) return [];
+      if (!results.Items?.length) return [];
       return results.Items.map((i) => new Message({ dynamoDbMessage: i }));
     } catch (err) {
       console.error(`Message.findAll(${sendAt}) failed:`, err);
@@ -219,7 +219,7 @@ class Message {
         Select: 'ALL_ATTRIBUTES',
       };
       const results: AWS.DynamoDB.QueryOutput = await query(params);
-      if (!results.Items) return undefined;
+      if (!results.Items?.length) return undefined;
       return new Message({ dynamoDbMessage: results.Items.shift() });
     } catch (err) {
       console.error(`Message.find(${sendAt}, ${id}) failed:`, err);
@@ -264,7 +264,7 @@ class Message {
         Select: 'ALL_ATTRIBUTES',
       };
       const results: AWS.DynamoDB.QueryOutput = await query(params);
-      if (!results.Items) return undefined;
+      if (!results.Items?.length) return undefined;
       return new Message({ dynamoDbMessage: results.Items.shift() });
     } catch (err) {
       console.error(`Message.findById(${id}) failed:`, err);
@@ -289,7 +289,7 @@ class Message {
         Select: 'ALL_PROJECTED_ATTRIBUTES',
       };
       const results: AWS.DynamoDB.QueryOutput = await query(params);
-      if (!results.Items) return [];
+      if (!results.Items?.length) return [];
       return results.Items.map((i) => ({
         id: i.id.S!,
         sendAt: i.sendAt.S!,
