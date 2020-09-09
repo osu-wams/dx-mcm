@@ -13,8 +13,8 @@ paths:
     post:
       tags:
         - api
-      summary: Send a multi-channel message
-      description: See documentation for more details
+      summary: Initiate sending a multi-channel message
+      description: See repository documentation for more details.
       operationId: postMessage
       parameters:
         - in: path
@@ -28,28 +28,29 @@ paths:
           description: >
             The API action to perform.
 
-            * `create` : Initiate a new multi-channel message.
-            * `process` : Initiate sending any message that is currently ready to send.
+            * `create` : Initiate a new multi-channel message, this action requires a CreateMessage payload.
+
+            * `process` : Initiate sending any message that is currently ready to send, this action doesn't require a payload.
       requestBody:
         description: The message request to send.
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ApiRequest'
+              $ref: '#/components/schemas/MessageRequest'
       responses:
         '200':
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiResponse'
+                $ref: '#/components/schemas/MessageResponse'
         '500':
           description: Error
           content: {}
       x-codegen-request-body-name: messageRequest
 components:
   schemas:
-    ApiResponse:
+    MessageResponse:
       type: object
       properties:
         requestId:
@@ -59,16 +60,72 @@ components:
         message:
           type: string
         object:
-          type: object
-    ApiRequest:
+          $ref: '#/components/schemas/Message'
+    MessageRequest:
       type: object
-      required:
-        - payload
       properties:
         payload:
-          type: object
+          oneOf:
+            - $ref: '#/components/schemas/Message'
+            - type: object
+      required: [payload]
+    PopulationParamsUser:
+      type: object
+      properties:
+        id:
+          type: string
+        smsNumber:
+          type: string
+      required: [id]
+    PopulationParams:
+      type: object
+      properties:
+        affiliations:
+          type: array
+          items:
+            type: string
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/PopulationParamsUser'
+      required: [affiliations]
+    Message:
+      type: object
+      properties:
+        channelIds:
+          type: array
+          items:
+            type: string
+        content:
+          type: string
+        contentShort:
+          type: string
+        imageUrl:
+          type: string
+        populationParams:
+          $ref: '#/components/schemas/PopulationParams'
+        sendAt:
+          type: string
+        title:
+          type: string
+      required: [channelIds, content, contentShort, imageUrl, populationParams, sendAt, title]
+      example:
+        channelIds:
+          - dashboard
+        content: Hey there here's a message with the full body content of the message to be sent.
+        contentShort: Hey there here's a message..
+        imageUrl: https://oregonstate.edu/bogus-image.png
+        populationParams:
+          affiliations:
+            - undergraduate
+          users:
+            - bobross
+            - rickross
+        sendAt: '2020-01-01T08:15:00.000Z'
+        title: Rise and shine Beaver Nation!
+
   securitySchemes:
-    api_key:
+    apiKey:
       type: apiKey
       name: x-api-key
       in: header

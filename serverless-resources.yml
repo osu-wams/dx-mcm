@@ -21,9 +21,7 @@ messagesTable:
         KeyType: HASH
       - AttributeName: id
         KeyType: RANGE
-    ProvisionedThroughput:
-      ReadCapacityUnits: 5
-      WriteCapacityUnits: 5
+    BillingMode: PAY_PER_REQUEST
     PointInTimeRecoverySpecification:
       PointInTimeRecoveryEnabled: true
     GlobalSecondaryIndexes:
@@ -37,9 +35,6 @@ messagesTable:
           NonKeyAttributes:
             - id
           ProjectionType: INCLUDE
-        ProvisionedThroughput:
-          ReadCapacityUnits: 5
-          WriteCapacityUnits: 5
       - IndexName: ${self:service.name}-MessageByHash
         KeySchema:
           - AttributeName: hash
@@ -48,9 +43,12 @@ messagesTable:
           ProjectionType: INCLUDE
           NonKeyAttributes:
             - id
-        ProvisionedThroughput:
-          ReadCapacityUnits: 5
-          WriteCapacityUnits: 5
+      - IndexName: ${self:service.name}-MessageId
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        Projection:
+          ProjectionType: ALL
 
 userMessagesTable:
   Type: AWS::DynamoDB::Table

@@ -37,8 +37,7 @@ provider:
       - !Ref PrivateSubnetB
       - !Ref PrivateSubnetC
   apiKeys:
-    - name: ${self:service.name}-api-key # .env.{stage} file contains the API key
-      value: ${env:AWS_APIGW_API_KEY}${file(./src/serverless.js):developerSuffix} # ensure a unique key when using a developer stack
+    - value: ${env:AWS_APIGW_API_KEY}${file(./src/serverless.js):developerSuffix} # ensure a unique key when using a developer stack
   tracing: ${file(./serverless.config.${opt:stage, 'development'}.yml):provider.tracing}
   iamRoleStatements:
     - Effect: Allow
@@ -115,7 +114,6 @@ resources:
     PrivateSubnetB: ${file(./serverless-vpc-resources.yml):PrivateSubnetB}
     PrivateSubnetC: ${file(./serverless-vpc-resources.yml):PrivateSubnetC}
     PublicSubnetD: ${file(./serverless-vpc-resources.yml):PublicSubnetD}
-    Eip: ${file(./serverless-vpc-resources.yml):Eip}
     NatGateway: ${file(./serverless-vpc-resources.yml):NatGateway}
     PrivateRouteTable: ${file(./serverless-vpc-resources.yml):PrivateRouteTable}
     PrivateRoute: ${file(./serverless-vpc-resources.yml):PrivateRoute}
