@@ -36,7 +36,9 @@ const buildUserMessages = (
       .flat();
   } catch (err) {
     console.error(err);
-    throw new Error(`buildUserMessages failed: ${err.message}`);
+    throw new Error(
+      'Failed to translate target channels and users into individual UserMessages for persistence.',
+    );
   }
 };
 
@@ -51,7 +53,7 @@ const persistUserMessages = (userMessages: UserMessage[]): Promise<UserMessage[]
     );
   } catch (err) {
     console.error(err);
-    throw new Error(`persistUserMessages failed: ${err.message}`);
+    throw new Error('Failed persisting individual UserMessages to DynamoDB.');
   }
 };
 
@@ -67,7 +69,7 @@ const publishUserMessagesToQueue = async (userMessages: UserMessage[]): Promise<
     );
   } catch (err) {
     console.error(err);
-    throw new Error(`publishUserMessagesToQueue failed: ${err.message}`);
+    throw new Error('Failed publishing individual UserMessages to queue for delivery.');
   }
 };
 
@@ -82,14 +84,18 @@ export const handler = async (event: MessageStateMachineResult, _context: any, c
     const persistedUserMessages = await persistUserMessages(userMessages);
     const filteredUserMessages = persistedUserMessages.filter(Boolean) as UserMessage[];
     await publishUserMessagesToQueue(filteredUserMessages);
-    await Message.updateStatus(message, Status.SENT);
+    await Message.updateStatus(
+      message,
+      Status.SENT,
+      `Published at ${new Date().toISOString()} to be sent at ${message.sendAt}`,
+    );
     callback(null, { userMessages });
   } catch (err) {
     console.error('Creating UserMessages failed -->  ', err);
     const queueUrl = await getQueueUrl(SQS_ERROR_MESSAGE_QUEUE_NAME);
     publishToQueue({ error: err.message, object: event }, queueUrl);
-    await Message.updateStatus(message, Status.ERROR);
-    callback(err, null);
+    await Message.updateStatus(message, Status.ERROR, err.message);
+    callback(err.message, null);
   }
 };
 

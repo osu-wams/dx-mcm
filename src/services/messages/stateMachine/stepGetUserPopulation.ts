@@ -94,6 +94,7 @@ export const handler = async (event: any, _context: any, callback: any) => {
       foundUsers.push(...foundInGrouper);
     } catch (err) {
       console.error('stepGetUserPopulation error when using Grouper API', err);
+      callback(err.message, null);
     }
   }
 
