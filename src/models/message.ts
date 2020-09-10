@@ -16,6 +16,7 @@ export interface DynamoDBMessageItem extends DynamoDB.PutItemInputAttributeMap {
   };
   sendAt: { S: string }; // partition key
   status: { S: string };
+  statusMessage: { S: string } | { NULL: boolean };
   title: { S: string };
 }
 
@@ -36,6 +37,7 @@ interface MessageParams {
     populationParams: MessagePopulationParams;
     sendAt: string;
     status: string;
+    statusMessage?: string;
     title: string;
   };
 }
@@ -44,6 +46,7 @@ export interface MessageStatus {
   id: string;
   sendAt: string;
   status: string;
+  statusMessage?: string;
 }
 
 /* eslint-disable no-unused-vars */
@@ -75,6 +78,8 @@ class Message {
 
   status: string = Status.NEW;
 
+  statusMessage?: string = '';
+
   title: string = '';
 
   static TABLE_NAME: string = `${DYNAMODB_TABLE_PREFIX}-Messages`;
@@ -93,6 +98,7 @@ class Message {
         id,
         imageUrl,
         status,
+        statusMessage,
         populationParams,
         channelIds,
         content,
@@ -103,6 +109,7 @@ class Message {
       this.id = id;
       this.imageUrl = imageUrl;
       this.status = status;
+      this.statusMessage = statusMessage;
       this.populationParams = populationParams;
       this.channelIds = channelIds;
       this.content = content;
@@ -112,11 +119,6 @@ class Message {
         hash ??
         urlSafeBase64Encode({
           sendAt,
-          status,
-          populationParams,
-          channelIds,
-          content,
-          contentShort,
           title,
         });
     }
@@ -128,6 +130,7 @@ class Message {
         imageUrl,
         hash,
         status,
+        statusMessage,
         populationParams,
         channelIds,
         content,
@@ -139,6 +142,7 @@ class Message {
       if (imageUrl) this.imageUrl = imageUrl.S || '';
       if (hash) this.hash = hash.S || '';
       if (status) this.status = status.S || '';
+      if (statusMessage) this.statusMessage = statusMessage.S || '';
       if (channelIds) this.channelIds = channelIds.SS || [];
       if (content) this.content = content.S || '';
       if (contentShort) this.contentShort = contentShort.S || '';
@@ -153,9 +157,14 @@ class Message {
     }
   }
 
-  static updateStatus = async (props: Message, status: Status): Promise<Message | undefined> => {
+  static updateStatus = async (
+    props: Message,
+    status: Status,
+    statusMessage: string,
+  ): Promise<Message | undefined> => {
     const message = props;
     message.status = status;
+    message.statusMessage = statusMessage;
     return Message.upsert(message);
   };
 
@@ -314,6 +323,7 @@ class Message {
       imageUrl,
       hash,
       status,
+      statusMessage,
       populationParams: { affiliations, users },
       channelIds,
       content,
@@ -326,6 +336,7 @@ class Message {
       imageUrl: imageUrl ? { S: imageUrl } : { NULL: true },
       hash: { S: hash },
       status: { S: status },
+      statusMessage: statusMessage ? { S: statusMessage } : { NULL: true },
       populationParams: {
         M: {
           affiliations: { SS: affiliations! },
