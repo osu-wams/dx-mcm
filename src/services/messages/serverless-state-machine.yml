@@ -37,28 +37,17 @@ definition:
                   BackoffRate: 2
                   MaxAttempts: 5
               Catch:
-                - ErrorEquals: ['States.Runtime']
-                  Next: RuntimeError
-                - ErrorEquals: ['HandledError']
-                  Next: HandledError
                 - ErrorEquals: ['States.ALL']
+                  ResultPath: '$.error'
                   Next: CatchAllFallback
               End: true
-            RuntimeError:
-              Type: Pass
-              Result: 'Task failed to execute at runtime, this could be due to an invalid JSON payload in InputPath or OutputPath'
-              ResultPath: '$.error'
-              Next: FailState
-            HandledError:
-              Type: Pass
-              Result: 'Handled error preventing GetUserPopulation task from completing, Message is unable to be delivered.'
-              ResultPath: '$.error'
-              Next: FailState
             CatchAllFallback:
-              Type: Pass
-              Result: 'GetUserPopulation caught an unhandled error.'
-              ResultPath: '$.error'
+              Type: Task
               Next: FailState
+              Comment: 'Handle a failed execution'
+              Resource: !GetAtt stepFailState.Arn
+              TimeoutSeconds: 240
+              HeartbeatSeconds: 30
             FailState:
               Type: Fail
         - StartAt: GetChannels

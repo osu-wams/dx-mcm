@@ -105,6 +105,10 @@ stepCreateUserMessage:
     SQS_PROCESS_USER_MESSAGE_QUEUE_NAME: !GetAtt userMessagesSqsQueue.QueueName
     SQS_ERROR_MESSAGE_QUEUE_NAME: !GetAtt messageErrorsSqsQueue.QueueName
 
+stepFailState:
+  handler: src/services/messages/stateMachine/stepFailState.handler
+  name: ${self:service.name}-messageFailState
+
 stepGetChannels:
   handler: src/services/messages/stateMachine/stepGetChannels.handler
   name: ${self:service.name}-messageGetChannels
