@@ -21,13 +21,17 @@ export const handler = async (event: SQSEvent) => {
       input: JSON.stringify(message),
       name: `${message.id}-${new Date().toISOString().slice(0, 10)}`,
     });
-    await Message.updateStatus(message, Status.PROCESSING);
+    await Message.updateStatus(
+      message,
+      Status.PROCESSING,
+      'Message processing through state machine.',
+    );
   } catch (err) {
     /* istanbul ignore next */
     console.error(err);
     const queueUrl = await getQueueUrl(SQS_ERROR_MESSAGE_QUEUE_NAME);
     publishToQueue({ error: err.message, object: event }, queueUrl);
-    await Message.updateStatus(message, Status.ERROR);
+    await Message.updateStatus(message, Status.ERROR, err.message);
   }
 };
 
