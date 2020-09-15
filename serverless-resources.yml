@@ -1,8 +1,3 @@
-apiSnsTopic:
-  Type: AWS::SNS::Topic
-  Properties:
-    TopicName: ${self:service.name}-api
-
 messagesTable:
   Type: AWS::DynamoDB::Table
   Properties:
