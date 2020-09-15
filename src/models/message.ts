@@ -25,21 +25,23 @@ export interface MessagePopulationParams {
   users?: UserData[];
 }
 
+export interface MessageCreateParams {
+  channelIds: string[];
+  content: string;
+  contentShort: string;
+  hash?: string;
+  id?: string;
+  imageUrl?: string;
+  populationParams: MessagePopulationParams;
+  sendAt: string;
+  status: string;
+  statusMessage?: string;
+  title: string;
+}
+
 interface MessageParams {
   dynamoDbMessage?: AWS.DynamoDB.AttributeMap;
-  message?: {
-    channelIds: string[];
-    content: string;
-    contentShort: string;
-    hash?: string;
-    id?: string;
-    imageUrl?: string;
-    populationParams: MessagePopulationParams;
-    sendAt: string;
-    status: string;
-    statusMessage?: string;
-    title: string;
-  };
+  message?: MessageCreateParams;
 }
 
 export interface MessageStatus {
@@ -333,10 +335,10 @@ class Message {
     return {
       sendAt: { S: sendAt },
       id: { S: id! },
-      imageUrl: imageUrl ? { S: imageUrl } : { NULL: true },
+      imageUrl: imageUrl && imageUrl !== '' ? { S: imageUrl } : { NULL: true },
       hash: { S: hash },
       status: { S: status },
-      statusMessage: statusMessage ? { S: statusMessage } : { NULL: true },
+      statusMessage: statusMessage && statusMessage !== '' ? { S: statusMessage } : { NULL: true },
       populationParams: {
         M: {
           affiliations: { SS: affiliations! },
