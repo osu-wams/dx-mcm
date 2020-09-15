@@ -4,8 +4,8 @@ provider:
     lambda: true
   usagePlan:
     quota:
-      limit: 1000
-      period: MONTH
+      limit: 2000
+      period: DAY
     throttle:
       burstLimit: 100
       rateLimit: 50

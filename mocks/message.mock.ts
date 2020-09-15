@@ -17,6 +17,7 @@ const dynamoDbMessage = {
   },
   sendAt: { S: '2020-01-01T16:20:00.000Z' },
   status: { S: 'NEW' },
+  statusMessage: { NULL: true },
   title: { S: 'title' },
 };
 const emptyDynamoDbMessage = {
@@ -29,6 +30,7 @@ const emptyDynamoDbMessage = {
   populationParams: { M: undefined },
   sendAt: { S: undefined },
   status: { S: undefined },
+  statusMessage: { S: undefined },
   title: { S: undefined },
 };
 const message = {
@@ -42,6 +44,7 @@ const message = {
   populationParams: { affiliations: ['test'], users: [{ id: 'bobross', phone: '+15412345678' }] },
   sendAt: '2020-01-01T16:20:00.000Z',
   status: 'NEW',
+  statusMessage: '',
   title: 'title',
 };
 const messageStatus = {
@@ -59,6 +62,7 @@ const emptyMessage = {
   populationParams: {},
   sendAt: '',
   status: '',
+  statusMessage: '',
   title: '',
 };
 

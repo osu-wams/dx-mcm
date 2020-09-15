@@ -26,7 +26,11 @@ const update = async (req: Request, res: Response, _next: NextFunction) => {
   if (!message) {
     res.status(400).json({ error: `Message ${id} not found.` });
   } else {
-    const updatedMessage = await Message.updateStatus(message, status);
+    const updatedMessage = await Message.updateStatus(
+      message,
+      status,
+      'Status updated through messages API.',
+    );
     res.status(200).json({ message: updatedMessage });
   }
 };

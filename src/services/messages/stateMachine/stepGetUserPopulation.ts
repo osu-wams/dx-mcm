@@ -6,7 +6,16 @@ import { MessagePopulationParams } from '@src/models/message';
 import { Subject } from '@osu-wams/grouper/dist/types';
 
 const affiliationLookup: { [key: string]: string } = {
-  undergrad: 'osu:ref:stu:level:01',
+  'all-students': 'osu:ref:stu:eligible-to-register',
+  'ecampus-students': 'osu:ref:stu:campus:dsc',
+  'cascades-students': 'osu:ref:stu:campus:b',
+  'corvallis-students': 'osu:ref:stu:campus:c',
+  'portland-students': 'osu:ref:stu:campus:4',
+  'lagrande-students': 'osu:ref:stu:campus:l',
+  'into-students': 'osu:ref:stu:level:06',
+  'undergrad-students': 'osu:ref:stu:level:01',
+  'graduate-students': 'osu:ref:stu:level:02',
+  'all-employees': 'osu:ref:emp:employees-all',
   teaching: 'osu:ref:stu:cert:next:cg11',
 };
 
@@ -25,7 +34,7 @@ const getMembersInAffiliation = async (
     let fetchMembers = true;
     let pageNumber = 1;
 
-    while (fetchMembers && pageNumber < 10) {
+    while (fetchMembers && pageNumber < 15) {
       // eslint-disable-next-line
       const results = await getMembers(client, [affiliation], ['id'], { pageNumber, pageSize });
       const pageSubjectCount = results.reduce((p, v) => p + (v.subjects ?? []).length, 0);
@@ -94,6 +103,7 @@ export const handler = async (event: any, _context: any, callback: any) => {
       foundUsers.push(...foundInGrouper);
     } catch (err) {
       console.error('stepGetUserPopulation error when using Grouper API', err);
+      callback(err.message, null);
     }
   }
 
