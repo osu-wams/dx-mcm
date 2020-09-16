@@ -1,13 +1,67 @@
-import { SNS_TOPIC_ARN } from '@src/constants';
+import throat from 'throat';
+import { v4 as uuidv4 } from 'uuid';
+import { SQS_ERROR_MESSAGE_QUEUE_NAME, SQS_PROCESS_MESSAGE_QUEUE_NAME } from '@src/constants';
 import {
-  validateSnsAction,
+  validateAction,
   responseBody,
-  successResponse,
   errorResponse,
+  successResponse,
 } from '@src/services/httpUtils';
-import { publish } from '@src/messagePubSub';
+import Message, { MessageCreateParams, MessageStatus, Status } from '@src/models/message'; // eslint-disable-line no-unused-vars
 import { APIGatewayProxyEvent } from 'aws-lambda'; // eslint-disable-line no-unused-vars, import/no-unresolved
-import { AWSError, SNS } from 'aws-sdk'; // eslint-disable-line no-unused-vars
+import { getQueueUrl, publishToQueue } from '@src/services/sqsUtils';
+
+const persistMessage = async (message: Message): Promise<Message | undefined> => {
+  const newMessage = await Message.upsert(message);
+  console.log('Created -->  ', newMessage);
+  return newMessage;
+};
+
+const createMessage = async (message: Message): Promise<Message | undefined> => {
+  if (await Message.exists(message)) {
+    const errorMessage = {
+      error: `Duplicate Message found with hash value (${message.hash}).`,
+      object: message,
+    };
+    const queueUrl = await getQueueUrl(SQS_ERROR_MESSAGE_QUEUE_NAME);
+    await publishToQueue(errorMessage, queueUrl);
+    throw new Error(errorMessage.error);
+  } else {
+    const persistedMessage = await persistMessage(message);
+    if (persistedMessage && persistedMessage.sendAt <= new Date().toISOString()) {
+      const queueUrl = await getQueueUrl(SQS_PROCESS_MESSAGE_QUEUE_NAME);
+      await publishToQueue(persistedMessage, queueUrl, persistedMessage.id);
+    }
+    if (!persistMessage) throw new Error('Message was not persisted.');
+    return persistedMessage;
+  }
+};
+
+const processMessages = async (sendAt?: string): Promise<(Message | undefined)[]> => {
+  const messageStatuses: MessageStatus[] = await Message.byStatusBeforeDate(
+    Status.NEW,
+    sendAt ?? `${new Date().toISOString().slice(0, 16)}:00.000Z`,
+  );
+
+  const messages: (Message | undefined)[] = await Promise.all(
+    messageStatuses
+      .filter((ms) => ms.id !== '')
+      .map(throat(5, (messageStatus) => Message.find(messageStatus.sendAt, messageStatus.id))),
+  );
+
+  const queueUrl = await getQueueUrl(SQS_PROCESS_MESSAGE_QUEUE_NAME);
+  await Promise.all(
+    messages
+      .filter((m) => m !== undefined)
+      .map(
+        throat(50, (message) => {
+          console.log('Processing -->  ', message);
+          return publishToQueue(message!, queueUrl, message!.id);
+        }),
+      ),
+  );
+  return messages;
+};
 
 /**
  * A generic handler to publish the supplied payload to the SNS topic with a
@@ -19,32 +73,38 @@ import { AWSError, SNS } from 'aws-sdk'; // eslint-disable-line no-unused-vars
  * @see ./serverless-functions.yml : httpMessagesPublisher to see API endpoint
  */
 export const handler = async (event: APIGatewayProxyEvent) => {
-  const { valid, response, payload, action } = validateSnsAction(event);
+  const { valid, response, payload, action } = validateAction(event);
   if (!valid) return response;
 
+  let apiGatewayResponse;
   try {
-    const message = {
-      Message: JSON.stringify(payload),
-      TopicArn: SNS_TOPIC_ARN,
-      Subject: 'Messages',
-      MessageAttributes: {
-        action: {
-          DataType: 'String',
-          StringValue: action,
-        },
-      },
-    };
-    const published = await publish(message);
-    if (published === AWSError) {
-      throw new Error(`httpMessagesPublisher failed to publish message -->  ${message}`);
+    if (action.toLowerCase().endsWith('create')) {
+      const message = new Message({ message: payload as MessageCreateParams });
+      message.id = uuidv4();
+      message.status = Status.NEW;
+      const persistedMessage = await createMessage(message);
+      apiGatewayResponse = successResponse({
+        successCode: 200,
+        body: responseBody({
+          message: 'Message created.',
+          action,
+          object: { ...persistedMessage },
+        }),
+      });
+    } else if (action.toLowerCase().endsWith('process')) {
+      const messages = await processMessages(payload.sendAt);
+      apiGatewayResponse = successResponse({
+        successCode: 200,
+        body: responseBody({
+          message: 'Message(s) set to process.',
+          action,
+          object: { messages },
+        }),
+      });
+    } else {
+      throw new Error('Action not found.');
     }
-    return successResponse({
-      body: responseBody({
-        message: 'Action published.',
-        action,
-        object: { id: (published as SNS.PublishResponse).MessageId, payload },
-      }),
-    });
+    return apiGatewayResponse;
   } catch (error) {
     console.dir(error, { depth: null, showHidden: true });
     return errorResponse({

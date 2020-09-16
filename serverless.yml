@@ -98,7 +98,6 @@ functions:
 
 resources:
   Resources:
-    apiSnsTopic: ${file(./serverless-resources.yml):apiSnsTopic}
     apiCloudFront: ${file(./serverless-resources.yml):apiCloudFront}
     messagesTable: ${file(./serverless-resources.yml):messagesTable}
     userMessagesTable: ${file(./serverless-resources.yml):userMessagesTable}

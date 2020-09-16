@@ -1,3 +1,4 @@
+import { MessageCreateParams } from '@src/models/message'; // eslint-disable-line no-unused-vars
 import { APIGatewayProxyEvent } from 'aws-lambda'; // eslint-disable-line no-unused-vars, import/no-unresolved
 
 interface IResponseArgs {
@@ -38,8 +39,16 @@ export const responseBody = ({
   });
 };
 
-export const validateSnsAction = (event: APIGatewayProxyEvent) => {
-  const result = {
+export const validateAction = (event: APIGatewayProxyEvent) => {
+  const result: {
+    valid: boolean;
+    response: {
+      statusCode: number;
+      body: string;
+    };
+    payload: MessageCreateParams | { sendAt?: string };
+    action: string;
+  } = {
     valid: false,
     response: { statusCode: 400, body: JSON.stringify({ message: 'Bad Request' }) },
     payload: {},
