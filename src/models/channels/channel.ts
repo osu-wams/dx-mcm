@@ -46,6 +46,10 @@ class Channel {
         this.deliveredStatus!,
         this.userMessage.sendAt,
       ]);
+      this.userMessage.channelDeliveredAt = compositeKey([
+        this.userMessage.channelId,
+        this.deliveredAt!,
+      ]);
       await UserMessage.upsert(this.userMessage);
     } else {
       console.info(

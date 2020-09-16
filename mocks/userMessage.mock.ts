@@ -1,7 +1,8 @@
 const dynamoDbUserMessage = {
+  channelDeliveredAt: { S: 'dashboard#2020-01-01T16:20:00.000Z' },
   channelId: { S: 'dashboard' },
-  channelMessageId: { S: 'dashboard:message-123456789' },
-  channelSendAt: { S: 'dashboard:2020-01-01T16:20:00.000Z' },
+  channelMessageId: { S: 'dashboard#message-123456789' },
+  channelSendAt: { S: 'dashboard#2020-01-01T16:20:00.000Z' },
   content: { S: 'content' },
   contentShort: { S: 'contentShort' },
   deliveredAt: { S: '2020-01-01T16:20:00.000Z' },
@@ -13,10 +14,11 @@ const dynamoDbUserMessage = {
   sendAt: { S: '2020-01-01T16:20:00.000Z' },
   smsNumber: { S: '1111111111' },
   status: { S: 'NEW' },
-  statusSendAt: { S: 'NEW:2020-01-01T16:20:00.000Z' },
+  statusSendAt: { S: 'NEW#2020-01-01T16:20:00.000Z' },
   title: { S: 'title' },
 };
 const emptyDynamoDbUserMessage = {
+  channelDeliveredAt: { S: undefined },
   channelId: { S: undefined },
   channelMessageId: { S: undefined },
   channelSendAt: { S: undefined },
@@ -34,9 +36,10 @@ const emptyDynamoDbUserMessage = {
   title: { S: undefined },
 };
 const userMessage = {
+  channelDeliveredAt: 'dashboard#2020-01-01T16:20:00.000Z',
   channelId: 'dashboard',
-  channelMessageId: 'dashboard:message-123456789',
-  channelSendAt: 'dashboard:2020-01-01T16:20:00.000Z',
+  channelMessageId: 'dashboard#message-123456789',
+  channelSendAt: 'dashboard#2020-01-01T16:20:00.000Z',
   content: 'content',
   contentShort: 'contentShort',
   deliveredAt: '2020-01-01T16:20:00.000Z',
@@ -48,10 +51,11 @@ const userMessage = {
   sendAt: '2020-01-01T16:20:00.000Z',
   smsNumber: '1111111111',
   status: 'NEW',
-  statusSendAt: 'NEW:2020-01-01T16:20:00.000Z',
+  statusSendAt: 'NEW#2020-01-01T16:20:00.000Z',
   title: 'title',
 };
 const emptyUserMessage = {
+  channelDeliveredAt: undefined,
   channelId: '',
   channelMessageId: '',
   channelSendAt: '',
