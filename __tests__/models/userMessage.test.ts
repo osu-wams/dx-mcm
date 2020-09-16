@@ -90,7 +90,7 @@ describe('UserMessage', () => {
         count: 2,
         items: [userMessage, userMessage],
         lastKey:
-          'eyJpZCI6eyJTIjoiMTIzNDU2Nzg5In0sInN0YXR1c1NlbmRBdCI6eyJTIjoiTkVXOjIwMjAtMDEtMDFUMTY6MjA6MDAuMDAwWiJ9LCJjaGFubmVsTWVzc2FnZUlkIjp7IlMiOiJkYXNoYm9hcmQ6bWVzc2FnZS0xMjM0NTY3ODkifX0.',
+          'eyJpZCI6eyJTIjoiMTIzNDU2Nzg5In0sInN0YXR1c1NlbmRBdCI6eyJTIjoiTkVXIzIwMjAtMDEtMDFUMTY6MjA6MDAuMDAwWiJ9LCJjaGFubmVsTWVzc2FnZUlkIjp7IlMiOiJkYXNoYm9hcmQjbWVzc2FnZS0xMjM0NTY3ODkifX0.',
       });
     });
     it('throws an error when there is a unhandled exception', async () => {
