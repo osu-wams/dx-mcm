@@ -6,6 +6,7 @@ import type Channel from '@src/models/channels/channel'; // eslint-disable-line 
 import { urlSafeBase64Encode, urlSafeBase64Decode } from './utils';
 
 export interface DynamoDBUserMessageItem extends DynamoDB.PutItemInputAttributeMap {
+  channelDeliveredAt: { S: string } | { NULL: boolean };
   channelId: { S: string };
   channelSendAt: { S: string };
   channelMessageId: { S: string };
@@ -27,6 +28,7 @@ export interface DynamoDBUserMessageItem extends DynamoDB.PutItemInputAttributeM
 interface UserMessageParams {
   dynamoDbUserMessage?: AWS.DynamoDB.AttributeMap;
   userMessage?: {
+    channelDeliveredAt?: string;
     channelId: string;
     content: string;
     contentShort: string;
@@ -87,10 +89,12 @@ export const channelExists = (userMessage: UserMessage): boolean =>
   ChannelId[userMessage.channelId.toUpperCase() as keyof typeof ChannelId] ===
   userMessage.channelId.toLowerCase();
 
-export const compositeKey = (fields: string[], separator: string = ':'): string =>
+export const compositeKey = (fields: string[], separator: string = '#'): string =>
   fields.join(separator);
 
 class UserMessage {
+  channelDeliveredAt?: string;
+
   channelId: string = '';
 
   channelMessageId?: string;
@@ -138,6 +142,7 @@ class UserMessage {
   constructor(p: UserMessageParams) {
     if (p.userMessage) {
       const {
+        channelDeliveredAt,
         channelId,
         content,
         contentShort,
@@ -168,10 +173,18 @@ class UserMessage {
       this.title = title;
       this.statusSendAt = compositeKey([this.status, this.sendAt]);
       this.channelSendAt = compositeKey([this.channelId, this.sendAt]);
+      if (this.deliveredAt) {
+        this.channelDeliveredAt = this.deliveredAt
+          ? compositeKey([this.channelId, this.deliveredAt])
+          : undefined;
+      } else {
+        this.channelDeliveredAt = channelDeliveredAt;
+      }
     }
 
     if (p.dynamoDbUserMessage) {
       const {
+        channelDeliveredAt,
         channelId,
         channelMessageId,
         channelSendAt,
@@ -189,6 +202,7 @@ class UserMessage {
         statusSendAt,
         title,
       } = p.dynamoDbUserMessage;
+      if (channelDeliveredAt) this.channelDeliveredAt = channelDeliveredAt.S;
       if (deliveredAt) this.deliveredAt = deliveredAt.S;
       if (sendAt) this.sendAt = sendAt.S || '';
       if (messageId) this.messageId = messageId.S || '';
@@ -405,29 +419,52 @@ class UserMessage {
    * @returns - the Item for use in Dynamodb
    */
   static asDynamoDbItem = (props: UserMessage): DynamoDBUserMessageItem => {
+    const {
+      channelId,
+      content,
+      contentShort,
+      channelMessageId,
+      channelSendAt,
+      deliveredAt,
+      id,
+      imageUrl,
+      messageId,
+      onid,
+      osuId,
+      sendAt,
+      smsNumber,
+      status,
+      statusSendAt,
+      title,
+    } = props;
+    let { channelDeliveredAt } = props;
+    if (deliveredAt) {
+      channelDeliveredAt = compositeKey([channelId, deliveredAt]);
+    }
     return {
-      channelId: { S: props.channelId },
+      channelId: { S: channelId },
+      title: { S: title },
+      content: { S: content },
+      contentShort: { S: contentShort },
+      messageId: { S: messageId },
+      id: { S: id },
+      sendAt: { S: sendAt },
+      status: { S: status },
       channelMessageId: {
-        S: props.channelMessageId ?? compositeKey([props.channelId, props.messageId]),
+        S: channelMessageId ?? compositeKey([channelId, messageId]),
       },
       channelSendAt: {
-        S: props.channelSendAt ?? compositeKey([props.channelId, props.sendAt]),
+        S: channelSendAt ?? compositeKey([channelId, sendAt]),
       },
-      content: { S: props.content },
-      contentShort: { S: props.contentShort },
-      deliveredAt: props.deliveredAt ? { S: props.deliveredAt } : { NULL: true },
-      messageId: { S: props.messageId },
-      id: { S: props.id },
-      imageUrl: props.imageUrl ? { S: props.imageUrl } : { NULL: true },
-      onid: props.onid ? { S: props.onid } : { NULL: true },
-      osuId: props.osuId ? { S: props.osuId } : { NULL: true },
-      sendAt: { S: props.sendAt },
-      smsNumber: props.smsNumber ? { S: props.smsNumber } : { NULL: true },
-      status: { S: props.status },
       statusSendAt: {
-        S: props.statusSendAt ?? compositeKey([props.status, props.sendAt]),
+        S: statusSendAt ?? compositeKey([status, sendAt]),
       },
-      title: { S: props.title },
+      deliveredAt: deliveredAt ? { S: deliveredAt } : { NULL: true },
+      imageUrl: imageUrl ? { S: imageUrl } : { NULL: true },
+      onid: onid ? { S: onid } : { NULL: true },
+      osuId: osuId ? { S: osuId } : { NULL: true },
+      smsNumber: smsNumber ? { S: smsNumber } : { NULL: true },
+      channelDeliveredAt: channelDeliveredAt ? { S: channelDeliveredAt } : { NULL: true },
     };
   };
 
