@@ -6,7 +6,7 @@ import type Channel from '@src/models/channels/channel'; // eslint-disable-line 
 import { urlSafeBase64Encode, urlSafeBase64Decode } from './utils';
 
 export interface DynamoDBUserMessageItem extends DynamoDB.PutItemInputAttributeMap {
-  channelDeliveredAt: { S: string } | { NULL: boolean };
+  channelDeliveredAt: { S: string };
   channelId: { S: string };
   channelSendAt: { S: string };
   channelMessageId: { S: string };
@@ -176,7 +176,7 @@ class UserMessage {
       if (this.deliveredAt) {
         this.channelDeliveredAt = this.deliveredAt
           ? compositeKey([this.channelId, this.deliveredAt])
-          : undefined;
+          : this.channelId;
       } else {
         this.channelDeliveredAt = channelDeliveredAt;
       }
@@ -363,7 +363,7 @@ class UserMessage {
           '#keyAttribute = :keyValue AND begins_with(#rangeAttribute, :rangeValue)',
         ExpressionAttributeNames: {
           '#keyAttribute': 'id',
-          '#rangeAttribute': 'channelSendAt',
+          '#rangeAttribute': 'channelDeliveredAt',
         },
         ExpressionAttributeValues: {
           ':keyValue': { S: id },
@@ -438,8 +438,8 @@ class UserMessage {
       title,
     } = props;
     let { channelDeliveredAt } = props;
-    if (deliveredAt) {
-      channelDeliveredAt = compositeKey([channelId, deliveredAt]);
+    if (!channelDeliveredAt) {
+      channelDeliveredAt = compositeKey([channelId, deliveredAt ?? '-']);
     }
     return {
       channelId: { S: channelId },
@@ -464,7 +464,7 @@ class UserMessage {
       onid: onid ? { S: onid } : { NULL: true },
       osuId: osuId ? { S: osuId } : { NULL: true },
       smsNumber: smsNumber ? { S: smsNumber } : { NULL: true },
-      channelDeliveredAt: channelDeliveredAt ? { S: channelDeliveredAt } : { NULL: true },
+      channelDeliveredAt: { S: channelDeliveredAt },
     };
   };
 
