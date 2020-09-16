@@ -439,7 +439,7 @@ class UserMessage {
     } = props;
     let { channelDeliveredAt } = props;
     if (!channelDeliveredAt) {
-      channelDeliveredAt = compositeKey([channelId, deliveredAt ?? '-']);
+      channelDeliveredAt = compositeKey([channelId, deliveredAt ?? '']);
     }
     return {
       channelId: { S: channelId },
