@@ -60,7 +60,7 @@ definition:
               End: true
     CreateUserMessage:
       Type: Task
-      Comment: 'Given the Message and { processedQueries: { users: [], channels: [] } found in upstream processing, create a new UserMessage for each and publish to the SQS Queue.'
+      Comment: 'Given the Message and { processedQueries: { s3Data: { bucket:<string>, key:<string> }, channels: [] } found in upstream processing, create a new UserMessage for each and publish to the SQS Queue.'
       Resource: !GetAtt stepCreateUserMessage.Arn
       Next: SucceedState
     SucceedState:
