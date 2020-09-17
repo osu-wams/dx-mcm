@@ -114,8 +114,14 @@ userMessagesTable:
 staticBucket:
   Type: AWS::S3::Bucket
   Properties:
-    BucketName: ${self:service.name}-static
     AccessControl: PublicRead
+    BucketName: ${self:service.name}-static
+
+dataTransferBucket:
+  Type: AWS::S3::Bucket
+  Properties:
+    AccessControl: Private
+    BucketName: ${self:service.name}-data-transfer
 
 apiCloudFront:
   Type: AWS::CloudFront::Distribution
