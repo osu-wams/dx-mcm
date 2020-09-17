@@ -1,20 +1,23 @@
 /* eslint-disable no-unused-vars */
 import { Client, getMembers } from '@osu-wams/grouper';
-import { uniqWith, isEqual } from 'lodash';
-import type { UserData } from '@src/services/messages/types';
-import { MessagePopulationParams } from '@src/models/message';
+import type { MessageWithPopulation, UserData } from '@src/services/messages/types';
+import Message, { MessagePopulationParams } from '@src/models/message';
 import { Subject } from '@osu-wams/grouper/dist/types';
+import { putObject } from '@src/services/s3Utils';
+import { DATA_TRANSFER_BUCKET } from '@src/constants';
+
+const dxGrouperBaseStem = 'app:dx:service:ref';
 
 const affiliationLookup: { [key: string]: string } = {
-  'all-students': 'osu:ref:stu:eligible-to-register',
-  'ecampus-students': 'osu:ref:stu:campus:dsc',
-  'cascades-students': 'osu:ref:stu:campus:b',
-  'corvallis-students': 'osu:ref:stu:campus:c',
-  'portland-students': 'osu:ref:stu:campus:4',
-  'lagrande-students': 'osu:ref:stu:campus:l',
-  'into-students': 'osu:ref:stu:level:06',
-  'undergrad-students': 'osu:ref:stu:level:01',
-  'graduate-students': 'osu:ref:stu:level:02',
+  'all-students': `${dxGrouperBaseStem}:eligible-to-register`,
+  'ecampus-students': `${dxGrouperBaseStem}:campus-ecampus`,
+  'cascades-students': `${dxGrouperBaseStem}:campus-cascades`,
+  'corvallis-students': `${dxGrouperBaseStem}:campus-corvallis`,
+  'portland-students': `${dxGrouperBaseStem}:campus-portland`,
+  'lagrande-students': `${dxGrouperBaseStem}:campus-lagrande`,
+  'into-students': `${dxGrouperBaseStem}:into-students`,
+  'undergraduate-students': `${dxGrouperBaseStem}:undergraduate-students`,
+  'graduate-students': `${dxGrouperBaseStem}:graduate-students`,
   'all-employees': 'osu:ref:emp:employees-all',
   teaching: 'osu:ref:stu:cert:next:cg11',
 };
@@ -42,14 +45,12 @@ const getMembersInAffiliation = async (
         pageNumber += 1;
         const subjects = results.map((r) => r.subjects ?? []).flat();
         members.push(...subjects);
+        console.debug(`getMembersInAffiliation fetch page ${pageNumber} count ${members.length}`);
       } else {
         fetchMembers = false;
       }
     }
-    return uniqWith(
-      members.map(({ id }) => ({ id, onid: id })),
-      isEqual,
-    );
+    return members.map(({ id }) => ({ id, onid: id }));
   } catch (err) {
     console.error(err);
     throw new Error(`getMembersInAffiliation failed: ${err.message}`);
@@ -58,17 +59,37 @@ const getMembersInAffiliation = async (
 
 const getAllMembers = async (client: Client, affiliations: string[]): Promise<UserData[]> => {
   try {
-    const userData: UserData[] = [];
+    let userData: UserData[] = [];
     for (let i = 0; i < affiliations.length; i += 1) {
       // eslint-disable-next-line
       const m = await getMembersInAffiliation(client, affiliations[i]);
-      userData.push(...m);
+      userData = userData.concat(m);
+      console.debug(
+        `getAllMembers affiliation process affiliation: ${affiliations[i]} returned ${m.length} making user data total ${userData.length}`,
+      );
     }
-    return uniqWith(userData, isEqual);
+    return userData;
   } catch (err) {
     console.error(err);
     throw new Error(`getAllMembers failed: ${err.message}`);
   }
+};
+
+const getTargetPopulation = (users: UserData[] | undefined, foundUsers: UserData[]): UserData[] => {
+  const uniqueUserIds = [...new Set(foundUsers.map((f) => f.id))];
+  const targetPopulation: UserData[] = users ?? [];
+  targetPopulation.push(...uniqueUserIds.map((id) => ({ id, onid: id })));
+  return targetPopulation;
+};
+
+const copyMessageToS3 = async (message: Message, users: UserData[]): Promise<string> => {
+  const object: MessageWithPopulation = {
+    ...message,
+    targetPopulation: users,
+  };
+  const key = `message-${object.sendAt}-${object.id}`;
+  await putObject(message, key, DATA_TRANSFER_BUCKET);
+  return key;
 };
 
 /**
@@ -85,9 +106,9 @@ const getAllMembers = async (client: Client, affiliations: string[]): Promise<Us
  * @param _context unused
  * @param callback callback to return from step function
  */
-export const handler = async (event: any, _context: any, callback: any) => {
+export const handler = async (event: Message, _context: any, callback: any) => {
   const { users, affiliations }: MessagePopulationParams = event.populationParams;
-  const foundUsers: UserData[] = users ?? [];
+  const foundUsers: UserData[] = [];
   const affiliationStems = affiliations?.map((a) => affiliationLookup[a]).filter(Boolean);
 
   if (affiliationStems?.length) {
@@ -99,16 +120,23 @@ export const handler = async (event: any, _context: any, callback: any) => {
       });
 
       const foundInGrouper = await getAllMembers(c, affiliationStems ?? []);
-      console.info('usersFoundInGrouper', foundInGrouper);
+      console.debug(`Grouper getAllMembers returned ${foundInGrouper.length}`);
       foundUsers.push(...foundInGrouper);
     } catch (err) {
       console.error('stepGetUserPopulation error when using Grouper API', err);
-      callback(err.message, null);
+      throw err;
     }
   }
 
-  // Return a unique array of user ids and phones by spreading a Set
-  callback(null, { users: foundUsers });
+  const targetPopulation: UserData[] = getTargetPopulation(users, foundUsers);
+  const key = await copyMessageToS3(event, targetPopulation);
+  if (key) {
+    callback(null, { s3Data: { bucket: DATA_TRANSFER_BUCKET, key } });
+  } else {
+    throw new Error(
+      'stepGetUserPopulation failed to upload message with target population data to S3.',
+    );
+  }
 };
 
 export default handler;
