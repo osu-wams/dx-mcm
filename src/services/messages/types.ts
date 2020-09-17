@@ -13,3 +13,7 @@ export interface UserData {
   osuId?: string;
   onid?: string;
 }
+
+export interface MessageWithPopulation extends Message {
+  targetPopulation: UserData[];
+}
