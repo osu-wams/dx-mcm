@@ -48,7 +48,7 @@ sqsMessageExecuteStateMachine:
 stepCreateUserMessage:
   handler: src/services/messages/stateMachine/stepCreateUserMessage.handler
   name: ${self:service.name}-messageCreateUserMessage
-  timeout: 300
+  timeout: 900
   environment:
     DATA_TRANSFER_BUCKET: !Ref dataTransferBucket
     # Left for local debugging

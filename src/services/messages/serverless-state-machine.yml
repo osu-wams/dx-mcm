@@ -1,6 +1,6 @@
 name: ${self:service.name}-messageStateMachine
 id: messageStateMachine
-type: EXPRESS
+type: STANDARD
 loggingConfig:
   level: ALL
   includeExecutionData: true
