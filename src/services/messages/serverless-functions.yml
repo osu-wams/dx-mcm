@@ -48,8 +48,11 @@ sqsMessageExecuteStateMachine:
 stepCreateUserMessage:
   handler: src/services/messages/stateMachine/stepCreateUserMessage.handler
   name: ${self:service.name}-messageCreateUserMessage
-  timeout: 300
+  timeout: 900
   environment:
+    DATA_TRANSFER_BUCKET: !Ref dataTransferBucket
+    # Left for local debugging
+    # DATA_TRANSFER_BUCKET: ${env:DATA_TRANSFER_BUCKET}
     SQS_PROCESS_USER_MESSAGE_QUEUE_NAME: !GetAtt userMessagesSqsQueue.QueueName
     SQS_ERROR_MESSAGE_QUEUE_NAME: !GetAtt messageErrorsSqsQueue.QueueName
 
@@ -64,8 +67,11 @@ stepGetChannels:
 stepGetUserPopulation:
   handler: src/services/messages/stateMachine/stepGetUserPopulation.handler
   name: ${self:service.name}-messageGetUserPopulation
-  timeout: 300
+  timeout: 900
   environment:
+    DATA_TRANSFER_BUCKET: !Ref dataTransferBucket
+    # Left for local debugging
+    # DATA_TRANSFER_BUCKET: ${env:DATA_TRANSFER_BUCKET}
     GROUPER_HOST: ${env:GROUPER_HOST}
     GROUPER_USERNAME: ${env:GROUPER_USERNAME}
     GROUPER_PASSWORD: ${env:GROUPER_PASSWORD}

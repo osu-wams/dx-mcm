@@ -42,6 +42,12 @@ provider:
   iamRoleStatements:
     - Effect: Allow
       Action:
+        - s3:*
+      Resource:
+        - !GetAtt dataTransferBucket.Arn
+        - !Join ['', [!GetAtt dataTransferBucket.Arn, '/*']]
+    - Effect: Allow
+      Action:
         - sns:Publish
       Resource: '*'
     - Effect: Allow
@@ -102,6 +108,7 @@ resources:
     messagesTable: ${file(./serverless-resources.yml):messagesTable}
     userMessagesTable: ${file(./serverless-resources.yml):userMessagesTable}
     staticBucket: ${file(./serverless-resources.yml):staticBucket}
+    dataTransferBucket: ${file(./serverless-resources.yml):dataTransferBucket}
     messagesSqsQueue: ${file(./src/services/messages/serverless-resources.yml):messagesSqsQueue}
     messageErrorsSqsQueue: ${file(./src/services/messages/serverless-resources.yml):messageErrorsSqsQueue}
     messageStateMachineLogGroup: ${file(./src/services/messages/serverless-resources.yml):messageStateMachineLogGroup}

@@ -19,7 +19,6 @@
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "libphonenumber-js": "^1.7.51",
-    "lodash": "^4.17.20",
     "serverless-http": "^2.5.0",
     "throat": "^5.0.0",
     "uuid": "^8.3.0"

@@ -3,7 +3,8 @@ import { SQS_PROCESS_USER_MESSAGE_QUEUE_NAME, SQS_ERROR_MESSAGE_QUEUE_NAME } fro
 import { getQueueUrl, publishToQueue } from '@src/services/sqsUtils';
 import UserMessage from '@src/models/userMessage';
 import Message, { Status } from '@src/models/message';
-import { MessageStateMachineResult, UserData } from '../types'; // eslint-disable-line no-unused-vars
+import { getObject } from '@src/services/s3Utils';
+import { MessageStateMachineResult, MessageWithPopulation, UserData } from '../types'; // eslint-disable-line no-unused-vars
 
 const buildUserMessages = (
   event: MessageStateMachineResult,
@@ -79,8 +80,21 @@ export const handler = async (event: MessageStateMachineResult, _context: any, c
     // message.processedQueries[].channels as a result from stepGetChannels
     const channels: string[] = message.processedQueries.find((v) => v.channels)?.channels ?? [];
     // message.processedQueries[].users as a result from stepGetUserPopulation
-    const users: UserData[] = message.processedQueries.find((v) => v.users)?.users ?? [];
-    const userMessages: UserMessage[] = buildUserMessages(message, channels, users);
+    const { key, bucket } = message.processedQueries.find((v) => v.s3Data)?.s3Data ?? {};
+
+    if (!key && !bucket)
+      throw new Error(
+        `Unable to fetch data processed by stepGetUserPopulation from S3, no bucket and key provided. Be sure a successful return from stepGetUserPopulation includes { s3Data: { bucket:, key: } }`,
+      );
+    const processedMessage: MessageWithPopulation = await getObject<MessageWithPopulation>(
+      key!,
+      bucket!,
+    );
+    const userMessages: UserMessage[] = buildUserMessages(
+      message,
+      channels,
+      processedMessage.targetPopulation,
+    );
     const persistedUserMessages = await persistUserMessages(userMessages);
     const filteredUserMessages = persistedUserMessages.filter(Boolean) as UserMessage[];
     await publishUserMessagesToQueue(filteredUserMessages);
