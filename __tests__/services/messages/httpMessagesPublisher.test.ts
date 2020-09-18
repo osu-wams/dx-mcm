@@ -1,6 +1,7 @@
 import { handler } from '@src/services/messages/httpMessagesPublisher';
 import { message } from '@mocks/message.mock';
-import * as event from '../../../events/lambda.http.messagesPublisher.json';
+import * as createEvent from '../../../events/lambda.http.messagesPublisher.create.json';
+import * as processEvent from '../../../events/lambda.http.messagesPublisher.process.json';
 
 const mockEvent = jest.fn();
 const mockGetQueueUrl = jest.fn();
@@ -23,12 +24,8 @@ jest.mock('@src/database', () => ({
 }));
 
 beforeEach(() => {
-  mockEvent.mockReturnValue(event);
   mockGetQueueUrl.mockResolvedValue({ QueueUrl: 'some-url' });
   mockSendMessage.mockResolvedValue(true);
-  mockQuery
-    .mockResolvedValueOnce({ Items: [], Count: 0 })
-    .mockResolvedValueOnce({ Items: [message], Count: 1 });
   mockPutItem.mockResolvedValue(message);
 });
 
@@ -37,16 +34,13 @@ afterEach(() => {
 });
 
 describe('handler', () => {
-  // TODO: figure out how mock Query should return multiple values in succession
-  it('creates a new message', async () => {
-    mockEvent.mockReturnValue({
-      ...mockEvent(),
-    });
-    const result = await handler(mockEvent());
-    expect(result).toMatchObject({ statusCode: 200 });
-    expect(mockGetQueueUrl).toHaveBeenCalled();
-    expect(mockSendMessage).toHaveBeenCalled();
+  beforeEach(() => {
+    mockEvent.mockReturnValue(createEvent);
+    mockQuery
+      .mockResolvedValueOnce({ Items: [], Count: 0 })
+      .mockResolvedValueOnce({ Items: [message], Count: 1 });
   });
+
   it('fails to validate request', async () => {
     mockEvent.mockReturnValue({
       ...mockEvent(),
@@ -68,5 +62,39 @@ describe('handler', () => {
     } catch (err) {
       expect(err).toBe('boom');
     }
+  });
+});
+
+describe('create action', () => {
+  beforeEach(() => {
+    mockEvent.mockReturnValue(createEvent);
+    mockQuery
+      .mockResolvedValueOnce({ Items: [], Count: 0 })
+      .mockResolvedValueOnce({ Items: [message], Count: 1 });
+  });
+  it('creates a new message', async () => {
+    mockEvent.mockReturnValue({
+      ...mockEvent(),
+    });
+    const result = await handler(mockEvent());
+    expect(result).toMatchObject({ statusCode: 200 });
+    expect(mockGetQueueUrl).toHaveBeenCalled();
+    expect(mockSendMessage).toHaveBeenCalled();
+  });
+});
+
+describe('process action', () => {
+  beforeEach(() => {
+    mockEvent.mockReturnValue(processEvent);
+    mockQuery.mockResolvedValue({ Items: [message], Count: 1 });
+  });
+  it('processes existing messages', async () => {
+    mockEvent.mockReturnValue({
+      ...mockEvent(),
+    });
+    const result = await handler(mockEvent());
+    expect(result).toMatchObject({ statusCode: 200 });
+    expect(mockGetQueueUrl).toHaveBeenCalled();
+    expect(mockSendMessage).toHaveBeenCalled();
   });
 });
