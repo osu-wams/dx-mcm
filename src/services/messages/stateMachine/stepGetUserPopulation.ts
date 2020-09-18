@@ -75,11 +75,10 @@ const getAllMembers = async (client: Client, affiliations: string[]): Promise<Us
   }
 };
 
-const getTargetPopulation = (users: UserData[] | undefined, foundUsers: UserData[]): UserData[] => {
+const getTargetPopulation = (users: UserData[], foundUsers: UserData[]): UserData[] => {
   const uniqueUserIds = [...new Set(foundUsers.map((f) => f.id))];
-  const targetPopulation: UserData[] = users ?? [];
-  targetPopulation.push(...uniqueUserIds.map((id) => ({ id, onid: id })));
-  return targetPopulation;
+  users.push(...uniqueUserIds.map((id) => ({ id, onid: id })));
+  return users;
 };
 
 const copyMessageToS3 = async (message: Message, users: UserData[]): Promise<string> => {
@@ -88,7 +87,7 @@ const copyMessageToS3 = async (message: Message, users: UserData[]): Promise<str
     targetPopulation: users,
   };
   const key = `message-${object.sendAt}-${object.id}`;
-  await putObject(message, key, DATA_TRANSFER_BUCKET);
+  await putObject(object, key, DATA_TRANSFER_BUCKET);
   return key;
 };
 
@@ -128,7 +127,8 @@ export const handler = async (event: Message, _context: any, callback: any) => {
     }
   }
 
-  const targetPopulation: UserData[] = getTargetPopulation(users, foundUsers);
+  // spread users into a new array prevents mutation of original object in getTargetPopulation
+  const targetPopulation: UserData[] = getTargetPopulation([...(users ?? [])], foundUsers);
   const key = await copyMessageToS3(event, targetPopulation);
   if (key) {
     callback(null, { s3Data: { bucket: DATA_TRANSFER_BUCKET, key } });
