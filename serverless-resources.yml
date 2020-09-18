@@ -122,6 +122,13 @@ dataTransferBucket:
   Properties:
     AccessControl: Private
     BucketName: ${self:service.name}-data-transfer
+    PublicAccessBlockConfiguration:
+      BlockPublicAcls: TRUE
+      BlockPublicPolicy: TRUE
+      IgnorePublicAcls: TRUE
+      RestrictPublicBuckets: TRUE
+    VersioningConfiguration:
+      Status: Enabled
 
 apiCloudFront:
   Type: AWS::CloudFront::Distribution

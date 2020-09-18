@@ -42,6 +42,12 @@ provider:
   iamRoleStatements:
     - Effect: Allow
       Action:
+        - s3:*
+      Resource:
+        - !GetAtt dataTransferBucket.Arn
+        - !Join ['', [!GetAtt dataTransferBucket.Arn, '/*']]
+    - Effect: Allow
+      Action:
         - sns:Publish
       Resource: '*'
     - Effect: Allow
