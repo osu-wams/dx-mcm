@@ -51,10 +51,14 @@ stepCreateUserMessage:
   timeout: 900
   environment:
     DATA_TRANSFER_BUCKET: !Ref dataTransferBucket
+    SQS_PROCESS_USER_MESSAGE_QUEUE_NAME: !GetAtt userMessagesSqsQueue.QueueName
+    SQS_ERROR_USER_MESSAGE_QUEUE_NAME: !GetAtt userMessageErrorsSqsQueue.QueueName
+    SQS_ERROR_MESSAGE_QUEUE_NAME: !GetAtt messageErrorsSqsQueue.QueueName
     # Left for local debugging
     # DATA_TRANSFER_BUCKET: ${env:DATA_TRANSFER_BUCKET}
-    SQS_PROCESS_USER_MESSAGE_QUEUE_NAME: !GetAtt userMessagesSqsQueue.QueueName
-    SQS_ERROR_MESSAGE_QUEUE_NAME: !GetAtt messageErrorsSqsQueue.QueueName
+    # SQS_PROCESS_USER_MESSAGE_QUEUE_NAME: ${env:SQS_PROCESS_USER_MESSAGE_QUEUE_NAME}
+    # SQS_ERROR_USER_MESSAGE_QUEUE_NAME: ${env:SQS_ERROR_USER_MESSAGE_QUEUE_NAME}
+    # SQS_ERROR_MESSAGE_QUEUE_NAME: ${env:SQS_ERROR_MESSAGE_QUEUE_NAME}
 
 stepFailState:
   handler: src/services/messages/stateMachine/stepFailState.handler
@@ -70,11 +74,11 @@ stepGetUserPopulation:
   timeout: 900
   environment:
     DATA_TRANSFER_BUCKET: !Ref dataTransferBucket
-    # Left for local debugging
-    # DATA_TRANSFER_BUCKET: ${env:DATA_TRANSFER_BUCKET}
     GROUPER_HOST: ${env:GROUPER_HOST}
     GROUPER_USERNAME: ${env:GROUPER_USERNAME}
     GROUPER_PASSWORD: ${env:GROUPER_PASSWORD}
+    # Left for local debugging
+    # DATA_TRANSFER_BUCKET: ${env:DATA_TRANSFER_BUCKET}
 
 cronInvokeMessageProcess:
   handler: src/services/messages/cronInvokeMessageProcess.handler
