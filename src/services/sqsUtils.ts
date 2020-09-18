@@ -20,7 +20,9 @@ export const validate = (event: SQSEvent): [boolean, SQSRecord[] | undefined] =>
 };
 
 export const getQueueUrl = async (queueName: string): Promise<string> => {
-  const response = await messageQueueGetQueueUrl(queueName);
+  const response = await messageQueueGetQueueUrl(queueName).catch((err) => {
+    throw new Error(`Failed fetching queueName: ${queueName}, caught: ${err}`);
+  });
   if (response === AWSError) {
     throw new Error(`Handled AWSError when fetching queueUrl: ${response}`);
   }
