@@ -22,7 +22,6 @@ definition:
               Type: Task
               Comment: 'Branch returns only its data (users:[]) to parent parallel state for inclusion'
               Resource: !GetAtt stepGetUserPopulation.Arn
-              TimeoutSeconds: 630
               HeartbeatSeconds: 30
               ResultPath: '$'
               Retry:
@@ -46,7 +45,6 @@ definition:
               Next: FailState
               Comment: 'Handle a failed execution'
               Resource: !GetAtt stepFailState.Arn
-              TimeoutSeconds: 630
               HeartbeatSeconds: 30
             FailState:
               Type: Fail

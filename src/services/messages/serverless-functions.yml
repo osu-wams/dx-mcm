@@ -67,7 +67,7 @@ stepGetChannels:
 stepGetUserPopulation:
   handler: src/services/messages/stateMachine/stepGetUserPopulation.handler
   name: ${self:service.name}-messageGetUserPopulation
-  timeout: 600
+  timeout: 900
   environment:
     DATA_TRANSFER_BUCKET: !Ref dataTransferBucket
     # Left for local debugging
