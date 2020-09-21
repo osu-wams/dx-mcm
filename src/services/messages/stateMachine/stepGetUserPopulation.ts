@@ -8,6 +8,10 @@ import { DATA_TRANSFER_BUCKET } from '@src/constants';
 
 const dxGrouperBaseStem = 'app:dx:service:ref';
 
+// Grouper subjects with sourceId that doesn't represent a user, could be another
+// source group or similar.
+const ignoreSourceIds = ['g:gsa'];
+
 const affiliationLookup: { [key: string]: string } = {
   'all-students': `${dxGrouperBaseStem}:eligible-to-register`,
   'ecampus-students': `${dxGrouperBaseStem}:campus-ecampus`,
@@ -44,7 +48,7 @@ const getMembersInAffiliation = async (
       if (pageSubjectCount > 0) {
         pageNumber += 1;
         const subjects = results.map((r) => r.subjects ?? []).flat();
-        members.push(...subjects);
+        members.push(...subjects.filter((s) => !ignoreSourceIds.includes(s.sourceId)));
         console.debug(`getMembersInAffiliation fetch page ${pageNumber} count ${members.length}`);
       } else {
         fetchMembers = false;
@@ -86,7 +90,7 @@ const copyMessageToS3 = async (message: Message, users: UserData[]): Promise<str
     ...message,
     targetPopulation: users,
   };
-  const key = `message-${object.sendAt}-${object.id}`;
+  const key = `message-${object.sendAt}-${object.id}.json`;
   await putObject(object, key, DATA_TRANSFER_BUCKET);
   return key;
 };
