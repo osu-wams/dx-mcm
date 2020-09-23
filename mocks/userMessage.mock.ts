@@ -2,11 +2,10 @@ const dynamoDbUserMessage = {
   channelDeliveredAt: { S: 'dashboard#2020-01-01T16:20:00.000Z' },
   channelId: { S: 'dashboard' },
   channelMessageId: { S: 'dashboard#message-123456789' },
-  channelSendAt: { S: 'dashboard#2020-01-01T16:20:00.000Z' },
   content: { S: 'content' },
   contentShort: { S: 'contentShort' },
   deliveredAt: { S: '2020-01-01T16:20:00.000Z' },
-  id: { S: '123456789' },
+  id: { S: 'bobross' },
   imageUrl: { S: 'https://blah.png' },
   messageId: { S: 'message-123456789' },
   onid: { S: 'bobross' },
@@ -14,16 +13,23 @@ const dynamoDbUserMessage = {
   sendAt: { S: '2020-01-01T16:20:00.000Z' },
   smsNumber: { S: '1111111111' },
   status: { S: 'NEW' },
-  statusSendAt: { S: 'NEW#2020-01-01T16:20:00.000Z' },
   title: { S: 'title' },
+  updatedAt: { S: '2020-01-01T16:20:00.000Z' },
+};
+const dynamoDbUserMessagePending = {
+  ...dynamoDbUserMessage,
+  status: { S: 'ERROR' },
+  statusMessage: { S: 'Error message' },
+  messageChannelUser: { S: 'message-123456789#dashboard#bobross' },
+  updatedAtMessageId: { S: '2020-01-01T16:20:00.000Z#message-123456789' },
 };
 const emptyDynamoDbUserMessage = {
   channelDeliveredAt: { S: undefined },
   channelId: { S: undefined },
   channelMessageId: { S: undefined },
-  channelSendAt: { S: undefined },
   content: { S: undefined },
   contentShort: { S: undefined },
+  deliveredAt: { S: undefined },
   id: { S: undefined },
   imageUrl: { S: undefined },
   messageId: { S: undefined },
@@ -32,18 +38,24 @@ const emptyDynamoDbUserMessage = {
   sendAt: { S: undefined },
   smsNumber: { S: undefined },
   status: { S: undefined },
-  statusSendAt: { S: undefined },
   title: { S: undefined },
+  updatedAt: { S: undefined },
 };
+const emptyDynamoDbUserMessagePending = {
+  ...emptyDynamoDbUserMessage,
+  statusMessage: { S: undefined },
+  messageChannelUser: { S: undefined },
+  updatedAtMessageId: { S: undefined },
+};
+
 const userMessage = {
   channelDeliveredAt: 'dashboard#2020-01-01T16:20:00.000Z',
   channelId: 'dashboard',
   channelMessageId: 'dashboard#message-123456789',
-  channelSendAt: 'dashboard#2020-01-01T16:20:00.000Z',
   content: 'content',
   contentShort: 'contentShort',
   deliveredAt: '2020-01-01T16:20:00.000Z',
-  id: '123456789',
+  id: 'bobross',
   imageUrl: 'https://blah.png',
   messageId: 'message-123456789',
   onid: 'bobross',
@@ -51,27 +63,53 @@ const userMessage = {
   sendAt: '2020-01-01T16:20:00.000Z',
   smsNumber: '1111111111',
   status: 'NEW',
-  statusSendAt: 'NEW#2020-01-01T16:20:00.000Z',
   title: 'title',
+  updatedAt: '2020-01-01T16:20:00.000Z',
 };
+
+const userMessagePending = {
+  ...userMessage,
+  status: 'ERROR',
+  statusMessage: 'Error message',
+  messageChannelUser: 'message-123456789#dashboard#bobross',
+  updatedAtMessageId: '2020-01-01T16:20:00.000Z#message-123456789',
+};
+
 const emptyUserMessage = {
-  channelDeliveredAt: undefined,
+  channelDeliveredAt: '',
   channelId: '',
   channelMessageId: '',
-  channelSendAt: '',
   content: '',
   contentShort: '',
   deliveredAt: '',
   id: '',
   imageUrl: '',
+  messageChannelUser: '',
   messageId: '',
   onid: '',
   osuId: '',
   sendAt: '',
   smsNumber: '',
   status: '',
-  statusSendAt: '',
   title: '',
+  updatedAt: '',
+  updatedAtMessageId: '',
 };
 
-export { dynamoDbUserMessage, emptyDynamoDbUserMessage, emptyUserMessage, userMessage };
+const emptyUserMessagePending = {
+  ...emptyUserMessage,
+  statusMessage: '',
+  messageChannelUser: '',
+  updatedAtMessageId: '',
+};
+
+export {
+  dynamoDbUserMessage,
+  dynamoDbUserMessagePending,
+  emptyDynamoDbUserMessage,
+  emptyDynamoDbUserMessagePending,
+  emptyUserMessage,
+  emptyUserMessagePending,
+  userMessage,
+  userMessagePending,
+};
