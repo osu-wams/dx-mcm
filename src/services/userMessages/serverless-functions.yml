@@ -22,40 +22,6 @@ httpUserMessagesList:
               channelId: true
               userId: true
               lastKey: true
-    - http:
-        private: true # forces header x-api-key to be present with a valid key from provider.apiKeys
-        method: get
-        path: /api/v1/userMessages/user/{userId}
-        request:
-          parameters:
-            paths:
-              userId: true
-    - http:
-        private: true # forces header x-api-key to be present with a valid key from provider.apiKeys
-        method: get
-        path: /api/v1/userMessages/user/{userId}/{lastKey}
-        request:
-          parameters:
-            paths:
-              userId: true
-              lastKey: true
-    - http:
-        private: true # forces header x-api-key to be present with a valid key from provider.apiKeys
-        method: get
-        path: /api/v1/userMessages/status/{status}
-        request:
-          parameters:
-            paths:
-              status: true
-    - http:
-        private: true # forces header x-api-key to be present with a valid key from provider.apiKeys
-        method: get
-        path: /api/v1/userMessages/status/{status}/{lastKey}
-        request:
-          parameters:
-            paths:
-              status: true
-              lastKey: true
 
 httpUserMessageRead:
   handler: src/services/userMessages/httpUserMessageRead.handler
