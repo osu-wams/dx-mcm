@@ -1,7 +1,7 @@
 import UserMessage, { Status, channelExists } from '@src/models/userMessage';
 import {
   dynamoDbUserMessage,
-  userMessage,
+  userMessage as userMessageMock,
   emptyUserMessage,
   emptyDynamoDbUserMessage,
 } from '@mocks/userMessage.mock';
@@ -9,6 +9,7 @@ import {
 const mockQuery = jest.fn();
 const mockPutItem = jest.fn();
 const mockUpdateItem = jest.fn();
+const mockDeleteItem = jest.fn();
 jest.mock('@src/database', () => ({
   // @ts-ignore
   ...jest.requireActual('@src/database'),
@@ -16,13 +17,18 @@ jest.mock('@src/database', () => ({
   query: () => mockQuery(),
   putItem: () => mockPutItem(),
   updateItem: () => mockUpdateItem(),
+  deleteItem: () => mockDeleteItem(),
 }));
+
+let userMessage: UserMessage;
+beforeEach(() => {
+  userMessage = new UserMessage({ userMessage: userMessageMock });
+});
 
 describe('UserMessage', () => {
   describe('constructor', () => {
     it('builds a dynamodb item from a userMessage', () => {
-      const model = new UserMessage({ userMessage });
-      expect(UserMessage.asDynamoDbItem(model)).toStrictEqual(dynamoDbUserMessage);
+      expect(userMessage.asDynamoDbItem()).toStrictEqual(dynamoDbUserMessage);
     });
     it('builds a userMessage from a dynamodb item', () => {
       const model = new UserMessage({ dynamoDbUserMessage });
@@ -41,14 +47,18 @@ describe('UserMessage', () => {
   describe('find', () => {
     it('does not find a matching record', async () => {
       mockQuery.mockResolvedValue({ Items: undefined });
-      expect(await UserMessage.find('123456789', 'bogus-id', '123')).toEqual({
+      expect(
+        await UserMessage.find({ id: '123456789', messageId: 'bogus-id', channelId: '123' }),
+      ).toEqual({
         count: 0,
         items: [],
       });
     });
     it('finds a matching record', async () => {
       mockQuery.mockResolvedValue({ Items: [dynamoDbUserMessage], Count: 1 });
-      expect(await UserMessage.find('123456789', 'message-123456789', '123')).toEqual({
+      expect(
+        await UserMessage.find({ id: '123456789', messageId: 'bogus-id', channelId: '123' }),
+      ).toEqual({
         count: 1,
         items: [userMessage],
         lastKey: undefined,
@@ -57,7 +67,7 @@ describe('UserMessage', () => {
     it('throws an error when there is a unhandled exception', async () => {
       mockQuery.mockRejectedValue('boom');
       try {
-        await UserMessage.find('123456789', 'message-123456789', '123');
+        await UserMessage.find({ id: '123456789', messageId: 'bogus-id', channelId: '123' });
       } catch (err) {
         expect(err).toBe('boom');
       }
@@ -82,7 +92,6 @@ describe('UserMessage', () => {
         Count: 2,
         LastEvaluatedKey: {
           id: dynamoDbUserMessage.id,
-          statusSendAt: dynamoDbUserMessage.statusSendAt,
           channelMessageId: dynamoDbUserMessage.channelMessageId,
         },
       });
@@ -90,7 +99,7 @@ describe('UserMessage', () => {
         count: 2,
         items: [userMessage, userMessage],
         lastKey:
-          'eyJpZCI6eyJTIjoiMTIzNDU2Nzg5In0sInN0YXR1c1NlbmRBdCI6eyJTIjoiTkVXIzIwMjAtMDEtMDFUMTY6MjA6MDAuMDAwWiJ9LCJjaGFubmVsTWVzc2FnZUlkIjp7IlMiOiJkYXNoYm9hcmQjbWVzc2FnZS0xMjM0NTY3ODkifX0.',
+          'eyJpZCI6eyJTIjoiYm9icm9zcyJ9LCJjaGFubmVsTWVzc2FnZUlkIjp7IlMiOiJkYXNoYm9hcmQjbWVzc2FnZS0xMjM0NTY3ODkifX0.',
       });
     });
     it('throws an error when there is a unhandled exception', async () => {
@@ -113,37 +122,6 @@ describe('UserMessage', () => {
       mockPutItem.mockRejectedValue('boom');
       try {
         await UserMessage.upsert(userMessage);
-      } catch (err) {
-        expect(err).toBe('boom');
-      }
-    });
-  });
-
-  describe('byStatus', () => {
-    it('does not find any matching records', async () => {
-      mockQuery.mockResolvedValue({ Items: undefined });
-      expect(await UserMessage.byStatus('123456789', Status.NEW)).toStrictEqual({
-        count: 0,
-        items: [],
-      });
-    });
-    it('finds all matching records', async () => {
-      mockQuery.mockResolvedValue({
-        Items: [
-          { ...dynamoDbUserMessage, channelMessageId: { S: userMessage.channelMessageId } },
-          { ...dynamoDbUserMessage, channelMessageId: { S: userMessage.channelMessageId } },
-        ],
-        Count: 2,
-      });
-      expect(await UserMessage.byStatus('123456789', Status.NEW)).toEqual({
-        count: 2,
-        items: [userMessage, userMessage],
-      });
-    });
-    it('throws an error when there is a unhandled exception', async () => {
-      mockQuery.mockRejectedValue('boom');
-      try {
-        await UserMessage.byStatus('123456789', Status.NEW);
       } catch (err) {
         expect(err).toBe('boom');
       }
@@ -175,7 +153,46 @@ describe('UserMessage', () => {
       expect(channelExists(userMessage)).toBeTruthy();
     });
     it('should not find a nonexistent channel', async () => {
-      expect(channelExists({ ...userMessage, channelId: 'doesnotexist' })).toBeFalsy();
+      userMessage.channelId = 'doesnotexist';
+      expect(channelExists(userMessage)).toBeFalsy();
+    });
+  });
+
+  describe('delete', () => {
+    it('deletes a new record', async () => {
+      mockQuery.mockResolvedValue({ Items: [dynamoDbUserMessage], Count: 1 });
+      mockDeleteItem.mockResolvedValue(userMessage);
+      expect(
+        await UserMessage.delete({
+          id: userMessage.id,
+          messageId: userMessage.messageId,
+          channelId: userMessage.channelId,
+        }),
+      ).toBeTruthy();
+    });
+    it('returns true when the item is not found', async () => {
+      mockQuery.mockResolvedValue({ Items: [], Count: 0 });
+      mockDeleteItem.mockResolvedValue(userMessage);
+      expect(
+        await UserMessage.delete({
+          id: userMessage.id,
+          messageId: userMessage.messageId,
+          channelId: userMessage.channelId,
+        }),
+      ).toBeTruthy();
+    });
+    it('throws an error when there is a unhandled exception', async () => {
+      mockQuery.mockResolvedValue({ Items: [dynamoDbUserMessage], Count: 1 });
+      mockDeleteItem.mockRejectedValue('boom');
+      try {
+        await UserMessage.delete({
+          id: userMessage.id,
+          messageId: userMessage.messageId,
+          channelId: userMessage.channelId,
+        });
+      } catch (err) {
+        expect(err).toBe('boom');
+      }
     });
   });
 });

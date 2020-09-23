@@ -1,0 +1,25 @@
+{
+  "populationParams": {
+    "users": [{ "id": "bobross" }],
+    "affiliations": ["x-students", "y-students"]
+  },
+  "channelIds": ["123"],
+  "content": "content",
+  "contentShort": "contentShort",
+  "hash": "eyJzZW5kQXQiOiIyMDIwLTAxLTAxIiwic3RhdHVzIjoiTkVXIiwicG9wdWxhdGlvblBhcmFtcyI6eyJhZmZpbGlhdGlvbiI6InRlc3QiLCJvc3VJZHMiOlsiOTg3NjU0MzIxIl19LCJjaGFubmVsSWRzIjpbIjEyMyJdLCJjb250ZW50IjoiY29udGVudCIsImNvbnRlbnRTaG9ydCI6ImNvbnRlbnRTaG9ydCJ9",
+  "id": "123456789",
+  "imageUrl": "https://blah.png",
+  "sendAt": "2020-01-01T16:20:00.000Z",
+  "status": "NEW",
+  "statusMessage": "",
+  "title": "title",
+  "processedQueries": [
+    {
+      "s3Data": {
+        "key": "test.error.json",
+        "bucket": "osu-dx-mcm-development-data-transfer"
+      }
+    },
+    { "channels": ["dashboard"] }
+  ]
+}

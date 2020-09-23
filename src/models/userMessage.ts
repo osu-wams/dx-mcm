@@ -1,14 +1,14 @@
 import { DYNAMODB_TABLE_PREFIX } from '@src/constants';
 import { DynamoDB } from 'aws-sdk'; // eslint-disable-line no-unused-vars
-import { putItem, updateItem, query } from '@src/database';
+import { putItem, updateItem, query, deleteItem } from '@src/database';
 import { DashboardChannel, SmsChannel } from '@src/models/channels';
 import type Channel from '@src/models/channels/channel'; // eslint-disable-line no-unused-vars
 import { urlSafeBase64Encode, urlSafeBase64Decode } from './utils';
 
+export type Constructor<T> = new (...args: any[]) => T;
+
 export interface DynamoDBUserMessageItem extends DynamoDB.PutItemInputAttributeMap {
-  channelDeliveredAt: { S: string };
   channelId: { S: string };
-  channelSendAt: { S: string };
   channelMessageId: { S: string };
   content: { S: string };
   contentShort: { S: string };
@@ -21,32 +21,45 @@ export interface DynamoDBUserMessageItem extends DynamoDB.PutItemInputAttributeM
   sendAt: { S: string };
   smsNumber: { S: string } | { NULL: boolean };
   status: { S: string };
-  statusSendAt: { S: string };
   title: { S: string };
+  updatedAt: { S: string };
 }
 
-interface UserMessageParams {
+export interface DynamoDBUserMessageDeliveredItem extends DynamoDBUserMessageItem {
+  channelDeliveredAt: { S: string };
+}
+
+export interface DynamoDBUserMessagePendingItem extends DynamoDBUserMessageItem {
+  messageChannelUser: { S: string };
+  updatedAtMessageId: { S: string };
+}
+export interface UserMessageParams {
   dynamoDbUserMessage?: AWS.DynamoDB.AttributeMap;
   userMessage?: {
     channelDeliveredAt?: string;
     channelId: string;
+    channelMessageId?: string;
     content: string;
     contentShort: string;
     deliveredAt?: string;
     id: string;
     imageUrl?: string;
+    messageChannelUser?: string;
     messageId: string;
     onid?: string;
     osuId?: string;
     sendAt: string;
     smsNumber?: string;
     status: string;
+    statusMessage?: string;
     title: string;
+    updatedAt?: string;
+    updatedAtMessageId?: string;
   };
 }
 
-export interface UserMessageResults {
-  items: UserMessage[];
+export interface UserMessageResults<T> {
+  items: T[];
   count: number;
   lastKey?: string;
 }
@@ -89,17 +102,17 @@ export const channelExists = (userMessage: UserMessage): boolean =>
   ChannelId[userMessage.channelId.toUpperCase() as keyof typeof ChannelId] ===
   userMessage.channelId.toLowerCase();
 
-export const compositeKey = (fields: string[], separator: string = '#'): string =>
-  fields.join(separator);
+export const compositeKey = (fields: string[], separator: string = '#'): string => {
+  if (fields.every((f) => !f)) return '';
+  return fields.join(separator);
+};
 
 class UserMessage {
-  channelDeliveredAt?: string;
+  channelDeliveredAt?: string = '';
 
   channelId: string = '';
 
-  channelMessageId?: string;
-
-  channelSendAt?: string;
+  channelMessageId?: string = '';
 
   content: string = '';
 
@@ -110,6 +123,8 @@ class UserMessage {
   id: string = '';
 
   imageUrl?: string = '';
+
+  messageChannelUser?: string = '';
 
   messageId: string = '';
 
@@ -123,27 +138,24 @@ class UserMessage {
 
   status: string = Status.NEW;
 
-  statusSendAt?: string;
-
   title: string = '';
+
+  updatedAt: string = '';
+
+  updatedAtMessageId?: string = '';
 
   static TABLE_NAME: string = `${DYNAMODB_TABLE_PREFIX}-UserMessages`;
 
-  static STATUS_INDEX_NAME: string = `${DYNAMODB_TABLE_PREFIX}-UserMessageStatuses`;
+  static BY_CHANNEL_INDEX: string = `${DYNAMODB_TABLE_PREFIX}-UserMessageByChannel`;
 
-  static ALL_BY_STATUS_INDEX_NAME: string = `${DYNAMODB_TABLE_PREFIX}-UserMessageAllByStatus`;
-
-  static CHANNEL_INDEX_NAME: string = `${DYNAMODB_TABLE_PREFIX}-UserMessageByChannel`;
-
-  static SEND_AT_INDEX_NAME: string = `${DYNAMODB_TABLE_PREFIX}-UserMessageBySendAt`;
-
-  static COMPOSITE_KEY_NAME: string = 'channelMessageId';
+  static BY_SEND_AT_INDEX: string = `${DYNAMODB_TABLE_PREFIX}-UserMessageBySendAt`;
 
   constructor(p: UserMessageParams) {
     if (p.userMessage) {
       const {
         channelDeliveredAt,
         channelId,
+        channelMessageId,
         content,
         contentShort,
         deliveredAt,
@@ -156,7 +168,9 @@ class UserMessage {
         smsNumber,
         status,
         title,
+        updatedAt,
       } = p.userMessage;
+      this.channelDeliveredAt = channelDeliveredAt;
       this.sendAt = sendAt;
       this.deliveredAt = deliveredAt;
       this.id = id;
@@ -168,18 +182,10 @@ class UserMessage {
       this.channelId = channelId;
       this.content = content;
       this.contentShort = contentShort;
-      this.channelMessageId = compositeKey([this.channelId, this.messageId]);
       this.smsNumber = smsNumber;
       this.title = title;
-      this.statusSendAt = compositeKey([this.status, this.sendAt]);
-      this.channelSendAt = compositeKey([this.channelId, this.sendAt]);
-      if (this.deliveredAt) {
-        this.channelDeliveredAt = this.deliveredAt
-          ? compositeKey([this.channelId, this.deliveredAt])
-          : this.channelId;
-      } else {
-        this.channelDeliveredAt = channelDeliveredAt;
-      }
+      this.updatedAt = updatedAt ?? new Date().toISOString();
+      this.channelMessageId = channelMessageId ?? compositeKey([this.channelId, this.messageId]);
     }
 
     if (p.dynamoDbUserMessage) {
@@ -187,7 +193,6 @@ class UserMessage {
         channelDeliveredAt,
         channelId,
         channelMessageId,
-        channelSendAt,
         content,
         contentShort,
         deliveredAt,
@@ -199,11 +204,11 @@ class UserMessage {
         sendAt,
         smsNumber,
         status,
-        statusSendAt,
         title,
+        updatedAt,
       } = p.dynamoDbUserMessage;
-      if (channelDeliveredAt) this.channelDeliveredAt = channelDeliveredAt.S;
-      if (deliveredAt) this.deliveredAt = deliveredAt.S;
+      if (channelDeliveredAt) this.channelDeliveredAt = channelDeliveredAt.S || '';
+      if (deliveredAt) this.deliveredAt = deliveredAt.S || '';
       if (sendAt) this.sendAt = sendAt.S || '';
       if (messageId) this.messageId = messageId.S || '';
       if (status) this.status = status.S || '';
@@ -214,138 +219,95 @@ class UserMessage {
       if (channelId) this.channelId = channelId.S || '';
       if (content) this.content = content.S || '';
       if (contentShort) this.contentShort = contentShort.S || '';
-      if (channelMessageId) this.channelMessageId = channelMessageId.S || '';
-      if (channelSendAt) this.channelSendAt = channelSendAt.S || '';
       if (smsNumber) this.smsNumber = smsNumber.S || '';
-      if (statusSendAt) this.statusSendAt = statusSendAt.S || '';
       if (title) this.title = title.S || '';
+      if (updatedAt) this.updatedAt = updatedAt.S || '';
+      if (channelMessageId)
+        this.channelMessageId =
+          channelMessageId.S || compositeKey([this.channelId, this.messageId]);
     }
   }
 
-  static upsert = async (props: UserMessage): Promise<UserMessageResults> => {
+  static upsert = async (props: UserMessage): Promise<UserMessageResults<UserMessage>> => {
     // ! DynamoDb only supports 'ALL_OLD' or 'NONE' for return values from the
     // ! putItem call, which means the only way to get values from ddb would be to
     // ! getItem with the key after having put the item successfully. The DX use
     // ! doesn't really seem like it needs to fetch the record after having created it
     // ! the first time.
+    const userMessage = new UserMessage({ userMessage: props });
+    const TableName = UserMessage.TABLE_NAME;
     try {
+      const Item = userMessage.asDynamoDbItem();
       const params: AWS.DynamoDB.PutItemInput = {
-        TableName: UserMessage.TABLE_NAME,
-        Item: UserMessage.asDynamoDbItem(props),
+        TableName,
+        Item,
         ReturnValues: 'NONE',
       };
-
       await putItem(params);
-      console.log('UserMessage.upsert succeeded:', props);
-      return UserMessage.find(props.id, props.messageId, props.channelId);
+      console.log(`UserMessage.upsert to ${TableName} succeeded:`, userMessage);
+
+      const { id, messageId, channelId, status } = userMessage;
+      return UserMessage.find({ id, messageId, channelId, status });
     } catch (err) {
-      console.error(`UserMessage.upsert failed:`, props, err);
+      console.error(`UserMessage.upsert to ${TableName} failed:`, props, err);
       throw err;
     }
   };
 
-  static findAll = async (id: string, lastKey?: string): Promise<UserMessageResults> => {
-    try {
-      const params: AWS.DynamoDB.QueryInput = {
-        TableName: UserMessage.TABLE_NAME,
-        IndexName: UserMessage.SEND_AT_INDEX_NAME,
-        KeyConditionExpression: '#keyAttribute = :keyValue',
-        ExpressionAttributeNames: {
-          '#keyAttribute': 'id',
-        },
-        ExpressionAttributeValues: {
-          ':keyValue': { S: id },
-        },
-        ScanIndexForward: false,
-        Select: 'ALL_ATTRIBUTES',
-      };
-      if (lastKey) params.ExclusiveStartKey = urlSafeBase64Decode(lastKey) as AWS.DynamoDB.Key;
-
-      return UserMessage.asUserMessageResults(params);
-    } catch (err) {
-      console.error(`UserMessage.findAll(${id}) failed:`, err);
-      throw err;
-    }
-  };
-
-  static find = async (
-    id: string,
-    messageId: string,
-    channelId: string,
-  ): Promise<UserMessageResults> => {
+  static find = async (args: {
+    id: string;
+    messageId: string;
+    channelId: string;
+    status?: string;
+  }): Promise<UserMessageResults<UserMessage>> => {
     try {
       const params: AWS.DynamoDB.QueryInput = {
         TableName: UserMessage.TABLE_NAME,
         KeyConditionExpression: '#keyAttribute = :keyValue AND #rangeAttribute = :rangeValue',
         ExpressionAttributeNames: {
           '#keyAttribute': 'id',
-          '#rangeAttribute': UserMessage.COMPOSITE_KEY_NAME,
+          '#rangeAttribute': 'channelMessageId',
         },
         ExpressionAttributeValues: {
-          ':keyValue': { S: id },
-          ':rangeValue': { S: compositeKey([channelId, messageId]) },
+          ':keyValue': { S: args.id },
+          ':rangeValue': { S: compositeKey([args.channelId, args.messageId]) },
         },
         Select: 'ALL_ATTRIBUTES',
       };
 
-      return UserMessage.asUserMessageResults(params);
+      return UserMessage.asUserMessageResults(params, UserMessage);
     } catch (err) {
-      console.error(`UserMessage.find(${id}, ${messageId}, ${channelId}) failed:`, err);
+      console.error(
+        `UserMessage.find(${args.id}, ${args.messageId}, ${args.channelId}) failed:`,
+        err,
+      );
       throw err;
     }
   };
 
-  static byStatus = async (
+  static findAll = async (
     id: string,
-    status: Status,
     lastKey?: string,
-  ): Promise<UserMessageResults> => {
+  ): Promise<UserMessageResults<UserMessage>> => {
     try {
       const params: AWS.DynamoDB.QueryInput = {
         TableName: UserMessage.TABLE_NAME,
-        IndexName: UserMessage.STATUS_INDEX_NAME,
-        KeyConditionExpression:
-          '#keyAttribute = :keyValue AND begins_with(#rangeAttribute, :rangeValue)',
-        ExpressionAttributeNames: {
-          '#keyAttribute': 'id',
-          '#rangeAttribute': 'statusSendAt',
-        },
-        ExpressionAttributeValues: {
-          ':keyValue': { S: id },
-          ':rangeValue': { S: status },
-        },
-        ScanIndexForward: false,
-        Select: 'ALL_ATTRIBUTES',
-      };
-      if (lastKey) params.ExclusiveStartKey = urlSafeBase64Decode(lastKey) as AWS.DynamoDB.Key;
-
-      return UserMessage.asUserMessageResults(params);
-    } catch (err) {
-      console.error(`UserMessage.byStatus(${id}, ${status}) failed:`, err);
-      throw err;
-    }
-  };
-
-  static allByStatus = async (status: Status, lastKey?: string): Promise<UserMessageResults> => {
-    try {
-      const params: AWS.DynamoDB.QueryInput = {
-        TableName: UserMessage.TABLE_NAME,
-        IndexName: UserMessage.ALL_BY_STATUS_INDEX_NAME,
+        IndexName: UserMessage.BY_SEND_AT_INDEX,
         KeyConditionExpression: '#keyAttribute = :keyValue',
         ExpressionAttributeNames: {
-          '#keyAttribute': 'status',
+          '#keyAttribute': 'id',
         },
         ExpressionAttributeValues: {
-          ':keyValue': { S: status },
+          ':keyValue': { S: id },
         },
         ScanIndexForward: false,
         Select: 'ALL_ATTRIBUTES',
       };
       if (lastKey) params.ExclusiveStartKey = urlSafeBase64Decode(lastKey) as AWS.DynamoDB.Key;
 
-      return UserMessage.asUserMessageResults(params);
+      return UserMessage.asUserMessageResults(params, UserMessage);
     } catch (err) {
-      console.error(`UserMessage.allByStatus(${status}) failed:`, err);
+      console.error(`UserMessage.findAll(${id}) failed:`, err);
       throw err;
     }
   };
@@ -354,11 +316,11 @@ class UserMessage {
     id: string,
     channelId: ChannelId,
     lastKey?: string,
-  ): Promise<UserMessageResults> => {
+  ): Promise<UserMessageResults<UserMessage>> => {
     try {
       const params: AWS.DynamoDB.QueryInput = {
         TableName: UserMessage.TABLE_NAME,
-        IndexName: UserMessage.CHANNEL_INDEX_NAME,
+        IndexName: UserMessage.BY_CHANNEL_INDEX,
         KeyConditionExpression:
           '#keyAttribute = :keyValue AND begins_with(#rangeAttribute, :rangeValue)',
         ExpressionAttributeNames: {
@@ -374,40 +336,79 @@ class UserMessage {
       };
       if (lastKey) params.ExclusiveStartKey = urlSafeBase64Decode(lastKey) as AWS.DynamoDB.Key;
 
-      return UserMessage.asUserMessageResults(params);
+      return UserMessage.asUserMessageResults(params, UserMessage);
     } catch (err) {
       console.error(`UserMessage.byChannel(${id}, ${channelId}) failed:`, err);
       throw err;
     }
   };
 
-  static updateStatus = async (props: UserMessage, status: string): Promise<UserMessageResults> => {
+  static updateStatus = async (
+    props: UserMessage,
+    status: string,
+  ): Promise<UserMessageResults<UserMessage>> => {
     try {
       const userMessage = props;
       const params: AWS.DynamoDB.UpdateItemInput = {
         TableName: UserMessage.TABLE_NAME,
         Key: {
           id: { S: userMessage.id.toString() },
-          [UserMessage.COMPOSITE_KEY_NAME]: {
-            S: compositeKey([userMessage.channelId, userMessage.messageId]),
-          },
+          channelMessageId: { S: compositeKey([userMessage.channelId, userMessage.messageId]) },
         },
         ReturnValues: 'NONE',
-        UpdateExpression: 'SET #S = :s, #SSA = :ssa',
-        ExpressionAttributeNames: { '#S': 'status', '#SSA': 'statusSendAt' },
+        UpdateExpression: 'SET #S = :s, #UA = :ua',
+        ExpressionAttributeNames: { '#S': 'status', '#UA': 'updatedAt' },
         ExpressionAttributeValues: {
           ':s': { S: status },
-          ':ssa': { S: compositeKey([status, props.sendAt]) },
+          ':ua': { S: new Date().toISOString() },
         },
       };
 
       await updateItem(params);
       userMessage.status = status;
-      userMessage.statusSendAt = compositeKey([props.status, props.sendAt]);
       console.log('UserMessage.updateStatus succeeded:', userMessage);
-      return UserMessage.find(userMessage.id, userMessage.messageId, userMessage.channelId);
+      const { id, messageId, channelId } = userMessage;
+      return UserMessage.find({ id, messageId, channelId, status });
     } catch (err) {
       console.error(`UserMessage.updateStatus failed:`, err);
+      throw err;
+    }
+  };
+
+  static delete = async (args: {
+    id: string;
+    messageId: string;
+    channelId: string;
+    status?: string;
+  }): Promise<boolean> => {
+    try {
+      const found = await UserMessage.find({
+        id: args.id,
+        messageId: args.messageId,
+        channelId: args.channelId,
+      });
+      const foundUserMessage = found.items.shift();
+      if (foundUserMessage) {
+        const params: AWS.DynamoDB.DeleteItemInput = {
+          TableName: UserMessage.TABLE_NAME,
+          Key: {
+            id: { S: args.id },
+            channelMessageId: { S: compositeKey([args.channelId, args.messageId]) },
+          },
+          ReturnValues: 'NONE',
+        };
+        await deleteItem(params);
+      } else {
+        console.debug(
+          `UserMessage.delete(${args.id}, ${args.messageId}, ${args.channelId}) was unable to find the usermessage for deletion.`,
+        );
+      }
+      return true;
+    } catch (err) {
+      console.error(
+        `UserMessage.delete(${args.id}, ${args.messageId}, ${args.channelId}) failed:`,
+        err,
+      );
       throw err;
     }
   };
@@ -418,59 +419,33 @@ class UserMessage {
    * @param props - the properties to translate to a dynamodb item
    * @returns - the Item for use in Dynamodb
    */
-  static asDynamoDbItem = (props: UserMessage): DynamoDBUserMessageItem => {
-    const {
-      channelId,
-      content,
-      contentShort,
-      channelMessageId,
-      channelSendAt,
-      deliveredAt,
-      id,
-      imageUrl,
-      messageId,
-      onid,
-      osuId,
-      sendAt,
-      smsNumber,
-      status,
-      statusSendAt,
-      title,
-    } = props;
-    let { channelDeliveredAt } = props;
-    if (!channelDeliveredAt) {
-      channelDeliveredAt = compositeKey([channelId, deliveredAt ?? '']);
-    }
+  asDynamoDbItem(): DynamoDBUserMessageItem {
     return {
-      channelId: { S: channelId },
-      title: { S: title },
-      content: { S: content },
-      contentShort: { S: contentShort },
-      messageId: { S: messageId },
-      id: { S: id },
-      sendAt: { S: sendAt },
-      status: { S: status },
+      channelId: { S: this.channelId },
+      title: { S: this.title },
+      updatedAt: { S: this.updatedAt ?? new Date().toISOString() },
+      content: { S: this.content },
+      contentShort: { S: this.contentShort },
+      messageId: { S: this.messageId },
+      id: { S: this.id },
+      sendAt: { S: this.sendAt },
+      status: { S: this.status },
       channelMessageId: {
-        S: channelMessageId ?? compositeKey([channelId, messageId]),
+        S: compositeKey([this.channelId, this.messageId]),
       },
-      channelSendAt: {
-        S: channelSendAt ?? compositeKey([channelId, sendAt]),
-      },
-      statusSendAt: {
-        S: statusSendAt ?? compositeKey([status, sendAt]),
-      },
-      deliveredAt: deliveredAt ? { S: deliveredAt } : { NULL: true },
-      imageUrl: imageUrl ? { S: imageUrl } : { NULL: true },
-      onid: onid ? { S: onid } : { NULL: true },
-      osuId: osuId ? { S: osuId } : { NULL: true },
-      smsNumber: smsNumber ? { S: smsNumber } : { NULL: true },
-      channelDeliveredAt: { S: channelDeliveredAt },
+      deliveredAt: this.deliveredAt ? { S: this.deliveredAt } : { NULL: true },
+      channelDeliveredAt: { S: compositeKey([this.channelId, this.deliveredAt!]) },
+      imageUrl: this.imageUrl ? { S: this.imageUrl } : { NULL: true },
+      onid: this.onid ? { S: this.onid } : { NULL: true },
+      osuId: this.osuId ? { S: this.osuId } : { NULL: true },
+      smsNumber: this.smsNumber ? { S: this.smsNumber } : { NULL: true },
     };
-  };
+  }
 
-  static asUserMessageResults = async (
+  static asUserMessageResults = async <T>(
     params: AWS.DynamoDB.QueryInput,
-  ): Promise<UserMessageResults> => {
+    Klass: Constructor<T>,
+  ): Promise<UserMessageResults<T>> => {
     const results: AWS.DynamoDB.QueryOutput = await query(params);
     console.log('Queried -->  ', params, results.Items);
     if (!results.Items)
@@ -479,7 +454,7 @@ class UserMessage {
         count: 0,
       };
     return {
-      items: results.Items.map((i) => new UserMessage({ dynamoDbUserMessage: i })),
+      items: results.Items.map((i) => new Klass({ dynamoDbUserMessage: i })),
       count: results.Count || 0,
       lastKey: results.LastEvaluatedKey ? urlSafeBase64Encode(results.LastEvaluatedKey) : undefined,
     };

@@ -1,5 +1,5 @@
 import { userMessage, dynamoDbUserMessage } from '@mocks/userMessage.mock';
-import { getChannel } from '@src/models/userMessage';
+import UserMessage, { getChannel } from '@src/models/userMessage';
 import * as constants from '@src/constants';
 
 const mockQuery = jest.fn();
@@ -22,7 +22,7 @@ describe('dashboardChannel', () => {
 
   it('processes a UserMessage', async () => {
     mockQuery.mockResolvedValue({ Items: [dynamoDbUserMessage] });
-    const channel = getChannel(userMessage);
+    const channel = getChannel(new UserMessage({ userMessage }));
     expect(await channel.process()).toBeUndefined();
     expect(mockPutItem).toBeCalled();
     expect(mockQuery).toBeCalled();

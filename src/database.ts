@@ -12,4 +12,7 @@ export const updateItem = (i: DynamoDB.UpdateItemInput): Promise<DynamoDB.Update
 export const query = (i: DynamoDB.QueryInput): Promise<DynamoDB.QueryOutput> =>
   database.query(i).promise();
 
+export const deleteItem = (i: DynamoDB.DeleteItemInput): Promise<DynamoDB.DeleteItemOutput> =>
+  database.deleteItem(i).promise();
+
 export default database;

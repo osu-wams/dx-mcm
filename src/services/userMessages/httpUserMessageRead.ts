@@ -20,7 +20,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
     const [onid, osuId] = (userId ?? '').split('-'); // eslint-disable-line no-unused-vars
 
     // TODO: make find more intelligent to handle osuId and onid, or make two calls and have to deal with lastKey?!
-    const userMessageResults = await UserMessage.find(onid, messageId, channelId);
+    const userMessageResults = await UserMessage.find({ id: onid, messageId, channelId });
     if (userMessageResults.count !== 1) {
       console.error(
         `Marking UserMessage read failed, found ${userMessageResults.count} records for userId:${userId}, messageId:${messageId}, channelId:${channelId}`,

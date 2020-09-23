@@ -42,10 +42,6 @@ class Channel {
       this.setDelivered();
       this.userMessage.deliveredAt = this.deliveredAt;
       this.userMessage.status = this.deliveredStatus!;
-      this.userMessage.statusSendAt = compositeKey([
-        this.deliveredStatus!,
-        this.userMessage.sendAt,
-      ]);
       this.userMessage.channelDeliveredAt = compositeKey([
         this.userMessage.channelId,
         this.deliveredAt!,
@@ -59,6 +55,7 @@ class Channel {
           this.typeName
         }.toEnvironments to include the missing value and reprocess messages.`,
       );
+      throw new Error(`Disallowed publishing to ${this.typeName} in ${ENV}.`);
     }
   }
 }

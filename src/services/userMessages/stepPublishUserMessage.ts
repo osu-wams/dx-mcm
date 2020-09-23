@@ -1,4 +1,5 @@
 import UserMessage, { getChannel, Status } from '@src/models/userMessage';
+import UserMessagePending from '@src/models/userMessagePending';
 import type { UserMessageStateMachineResult } from './types'; // eslint-disable-line no-unused-vars
 
 export const handler = async (
@@ -21,19 +22,25 @@ export const handler = async (
       console.log('Processed UserMessage -->  ', userMessage);
       callback(null, { userMessage });
     } else {
-      const cause = `Publishing UserMessage disallowed --> sendToChannel? = ${sendToChannel}, Allowed to sendUserMessages = ${sendUserMessages.join(
-        ', ',
-      )}`;
-      console.warn(cause);
-      // TODO: New Status to cause this to retry in the future? Set the sendTo date in the future? Log the error and chill?
-      await UserMessage.updateStatus(userMessage, Status.ERROR);
-      callback(Error(cause));
+      const cause = `Disallowed publishing to channel (${userMessage.channelId}).`;
+      console.error(cause, { sendToChannel, sendUserMessages });
+      throw new Error(cause);
     }
   } catch (error) {
     /* istanbul ignore next */
-    const cause = `Publishing UserMessage failed due to error: ${error.mesage}`;
+    const cause = `Publishing UserMessage failed due to error: ${error.message}`;
     console.error(cause, error);
-    await UserMessage.updateStatus(userMessage, Status.ERROR);
+
+    const userMessagePending = new UserMessagePending({ userMessage: { ...userMessage } });
+    userMessagePending.status = Status.ERROR;
+    userMessagePending.statusMessage = error.errorMessage || error.message;
+
+    await UserMessage.delete({
+      id: userMessage.id,
+      messageId: userMessage.messageId,
+      channelId: userMessage.channelId,
+    });
+    await UserMessagePending.upsert(userMessagePending);
     callback(error);
   }
 };
