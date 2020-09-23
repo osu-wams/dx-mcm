@@ -61,6 +61,8 @@ provider:
         - !Join ['', [!GetAtt messagesTable.Arn, '/index/*']]
         - !GetAtt userMessagesTable.Arn
         - !Join ['', [!GetAtt userMessagesTable.Arn, '/index/*']]
+        - !GetAtt userMessagesPendingTable.Arn
+        - !Join ['', [!GetAtt userMessagesPendingTable.Arn, '/index/*']]
     - Effect: Allow
       Action:
         - sqs:SendMessage
@@ -107,6 +109,7 @@ resources:
     apiCloudFront: ${file(./serverless-resources.yml):apiCloudFront}
     messagesTable: ${file(./serverless-resources.yml):messagesTable}
     userMessagesTable: ${file(./serverless-resources.yml):userMessagesTable}
+    userMessagesPendingTable: ${file(./serverless-resources.yml):userMessagesPendingTable}
     staticBucket: ${file(./serverless-resources.yml):staticBucket}
     dataTransferBucket: ${file(./serverless-resources.yml):dataTransferBucket}
     messagesSqsQueue: ${file(./src/services/messages/serverless-resources.yml):messagesSqsQueue}
