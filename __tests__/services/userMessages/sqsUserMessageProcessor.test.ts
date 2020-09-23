@@ -3,13 +3,13 @@ import { userMessage } from '@mocks/userMessage.mock';
 
 const mockQuery = jest.fn();
 const mockPutItem = jest.fn();
-const mockUpdateItem = jest.fn();
+const mockDeleteItem = jest.fn();
 jest.mock('@src/database', () => ({
   // @ts-ignore
   ...jest.requireActual('@src/database'),
   query: () => mockQuery(),
   putItem: () => mockPutItem(),
-  updateItem: () => mockUpdateItem(),
+  deleteItem: () => mockDeleteItem(),
 }));
 
 const mockGetQueueUrl = jest.fn();
@@ -60,7 +60,7 @@ describe('handler', () => {
     mockSendMessage.mockResolvedValue(true);
     mockQuery.mockResolvedValue({ Items: [userMessage], Count: 1 });
     mockPutItem.mockResolvedValue(userMessage);
-    mockUpdateItem.mockResolvedValue(userMessage);
+    mockDeleteItem.mockResolvedValue(true);
   });
 
   it('publishes user messages to the queue', async () => {
@@ -70,14 +70,13 @@ describe('handler', () => {
     expect(mockGetQueueUrl).not.toHaveBeenCalled();
     expect(mockSendMessage).not.toHaveBeenCalled();
     expect(mockPutItem).not.toHaveBeenCalled();
-    expect(mockUpdateItem).toHaveBeenCalled();
   });
   it('throws an error when there is a unhandled exception', async () => {
     mockStartExecution.mockRejectedValue('boom');
     await handler(mockEvent());
     expect(mockGetQueueUrl).toHaveBeenCalled();
     expect(mockSendMessage).toHaveBeenCalled();
-    expect(mockPutItem).not.toHaveBeenCalled();
-    expect(mockUpdateItem).toHaveBeenCalled();
+    expect(mockPutItem).toHaveBeenCalled();
+    expect(mockDeleteItem).toHaveBeenCalled();
   });
 });

@@ -3,6 +3,7 @@ import { SQSEvent } from 'aws-lambda'; // eslint-disable-line no-unused-vars, im
 import { validate, getQueueUrl, publishToQueue } from '@src/services/sqsUtils';
 import { startExecution } from '@src/stateMachine';
 import UserMessage, { compositeKey, Status } from '@src/models/userMessage';
+import UserMessagePending from '@src/models/userMessagePending';
 
 export const handler = async (event: SQSEvent) => {
   const [valid, records] = validate(event);
@@ -19,13 +20,21 @@ export const handler = async (event: SQSEvent) => {
       input: JSON.stringify(userMessage),
       name: compositeKey([userMessage.channelId, userMessage.messageId], '_'),
     });
-    await UserMessage.updateStatus(userMessage, Status.PROCESSING);
   } catch (err) {
     /* istanbul ignore next */
     console.error(err);
     const queueUrl = await getQueueUrl(SQS_ERROR_USER_MESSAGE_QUEUE_NAME);
     publishToQueue({ error: err.message, object: event }, queueUrl);
-    await UserMessage.updateStatus(userMessage, Status.ERROR);
+    const userMessagePending = new UserMessagePending({ userMessage: { ...userMessage } });
+    userMessagePending.status = Status.ERROR;
+    userMessagePending.statusMessage = err.errorMessage || err.message;
+
+    await UserMessage.delete({
+      id: userMessage.id,
+      messageId: userMessage.messageId,
+      channelId: userMessage.channelId,
+    });
+    await UserMessagePending.upsert(userMessagePending);
   }
 };
 
