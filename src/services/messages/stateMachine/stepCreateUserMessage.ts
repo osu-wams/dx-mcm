@@ -54,37 +54,6 @@ const buildUserMessages = (
 };
 
 /**
- * Attempt to upsert all of the provided UserMessage instances into DynaomoDB, or
- * publish errors to the UserMessage Error queue if the upsert fails.
- * @param userMessages the UserMessage instances to upsert into the DynamoDB
- */
-const persistUserMessages = async (
-  userMessages: UserMessage[],
-): Promise<(UserMessage | undefined)[]> => {
-  const errorQueueUrl = await getQueueUrl(SQS_ERROR_USER_MESSAGE_QUEUE_NAME);
-  try {
-    return Promise.all(
-      userMessages.map(
-        throat(50, (userMessage: UserMessage) => {
-          return UserMessage.upsert(userMessage)
-            .then((um) => um.items[0])
-            .catch((err) => {
-              publishToQueue({ object: { userMessage }, error: err }, errorQueueUrl);
-              console.error(err);
-              return undefined;
-            });
-        }),
-      ),
-    );
-  } catch (err) {
-    console.error(err);
-    throw new Error(
-      `${userMessages.length} UserMessages failed while attempting to persist/upsert in DynamoDB. Caught: ${err}`,
-    );
-  }
-};
-
-/**
  * Publish each UserMessages instance to the processing queue where a lambda will
  * fire off processing each individual UserMessage and deliver it to its intended channel. If
  * publishing to the processing queue fails, then publish to the error queue for disposition.
@@ -135,23 +104,20 @@ export const handler = async (event: MessageStateMachineResult, _context: any, c
       channels,
       processedMessage.targetPopulation,
     );
-    const persistedUserMessages = await persistUserMessages(userMessages);
-    const filteredUserMessages = persistedUserMessages.filter(Boolean) as UserMessage[];
-    await publishUserMessagesToQueue(filteredUserMessages);
+    await publishUserMessagesToQueue(userMessages);
     await Message.updateStatus(
       message,
       Status.SENT,
       `Published at ${new Date().toISOString()} to be sent at ${message.sendAt}`,
     );
     callback(null, {
-      userMessagePublishedCount: filteredUserMessages.length,
-      userMessagePeristedCount: persistedUserMessages.length,
+      userMessagePublishedCount: userMessages.length,
       messageId: message.id,
     });
   } catch (err) {
     console.error('stepCreateUserMessage handler failed -->  ', err);
     const queueUrl = await getQueueUrl(SQS_ERROR_MESSAGE_QUEUE_NAME);
-    publishToQueue({ error: err.message, object: { message: event } }, queueUrl);
+    publishToQueue({ error: err.message, object: { message } }, queueUrl);
     await Message.updateStatus(message, Status.ERROR, err.message);
     callback(err.message, null);
   }
