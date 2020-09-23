@@ -1,5 +1,6 @@
 messagesTable:
   Type: AWS::DynamoDB::Table
+  DeletionPolicy: Retain
   Properties:
     TableName: ${self:service.name}-Messages
     AttributeDefinitions:
@@ -47,6 +48,7 @@ messagesTable:
 
 userMessagesTable:
   Type: AWS::DynamoDB::Table
+  DeletionPolicy: Retain
   Properties:
     TableName: ${self:service.name}-UserMessages
     AttributeDefinitions:
@@ -54,11 +56,7 @@ userMessagesTable:
         AttributeType: S
       - AttributeName: channelMessageId
         AttributeType: S
-      - AttributeName: statusSendAt
-        AttributeType: S
       - AttributeName: sendAt
-        AttributeType: S
-      - AttributeName: status
         AttributeType: S
       - AttributeName: channelDeliveredAt
         AttributeType: S
@@ -82,7 +80,7 @@ userMessagesTable:
           NonKeyAttributes:
             - sendAt
             - status
-            - channelMessageId
+            - channelDeliveredAt
       - IndexName: ${self:service.name}-UserMessageBySendAt
         KeySchema:
           - AttributeName: id
@@ -93,32 +91,47 @@ userMessagesTable:
           ProjectionType: INCLUDE
           NonKeyAttributes:
             - channelMessageId
-    GlobalSecondaryIndexes:
-      - IndexName: ${self:service.name}-UserMessageStatuses
-        KeySchema:
-          - AttributeName: id
-            KeyType: HASH
-          - AttributeName: statusSendAt
-            KeyType: RANGE
-        Projection:
-          ProjectionType: ALL
-      - IndexName: ${self:service.name}-UserMessageAllByStatus
+
+userMessagesPendingTable:
+  Type: AWS::DynamoDB::Table
+  DeletionPolicy: Retain
+  Properties:
+    TableName: ${self:service.name}-UserMessagesPending
+    AttributeDefinitions:
+      - AttributeName: status
+        AttributeType: S
+      - AttributeName: messageChannelUser
+        AttributeType: S
+      - AttributeName: updatedAtMessageId
+        AttributeType: S
+    KeySchema:
+      - AttributeName: status
+        KeyType: HASH
+      - AttributeName: messageChannelUser
+        KeyType: RANGE
+    BillingMode: PAY_PER_REQUEST
+    PointInTimeRecoverySpecification:
+      PointInTimeRecoveryEnabled: true
+    LocalSecondaryIndexes:
+      - IndexName: ${self:service.name}-UserMessagePendingUpdatedAt
         KeySchema:
           - AttributeName: status
             KeyType: HASH
-          - AttributeName: sendAt
+          - AttributeName: updatedAtMessageId
             KeyType: RANGE
         Projection:
           ProjectionType: ALL
 
 staticBucket:
   Type: AWS::S3::Bucket
+  DeletionPolicy: Retain
   Properties:
     AccessControl: PublicRead
     BucketName: ${self:service.name}-static
 
 dataTransferBucket:
   Type: AWS::S3::Bucket
+  DeletionPolicy: Retain
   Properties:
     AccessControl: Private
     BucketName: ${self:service.name}-data-transfer
@@ -132,6 +145,7 @@ dataTransferBucket:
 
 apiCloudFront:
   Type: AWS::CloudFront::Distribution
+  DeletionPolicy: Retain
   Properties:
     DistributionConfig:
       Aliases:
