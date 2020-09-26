@@ -82,6 +82,7 @@ stepGetUserPopulation:
 
 cronInvokeMessageProcess:
   handler: src/services/messages/cronInvokeMessageProcess.handler
+  name: ${self:service.name}-cronInvokeMessageProcess
   description: 'Lambda that fires off post to the API to initiate processing messages ready to be sent'
   environment:
     API_KEY: '${env:AWS_APIGW_API_KEY}${file(./src/serverless.js):developerSuffix}'
