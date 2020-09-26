@@ -1,6 +1,6 @@
 import serverless from 'serverless-http';
 import express, { Request, Response, NextFunction } from 'express'; // eslint-disable-line no-unused-vars
-import errorHandler from '@src/services/messages/api/errorHandler';
+import { errorHandler } from '@src/services/expressUtils';
 import Message, { Status } from '@src/models/message';
 
 const API_BASE_URL = '/api/v1/message';
