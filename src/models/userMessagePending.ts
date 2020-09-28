@@ -21,6 +21,8 @@ class UserMessagePending extends UserMessage {
     super(p);
     if (p.userMessage) {
       this.statusMessage = p.userMessage.statusMessage;
+      this.updatedAtMessageId = p.userMessage.updatedAtMessageId || '';
+      this.messageChannelUser = p.userMessage.messageChannelUser || '';
     } else if (p.dynamoDbUserMessage) {
       const { statusMessage, updatedAtMessageId, messageChannelUser } = p.dynamoDbUserMessage;
       if (statusMessage) this.statusMessage = statusMessage.S || '';
@@ -155,7 +157,7 @@ class UserMessagePending extends UserMessage {
       };
       if (lastKey) params.ExclusiveStartKey = urlSafeBase64Decode(lastKey) as AWS.DynamoDB.Key;
 
-      return UserMessage.asUserMessageResults(params, UserMessagePending);
+      return UserMessagePending.asUserMessageResults(params, UserMessagePending);
     } catch (err) {
       console.error(`UserMessagePending.byMessage(${status}, ${messageId}) failed:`, err);
       throw err;
