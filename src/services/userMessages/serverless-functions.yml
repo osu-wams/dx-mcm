@@ -1,43 +1,12 @@
-httpUserMessagesList:
-  handler: src/services/userMessages/httpUserMessagesList.handler
-  name: ${self:service.name}-userMessagesList
-  description: Query a list of user messages
+httpUserMessageApi:
+  handler: src/services/userMessages/api/main.handler
+  name: ${self:service.name}-userMessageApi
+  description: UserMessage API endpoint
   events:
     - http:
         private: true # forces header x-api-key to be present with a valid key from provider.apiKeys
-        method: get
-        path: /api/v1/userMessages/channel/{channelId}/{userId}
-        request:
-          parameters:
-            paths:
-              channelId: true
-              userId: true
-    - http:
-        private: true # forces header x-api-key to be present with a valid key from provider.apiKeys
-        method: get
-        path: /api/v1/userMessages/channel/{channelId}/{userId}/{lastKey}
-        request:
-          parameters:
-            paths:
-              channelId: true
-              userId: true
-              lastKey: true
-
-httpUserMessageRead:
-  handler: src/services/userMessages/httpUserMessageRead.handler
-  name: ${self:service.name}-userMessageRead
-  description: Mark a user message as being read for a user
-  events:
-    - http:
-        private: true # forces header x-api-key to be present with a valid key from provider.apiKeys
-        method: get
-        path: /api/v1/userMessages/read/{channelId}/{messageId}/{userId}
-        request:
-          parameters:
-            paths:
-              channelId: true
-              messageId: true
-              userId: true
+        method: ANY
+        path: /api/v1/userMessages/{proxy+}
 
 sqsUserMessageProcessor:
   handler: src/services/userMessages/sqsUserMessageProcessor.handler
@@ -81,3 +50,17 @@ stepPublishUserMessage:
   timeout: 300
   environment:
     SQS_ERROR_USER_MESSAGE_QUEUE_NAME: !GetAtt userMessageErrorsSqsQueue.QueueName
+
+cronUserMessagePendingMonitor:
+  handler: src/services/userMessages/cronUserMessagePendingMonitor.handler
+  name: ${self:service.name}-cronUserMessagePendingMonitor
+  description: Scheduled Lambda to identify and send notifications about UserMessages that failed while trying to deliver.
+  environment:
+    DX_ALERTS_SLACK_HOOK: ${env:DX_ALERTS_SLACK_HOOK}
+    PENDING_MIN_AGO: 15
+  events:
+    - schedule:
+        name: ${self:service.name}-cronUserMessagePendingMonitor
+        description: Trigger the cronUserMessagePendingMonitor repeatedly
+        rate: rate(15 minutes)
+        enabled: true

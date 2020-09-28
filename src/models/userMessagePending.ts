@@ -4,6 +4,7 @@ import UserMessage, {
   ChannelId, // eslint-disable-line no-unused-vars
   compositeKey,
   DynamoDBUserMessagePendingItem, // eslint-disable-line no-unused-vars
+  Status, // eslint-disable-line no-unused-vars
   UserMessageParams, // eslint-disable-line no-unused-vars
   UserMessageResults, // eslint-disable-line no-unused-vars
 } from './userMessage';
@@ -20,9 +21,13 @@ class UserMessagePending extends UserMessage {
     super(p);
     if (p.userMessage) {
       this.statusMessage = p.userMessage.statusMessage;
+      this.updatedAtMessageId = p.userMessage.updatedAtMessageId || '';
+      this.messageChannelUser = p.userMessage.messageChannelUser || '';
     } else if (p.dynamoDbUserMessage) {
-      const { statusMessage } = p.dynamoDbUserMessage;
+      const { statusMessage, updatedAtMessageId, messageChannelUser } = p.dynamoDbUserMessage;
       if (statusMessage) this.statusMessage = statusMessage.S || '';
+      if (updatedAtMessageId) this.updatedAtMessageId = updatedAtMessageId.S || '';
+      if (messageChannelUser) this.messageChannelUser = messageChannelUser.S || '';
     }
   }
 
@@ -44,6 +49,8 @@ class UserMessagePending extends UserMessage {
   }
 
   static TABLE_NAME: string = `${DYNAMODB_TABLE_PREFIX}-UserMessagesPending`;
+
+  static UPDATED_AT_INDEX: string = `${DYNAMODB_TABLE_PREFIX}-UserMessagePendingUpdatedAt`;
 
   static upsert = async (props: UserMessage): Promise<UserMessageResults<UserMessagePending>> => {
     // ! DynamoDb only supports 'ALL_OLD' or 'NONE' for return values from the
@@ -72,12 +79,16 @@ class UserMessagePending extends UserMessage {
   };
 
   static find = async (args: {
-    id: string;
-    messageId: string;
-    channelId: string;
+    id?: string;
+    messageId?: string;
+    channelId?: string;
+    messageChannelUser?: string;
     status?: string;
   }): Promise<UserMessageResults<UserMessagePending>> => {
     try {
+      const keyValue = args.status || Status.ERROR;
+      const rangeValue =
+        args.messageChannelUser || compositeKey([args.messageId!, args.channelId!, args.id!]);
       const params: AWS.DynamoDB.QueryInput = {
         TableName: UserMessagePending.TABLE_NAME,
         KeyConditionExpression: '#keyAttribute = :keyValue AND #rangeAttribute = :rangeValue',
@@ -86,8 +97,8 @@ class UserMessagePending extends UserMessage {
           '#rangeAttribute': 'messageChannelUser',
         },
         ExpressionAttributeValues: {
-          ':keyValue': { S: args.status },
-          ':rangeValue': { S: compositeKey([args.messageId, args.channelId, args.id]) },
+          ':keyValue': { S: keyValue },
+          ':rangeValue': { S: rangeValue },
         },
         Select: 'ALL_ATTRIBUTES',
       };
@@ -95,7 +106,7 @@ class UserMessagePending extends UserMessage {
       return UserMessage.asUserMessageResults(params, UserMessagePending);
     } catch (err) {
       console.error(
-        `UserMessage.find(${args.id}, ${args.messageId}, ${args.channelId}) failed:`,
+        `UserMessage.find(${args.id}, ${args.messageId}, ${args.channelId}, ${args.messageChannelUser}) failed:`,
         err,
       );
       throw err;
@@ -146,9 +157,40 @@ class UserMessagePending extends UserMessage {
       };
       if (lastKey) params.ExclusiveStartKey = urlSafeBase64Decode(lastKey) as AWS.DynamoDB.Key;
 
-      return UserMessage.asUserMessageResults(params, UserMessagePending);
+      return UserMessagePending.asUserMessageResults(params, UserMessagePending);
     } catch (err) {
       console.error(`UserMessagePending.byMessage(${status}, ${messageId}) failed:`, err);
+      throw err;
+    }
+  };
+
+  static updatedSince = async (
+    status: string,
+    minAgo: number,
+    lastKey?: string,
+  ): Promise<UserMessageResults<UserMessagePending>> => {
+    try {
+      // 2020-01-01T01:01:01.000Z cut down to 2020-01-01T01:01 for inclusive query comparison
+      const startDate = new Date(Date.now() - 1000 * 60 * minAgo).toISOString().slice(0, 16);
+      const params: AWS.DynamoDB.QueryInput = {
+        TableName: UserMessagePending.TABLE_NAME,
+        IndexName: UserMessagePending.UPDATED_AT_INDEX,
+        KeyConditionExpression: '#keyAttribute = :keyValue AND #rangeAttribute > :rangeValue',
+        ExpressionAttributeNames: {
+          '#keyAttribute': 'status',
+          '#rangeAttribute': 'updatedAtMessageId',
+        },
+        ExpressionAttributeValues: {
+          ':keyValue': { S: status },
+          ':rangeValue': { S: startDate },
+        },
+        Select: 'ALL_ATTRIBUTES',
+      };
+      if (lastKey) params.ExclusiveStartKey = urlSafeBase64Decode(lastKey) as AWS.DynamoDB.Key;
+
+      return UserMessagePending.asUserMessageResults(params, UserMessagePending);
+    } catch (err) {
+      console.error(`UserMessagePending.updatedSince(${status}, ${minAgo}) failed:`, err);
       throw err;
     }
   };

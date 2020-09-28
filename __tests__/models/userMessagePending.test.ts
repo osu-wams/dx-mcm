@@ -5,6 +5,7 @@ import {
   emptyUserMessagePending,
   emptyDynamoDbUserMessagePending,
 } from '@mocks/userMessage.mock';
+import { ChannelId, Status } from '@src/models/userMessage';
 
 const mockQuery = jest.fn();
 const mockPutItem = jest.fn();
@@ -113,6 +114,59 @@ describe('UserMessagePendingPending', () => {
         await UserMessagePending.byMessage('123456789', 'bogus-id');
       } catch (err) {
         expect(err).toBe('boom');
+      }
+    });
+  });
+
+  describe('updatedSince', () => {
+    it('does not find a matching record', async () => {
+      mockQuery.mockResolvedValue({ Items: undefined });
+      expect(await UserMessagePending.updatedSince(Status.ERROR, 12)).toEqual({
+        count: 0,
+        items: [],
+      });
+    });
+    it('finds a matching record', async () => {
+      mockQuery.mockResolvedValue({ Items: [dynamoDbUserMessagePending], Count: 1 });
+      expect(await UserMessagePending.updatedSince(Status.ERROR, 12)).toEqual({
+        count: 1,
+        items: [userMessagePending],
+      });
+    });
+    it('throws an error when there is a unhandled exception', async () => {
+      mockQuery.mockRejectedValue('boom');
+      try {
+        await UserMessagePending.updatedSince(Status.ERROR, 12);
+      } catch (err) {
+        expect(err).toBe('boom');
+      }
+    });
+  });
+
+  describe('findAll', () => {
+    it('has not been implemented', async () => {
+      try {
+        await UserMessagePending.findAll('id');
+      } catch (err) {
+        expect(err).toBeTruthy();
+      }
+    });
+  });
+  describe('byChannel', () => {
+    it('has not been implemented', async () => {
+      try {
+        await UserMessagePending.byChannel('id', ChannelId.DASHBOARD);
+      } catch (err) {
+        expect(err).toBeTruthy();
+      }
+    });
+  });
+  describe('updateStatus', () => {
+    it('has not been implemented', async () => {
+      try {
+        await UserMessagePending.updateStatus(userMessagePending, Status.ERROR);
+      } catch (err) {
+        expect(err).toBeTruthy();
       }
     });
   });
