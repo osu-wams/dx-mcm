@@ -57,6 +57,7 @@ const userMessage = {
   deliveredAt: '2020-01-01T16:20:00.000Z',
   id: 'bobross',
   imageUrl: 'https://blah.png',
+  messageChannelUser: '',
   messageId: 'message-123456789',
   onid: 'bobross',
   osuId: '123456789',
@@ -65,6 +66,7 @@ const userMessage = {
   status: 'NEW',
   title: 'title',
   updatedAt: '2020-01-01T16:20:00.000Z',
+  updatedAtMessageId: '',
 };
 
 const userMessagePending = {
