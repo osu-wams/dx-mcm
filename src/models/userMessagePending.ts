@@ -239,15 +239,11 @@ class UserMessagePending extends UserMessage {
       const items = [];
       let batchIds = ids.splice(0, 50);
       while (batchIds.length) {
-        const params: AWS.DynamoDB.BatchGetItemInput = {
-          RequestItems: {},
-        };
+        const params: AWS.DynamoDB.BatchGetItemInput = { RequestItems: {} };
         params.RequestItems[UserMessagePending.TABLE_NAME] = {
           Keys: batchIds.map((id) => ({ status: { S: status }, messageChannelUser: { S: id } })),
         };
-        console.debug(JSON.stringify(params));
         const results = await batchGetItem(params); // eslint-disable-line
-        console.debug(JSON.stringify(results));
         if (results.Responses) {
           items.push(
             results.Responses[UserMessagePending.TABLE_NAME].map(
