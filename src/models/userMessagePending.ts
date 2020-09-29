@@ -1,5 +1,5 @@
 import { DYNAMODB_TABLE_PREFIX } from '@src/constants';
-import { putItem } from '@src/database';
+import { batchGetItem, deleteItem, putItem } from '@src/database';
 import UserMessage, {
   ChannelId, // eslint-disable-line no-unused-vars
   compositeKey,
@@ -135,6 +135,45 @@ class UserMessagePending extends UserMessage {
     throw new Error('UserMessagePending.updateStatus not yet implemented.');
   };
 
+  static delete = async (args: {
+    id: string;
+    messageId: string;
+    channelId: string;
+    status?: string;
+  }): Promise<boolean> => {
+    try {
+      const found = await UserMessagePending.find({
+        id: args.id,
+        messageId: args.messageId,
+        channelId: args.channelId,
+      });
+      const foundItem = found.items.shift();
+      if (foundItem) {
+        console.debug(`UserMessagePending.deleting found item: ${JSON.stringify(foundItem)}`);
+        const params: AWS.DynamoDB.DeleteItemInput = {
+          TableName: UserMessagePending.TABLE_NAME,
+          Key: {
+            status: { S: args.status },
+            messageChannelUser: { S: compositeKey([args.messageId, args.channelId, args.id]) },
+          },
+          ReturnValues: 'NONE',
+        };
+        await deleteItem(params);
+      } else {
+        console.debug(
+          `UserMessagePending.delete(${args.id}, ${args.messageId}, ${args.channelId}, ${args.status}) was unable to find the usermessagepending for deletion.`,
+        );
+      }
+      return true;
+    } catch (err) {
+      console.error(
+        `UserMessagePending.delete(${args.id}, ${args.messageId}, ${args.channelId}, ${args.status}) failed:`,
+        err,
+      );
+      throw err;
+    }
+  };
+
   static byMessage = async (
     status: string,
     messageId: string,
@@ -191,6 +230,49 @@ class UserMessagePending extends UserMessage {
       return UserMessagePending.asUserMessageResults(params, UserMessagePending);
     } catch (err) {
       console.error(`UserMessagePending.updatedSince(${status}, ${minAgo}) failed:`, err);
+      throw err;
+    }
+  };
+
+  static batchGet = async (status: string, ids: string[]): Promise<UserMessagePending[]> => {
+    try {
+      const items = [];
+      let batchIds = ids.splice(0, 50);
+      while (batchIds.length) {
+        const params: AWS.DynamoDB.BatchGetItemInput = {
+          RequestItems: {},
+        };
+        params.RequestItems[UserMessagePending.TABLE_NAME] = {
+          Keys: batchIds.map((id) => ({ status: { S: status }, messageChannelUser: { S: id } })),
+        };
+        console.debug(JSON.stringify(params));
+        const results = await batchGetItem(params); // eslint-disable-line
+        console.debug(JSON.stringify(results));
+        if (results.Responses) {
+          items.push(
+            results.Responses[UserMessagePending.TABLE_NAME].map(
+              (r) => new UserMessagePending({ dynamoDbUserMessage: r }),
+            ),
+          );
+        } else {
+          console.warn(
+            `UserMessagePending.batchGet expected DynamoDB response but returned none when fetching ids: ${batchIds.join(
+              ', ',
+            )}`,
+          );
+        }
+        if (results.UnprocessedKeys && results.UnprocessedKeys[UserMessagePending.TABLE_NAME]) {
+          console.error(
+            `UserMessagePending.batchGet failed to fetch unprocessed keys: ${
+              results.UnprocessedKeys[UserMessagePending.TABLE_NAME].Keys
+            }`,
+          );
+        }
+        batchIds = ids.splice(0, 50); // return the next 50, until ids is empty
+      }
+      return items.flat();
+    } catch (err) {
+      console.error(`UserMessagePending.batchGet(${status}, ${ids}) failed:`, err);
       throw err;
     }
   };
