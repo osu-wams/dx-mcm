@@ -94,13 +94,9 @@ const retrySendingUserMessages = async (req: Request, res: Response, next: NextF
     const userMessages = items.map((i) => new UserMessage({ userMessage: i }));
     await publishUserMessagesToQueue(userMessages);
     for (let i = 0; i < items.length; i += 1) {
+      const { id, channelId, messageId } = items[i];
       // eslint-disable-next-line
-      await UserMessagePending.delete({
-        id: items[i].id,
-        channelId: items[i].channelId,
-        messageId: items[i].messageId,
-        status: Status.ERROR,
-      });
+      await UserMessagePending.delete({ id, channelId, messageId, status: Status.ERROR });
     }
     res.status(200).json({ action, object: { items } });
   } catch (err) {
