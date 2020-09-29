@@ -90,8 +90,6 @@ const retrySendingUserMessages = async (req: Request, res: Response, next: NextF
   try {
     const action = 'user-message-pending-retry-errors';
     const { ids }: { ids: string[] } = req.body;
-    console.log(`requestBody: ${req.body}, ids: ${ids}`);
-
     const items = await UserMessagePending.batchGet(Status.ERROR, ids);
     const userMessages = items.map((i) => new UserMessage({ userMessage: i }));
     await publishUserMessagesToQueue(userMessages);
