@@ -4,10 +4,10 @@ import { errorHandler } from '@src/services/expressUtils';
 import UserMessage, { ChannelId, Status } from '@src/models/userMessage';
 import UserMessagePending from '@src/models/userMessagePending';
 import { USER_MESSAGE_API_PATH } from '@src/constants';
+import { publishUserMessagesToQueue } from '@src/services/sqsUtils';
 
 const app = express();
 
-// eslint-disable-next-line no-unused-vars
 const findByChannel = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const action = 'user-messages-find-by-channel';
@@ -28,7 +28,6 @@ const findByChannel = async (req: Request, res: Response, next: NextFunction) =>
   }
 };
 
-// eslint-disable-next-line no-unused-vars
 const markRead = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const action = 'user-message-mark-read';
@@ -60,7 +59,6 @@ const markRead = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-// eslint-disable-next-line no-unused-vars
 const findByStatus = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const action = 'user-message-pending-find-by-status';
@@ -77,7 +75,6 @@ const findByStatus = async (req: Request, res: Response, next: NextFunction) => 
   }
 };
 
-// eslint-disable-next-line no-unused-vars
 const findError = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const action = 'user-message-pending-find-error';
@@ -89,11 +86,39 @@ const findError = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const retrySendingUserMessages = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const action = 'user-message-pending-retry-errors';
+    const { ids }: { ids: string[] } = req.body;
+    console.log(`requestBody: ${req.body}, ids: ${ids}`);
+
+    const items = await UserMessagePending.batchGet(Status.ERROR, ids);
+    const userMessages = items.map((i) => new UserMessage({ userMessage: i }));
+    await publishUserMessagesToQueue(userMessages);
+    for (let i = 0; i < items.length; i += 1) {
+      // eslint-disable-next-line
+      await UserMessagePending.delete({
+        id: items[i].id,
+        channelId: items[i].channelId,
+        messageId: items[i].messageId,
+        status: Status.ERROR,
+      });
+    }
+    res.status(200).json({ action, object: { items } });
+  } catch (err) {
+    errorHandler(err, req, res, next);
+  }
+};
+
 app.get(`${USER_MESSAGE_API_PATH}/channel/:channelId/:userId/:lastKey?`, findByChannel);
 app.get(`${USER_MESSAGE_API_PATH}/read/:channelId/:messageId/:userId`, markRead);
 app.get(`${USER_MESSAGE_API_PATH}/status/:status/:fromDate/:lastKey?`, findByStatus);
 app.get(`${USER_MESSAGE_API_PATH}/error/:messageChannelUser`, findError);
-// app.get(`${USER_MESSAGE_API_PATH}/error/:messageChannelUser/retry`, retrySendingUserMessage);
+app.post(
+  `${USER_MESSAGE_API_PATH}/error/retry`,
+  express.json({ type: '*/*' }),
+  retrySendingUserMessages,
+);
 
 export const handler = serverless(app);
 export default handler;
