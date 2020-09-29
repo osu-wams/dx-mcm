@@ -48,8 +48,8 @@ export const handler = async (_event: any, _context: any, _callback: any) => {
     const data: { blocks: { type: string; text?: { type: string; text: string } }[] } = {
       blocks: [title],
     };
-
-    getStatusMessages(items).forEach((s) => {
+    const statusMessages = getStatusMessages(items);
+    statusMessages.forEach((s) => {
       const text = items
         .filter((i) => i.statusMessage === s)
         .map(
@@ -69,6 +69,21 @@ export const handler = async (_event: any, _context: any, _callback: any) => {
       data.blocks.push(divider, context, itemDetail);
     });
 
+    const curlContext = {
+      type: 'context',
+      elements: [
+        { type: 'mrkdwn', text: ':robot_face: Retry delivering all messages in this notification' },
+      ],
+    };
+    const ids = items.map((i) => `"${i.messageChannelUser}"`).join(',');
+    const curlCommand = {
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: `\`\`\`\ncurl --header "Content-Type: application/json" -X POST -d '{"ids": [${ids}]}' ${USER_MESSAGE_API_URL}/error/retry\n\`\`\``,
+      },
+    };
+    data.blocks.push(curlContext, curlCommand);
     await axios.post(DX_ALERTS_SLACK_HOOK, data, {
       headers: { 'Content-Type': 'application/json' },
     });
