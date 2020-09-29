@@ -15,4 +15,7 @@ export const query = (i: DynamoDB.QueryInput): Promise<DynamoDB.QueryOutput> =>
 export const deleteItem = (i: DynamoDB.DeleteItemInput): Promise<DynamoDB.DeleteItemOutput> =>
   database.deleteItem(i).promise();
 
+export const batchGetItem = (i: DynamoDB.BatchGetItemInput): Promise<DynamoDB.BatchGetItemOutput> =>
+  database.batchGetItem(i).promise();
+
 export default database;
