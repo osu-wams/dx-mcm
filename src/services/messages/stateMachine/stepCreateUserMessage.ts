@@ -1,10 +1,5 @@
-import throat from 'throat';
-import {
-  SQS_PROCESS_USER_MESSAGE_QUEUE_NAME,
-  SQS_ERROR_MESSAGE_QUEUE_NAME,
-  SQS_ERROR_USER_MESSAGE_QUEUE_NAME,
-} from '@src/constants';
-import { getQueueUrl, publishToQueue } from '@src/services/sqsUtils';
+import { SQS_ERROR_MESSAGE_QUEUE_NAME } from '@src/constants';
+import { getQueueUrl, publishToQueue, publishUserMessagesToQueue } from '@src/services/sqsUtils';
 import UserMessage from '@src/models/userMessage';
 import Message, { Status } from '@src/models/message';
 import { getObject } from '@src/services/s3Utils';
@@ -49,36 +44,6 @@ const buildUserMessages = (
     console.error(err);
     throw new Error(
       'Failed to translate target channels and users into individual UserMessages for persistence.',
-    );
-  }
-};
-
-/**
- * Publish each UserMessages instance to the processing queue where a lambda will
- * fire off processing each individual UserMessage and deliver it to its intended channel. If
- * publishing to the processing queue fails, then publish to the error queue for disposition.
- * @param userMessages the UserMessage instances that were persisted to DynamoDB
- */
-const publishUserMessagesToQueue = async (userMessages: UserMessage[]): Promise<void[]> => {
-  try {
-    const queueUrl = await getQueueUrl(SQS_PROCESS_USER_MESSAGE_QUEUE_NAME);
-    const errorQueueUrl = await getQueueUrl(SQS_ERROR_USER_MESSAGE_QUEUE_NAME);
-    return Promise.all(
-      userMessages.map(
-        throat(50, (userMessage: UserMessage) => {
-          return publishToQueue(userMessage!, queueUrl).catch((err) => {
-            // TODO: Mark the UserMessage as a fail status?
-            publishToQueue({ object: { userMessage }, error: err }, errorQueueUrl);
-            console.error(err);
-          });
-        }),
-      ),
-    );
-  } catch (err) {
-    // Throw error caught when one of the getQueueUrl fails, setting Message in error state
-    console.error(err);
-    throw new Error(
-      `${userMessages.length} UserMessages persisted/upserted in DynamoDB, but publishing to SQS failed. Caught: ${err}`,
     );
   }
 };

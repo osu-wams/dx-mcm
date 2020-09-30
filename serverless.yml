@@ -53,6 +53,8 @@ provider:
     - Effect: Allow
       Action:
         - dynamodb:GetItem
+        - dynamodb:BatchGetItem
+        - dynamodb:DeleteItem
         - dynamodb:PutItem
         - dynamodb:UpdateItem
         - dynamodb:Query
