@@ -9,6 +9,7 @@ import * as findByChannelEvent from '../../../events/lambda.http.userMessageApi.
 import * as markReadEvent from '../../../events/lambda.http.userMessageApi.markRead.json';
 import * as findErrorEvent from '../../../events/lambda.http.userMessageApi.findError.json';
 import * as findByStatusEvent from '../../../events/lambda.http.userMessageApi.findByStatus.json';
+import * as markAllReadEvent from '../../../events/lambda.http.userMessageApi.markAllRead.json';
 
 const mockEvent = jest.fn();
 
@@ -188,6 +189,68 @@ describe('handler', () => {
         }),
       );
       expect(mockPutItem).not.toHaveBeenCalled();
+    });
+    it('returns an error', async () => {
+      mockQuery.mockRejectedValue({ message: 'error' });
+      const response = await handler(mockEvent(), mockContext);
+      expect(response.statusCode).toBe(500);
+      expect(response.body).toBe(JSON.stringify({ message: 'error', data: null }));
+      expect(mockPutItem).not.toHaveBeenCalled();
+    });
+  });
+
+  describe.only('markAllRead', () => {
+    beforeEach(() => {
+      mockEvent.mockReturnValue(JSON.parse(JSON.stringify(markAllReadEvent)));
+    });
+
+    it('updates a record', async () => {
+      mockQuery
+        .mockResolvedValueOnce({ Items: [dynamoDbUserMessage], Count: 1 })
+        .mockResolvedValueOnce({
+          Items: [{ ...dynamoDbUserMessage, status: { S: 'READ' } }],
+          Count: 1,
+        });
+      mockUpdateItem.mockResolvedValue({ ...userMessage, status: 'READ' });
+      const response = await handler(mockEvent(), mockContext);
+      expect(response.statusCode).toBe(200);
+      expect(response.body).toBe(
+        JSON.stringify({
+          action: 'user-messages-mark-all-read',
+          message: '1 marked as read.',
+        }),
+      );
+      expect(mockUpdateItem).toHaveBeenCalled();
+    });
+    it('updates many records', async () => {
+      mockQuery
+        .mockResolvedValueOnce({ Items: [dynamoDbUserMessage, dynamoDbUserMessage], Count: 2 })
+        .mockResolvedValue({
+          Items: [{ ...dynamoDbUserMessage, status: { S: 'READ' } }],
+          Count: 1,
+        });
+      mockUpdateItem.mockResolvedValue({ ...userMessage, status: 'READ' });
+      const response = await handler(mockEvent(), mockContext);
+      expect(response.statusCode).toBe(200);
+      expect(response.body).toBe(
+        JSON.stringify({
+          action: 'user-messages-mark-all-read',
+          message: '2 marked as read.',
+        }),
+      );
+      expect(mockUpdateItem).toHaveBeenCalled();
+    });
+    it('does not find a record to update', async () => {
+      mockQuery.mockResolvedValue({ Items: [], Count: 0 });
+      const response = await handler(mockEvent(), mockContext);
+      expect(response.statusCode).toBe(200);
+      expect(response.body).toBe(
+        JSON.stringify({
+          action: 'user-messages-mark-all-read',
+          message: '0 marked as read.',
+        }),
+      );
+      expect(mockUpdateItem).not.toHaveBeenCalled();
     });
     it('returns an error', async () => {
       mockQuery.mockRejectedValue({ message: 'error' });
