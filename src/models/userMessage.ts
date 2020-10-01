@@ -102,9 +102,11 @@ export const channelExists = (userMessage: UserMessage): boolean =>
   ChannelId[userMessage.channelId.toUpperCase() as keyof typeof ChannelId] ===
   userMessage.channelId.toLowerCase();
 
-export const compositeKey = (fields: string[], separator: string = '#'): string => {
+export const separator = '#';
+
+export const compositeKey = (fields: string[], s: string = separator): string => {
   if (fields.every((f) => !f)) return '';
-  return fields.join(separator);
+  return fields.join(s);
 };
 
 class UserMessage {
@@ -149,6 +151,8 @@ class UserMessage {
   static BY_CHANNEL_INDEX: string = `${DYNAMODB_TABLE_PREFIX}-UserMessageByChannel`;
 
   static BY_SEND_AT_INDEX: string = `${DYNAMODB_TABLE_PREFIX}-UserMessageBySendAt`;
+
+  static BY_STATUS_INDEX: string = `${DYNAMODB_TABLE_PREFIX}-UserMessageByStatus`;
 
   constructor(p: UserMessageParams) {
     if (p.userMessage) {
@@ -343,8 +347,39 @@ class UserMessage {
     }
   };
 
+  /**
+   * This is a Global Secondary Index used to query for all UserMessages for an id and status,
+   * returning the channelMessageId's found. The channelMessageId's are the tables default range key
+   * and can be used in conjunction with the id to further query individual messages.
+   * @param id parition key - onid
+   * @param status status to query for
+   */
+  static byStatus = async (id: string, status: Status): Promise<string[]> => {
+    try {
+      const params: AWS.DynamoDB.QueryInput = {
+        TableName: UserMessage.TABLE_NAME,
+        IndexName: UserMessage.BY_STATUS_INDEX,
+        KeyConditionExpression: '#keyAttribute = :keyValue AND #rangeAttribute = :rangeValue',
+        ExpressionAttributeNames: {
+          '#keyAttribute': 'id',
+          '#rangeAttribute': 'status',
+        },
+        ExpressionAttributeValues: {
+          ':keyValue': { S: id },
+          ':rangeValue': { S: status },
+        },
+      };
+      const results: AWS.DynamoDB.QueryOutput = await query(params);
+      if (!results.Items) return [];
+      return results.Items.map((i) => i.channelMessageId.S!);
+    } catch (err) {
+      console.error(`UserMessage.byStatus(${id}, ${status}) failed:`, err);
+      throw err;
+    }
+  };
+
   static updateStatus = async (
-    props: UserMessage,
+    props: UserMessage | { id: string; channelId: string; messageId: string },
     status: string,
   ): Promise<UserMessageResults<UserMessage>> => {
     try {
@@ -365,7 +400,6 @@ class UserMessage {
       };
 
       await updateItem(params);
-      userMessage.status = status;
       console.log('UserMessage.updateStatus succeeded:', userMessage);
       const { id, messageId, channelId } = userMessage;
       return UserMessage.find({ id, messageId, channelId, status });

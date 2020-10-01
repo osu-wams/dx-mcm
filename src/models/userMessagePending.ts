@@ -129,7 +129,7 @@ class UserMessagePending extends UserMessage {
   };
 
   static updateStatus = async (
-    _props: UserMessage, // eslint-disable-line no-unused-vars
+    _props: UserMessage | { id: string; channelId: string; messageId: string }, // eslint-disable-line no-unused-vars
     _status: string, // eslint-disable-line no-unused-vars
   ): Promise<UserMessageResults<UserMessagePending>> => {
     throw new Error('UserMessagePending.updateStatus not yet implemented.');
