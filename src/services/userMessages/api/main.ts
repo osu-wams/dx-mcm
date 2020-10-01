@@ -81,7 +81,7 @@ const markAllRead = async (req: Request, res: Response, next: NextFunction) => {
     }
     res.status(200).json({
       action,
-      object: { message: `${updatedUserMessages.length} marked as read.` },
+      message: `${updatedUserMessages.length} marked as read.`,
     });
   } catch (err) {
     errorHandler(err, req, res, next);
