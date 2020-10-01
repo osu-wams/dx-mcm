@@ -199,7 +199,7 @@ describe('handler', () => {
     });
   });
 
-  describe.only('markAllRead', () => {
+  describe('markAllRead', () => {
     beforeEach(() => {
       mockEvent.mockReturnValue(JSON.parse(JSON.stringify(markAllReadEvent)));
     });
