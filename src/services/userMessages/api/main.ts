@@ -1,7 +1,7 @@
 import serverless from 'serverless-http';
 import express, { Request, Response, NextFunction } from 'express'; // eslint-disable-line no-unused-vars
 import { errorHandler } from '@src/services/expressUtils';
-import UserMessage, { ChannelId, Status } from '@src/models/userMessage';
+import UserMessage, { ChannelId, separator, Status } from '@src/models/userMessage';
 import UserMessagePending from '@src/models/userMessagePending';
 import { USER_MESSAGE_API_PATH } from '@src/constants';
 import { publishUserMessagesToQueue } from '@src/services/sqsUtils';
@@ -59,6 +59,35 @@ const markRead = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const markAllRead = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const action = 'user-messages-mark-all-read';
+    const { userId, channelId } = req.params;
+    if (!userId)
+      throw new Error(`Missing userId ({onid}-{osuId}) in path. Path parameters: ${req.params}`);
+    if (!channelId) throw new Error(`Missing channelId in path. Path parameters: ${req.params}`);
+    const [onid] = (userId ?? '').split('-'); // eslint-disable-line no-unused-vars
+
+    const channelMessageIds = await UserMessage.byStatus(onid, Status.DELIVERED);
+    const updatedUserMessages = [];
+    for (let i = 0; i < channelMessageIds.length; i += 1) {
+      const messageId = channelMessageIds[i].split(separator)[1];
+      // eslint-disable-next-line
+      const updatedUserMessage = await UserMessage.updateStatus(
+        { id: onid, channelId, messageId },
+        Status.READ,
+      );
+      updatedUserMessages.push(...updatedUserMessage.items);
+    }
+    res.status(200).json({
+      action,
+      object: { message: `${updatedUserMessages.length} marked as read.` },
+    });
+  } catch (err) {
+    errorHandler(err, req, res, next);
+  }
+};
+
 const findByStatus = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const action = 'user-message-pending-find-by-status';
@@ -105,6 +134,7 @@ const retrySendingUserMessages = async (req: Request, res: Response, next: NextF
 };
 
 app.get(`${USER_MESSAGE_API_PATH}/channel/:channelId/:userId/:lastKey?`, findByChannel);
+app.get(`${USER_MESSAGE_API_PATH}/read/:channelId/all/:userId`, markAllRead);
 app.get(`${USER_MESSAGE_API_PATH}/read/:channelId/:messageId/:userId`, markRead);
 app.get(`${USER_MESSAGE_API_PATH}/status/:status/:fromDate/:lastKey?`, findByStatus);
 app.get(`${USER_MESSAGE_API_PATH}/error/:messageChannelUser`, findError);
