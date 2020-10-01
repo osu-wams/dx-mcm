@@ -60,6 +60,8 @@ userMessagesTable:
         AttributeType: S
       - AttributeName: channelDeliveredAt
         AttributeType: S
+      - AttributeName: status
+        AttributeType: S
     KeySchema:
       - AttributeName: id
         KeyType: HASH
@@ -86,6 +88,17 @@ userMessagesTable:
           - AttributeName: id
             KeyType: HASH
           - AttributeName: sendAt
+            KeyType: RANGE
+        Projection:
+          ProjectionType: INCLUDE
+          NonKeyAttributes:
+            - channelMessageId
+    GlobalSecondaryIndexes:
+      - IndexName: ${self:service.name}-UserMessageByStatus
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+          - AttributeName: status
             KeyType: RANGE
         Projection:
           ProjectionType: INCLUDE
