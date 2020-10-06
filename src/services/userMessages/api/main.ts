@@ -21,7 +21,7 @@ const findByChannel = async (req: Request, res: Response, next: NextFunction) =>
 
     res.status(200).json({
       action,
-      object: { userMessageResults },
+      userMessageResults,
     });
   } catch (err) {
     errorHandler(err, req, res, next);
@@ -51,7 +51,7 @@ const markRead = async (req: Request, res: Response, next: NextFunction) => {
       );
       res.status(200).json({
         action,
-        object: { userMessage: userMessageStatusResults.items[0] },
+        userMessage: userMessageStatusResults.items[0],
       });
     }
   } catch (err) {
@@ -98,7 +98,7 @@ const findByStatus = async (req: Request, res: Response, next: NextFunction) => 
       pendingMinAgo,
       lastKey,
     );
-    res.status(200).json({ action, object: { userMessageResults } });
+    res.status(200).json({ action, userMessageResults });
   } catch (err) {
     errorHandler(err, req, res, next);
   }
@@ -109,7 +109,7 @@ const findError = async (req: Request, res: Response, next: NextFunction) => {
     const action = 'user-message-pending-find-error';
     const { messageChannelUser } = req.params; // # delimiter must be urlencoded as %23
     const userMessageResults = await UserMessagePending.find({ messageChannelUser });
-    res.status(200).json({ action, object: { userMessageResults } });
+    res.status(200).json({ action, userMessageResults });
   } catch (err) {
     errorHandler(err, req, res, next);
   }
@@ -127,7 +127,7 @@ const retrySendingUserMessages = async (req: Request, res: Response, next: NextF
       // eslint-disable-next-line
       await UserMessagePending.delete({ id, channelId, messageId, status: Status.ERROR });
     }
-    res.status(200).json({ action, object: { items } });
+    res.status(200).json({ action, items });
   } catch (err) {
     errorHandler(err, req, res, next);
   }

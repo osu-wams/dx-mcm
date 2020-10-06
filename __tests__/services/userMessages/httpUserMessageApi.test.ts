@@ -53,7 +53,7 @@ describe('handler', () => {
       expect(response.body).toBe(
         JSON.stringify({
           action: 'user-messages-find-by-channel',
-          object: { userMessageResults: { items: [userMessage], count: 1 } },
+          userMessageResults: { items: [userMessage], count: 1 },
         }),
       );
       expect(mockPutItem).not.toHaveBeenCalled();
@@ -65,7 +65,7 @@ describe('handler', () => {
       expect(response.body).toBe(
         JSON.stringify({
           action: 'user-messages-find-by-channel',
-          object: { userMessageResults: { items: [], count: 0 } },
+          userMessageResults: { items: [], count: 0 },
         }),
       );
       expect(mockPutItem).not.toHaveBeenCalled();
@@ -97,7 +97,7 @@ describe('handler', () => {
       expect(response.body).toBe(
         JSON.stringify({
           action: 'user-message-mark-read',
-          object: { userMessage: { ...userMessage, status: 'READ' } },
+          userMessage: { ...userMessage, status: 'READ' },
         }),
       );
       expect(mockUpdateItem).toHaveBeenCalled();
@@ -135,7 +135,7 @@ describe('handler', () => {
       expect(response.body).toBe(
         JSON.stringify({
           action: 'user-message-pending-find-by-status',
-          object: { userMessageResults: { items: [userMessagePending], count: 1 } },
+          userMessageResults: { items: [userMessagePending], count: 1 },
         }),
       );
       expect(mockPutItem).not.toHaveBeenCalled();
@@ -147,7 +147,7 @@ describe('handler', () => {
       expect(response.body).toBe(
         JSON.stringify({
           action: 'user-message-pending-find-by-status',
-          object: { userMessageResults: { items: [], count: 0 } },
+          userMessageResults: { items: [], count: 0 },
         }),
       );
       expect(mockPutItem).not.toHaveBeenCalled();
@@ -173,7 +173,7 @@ describe('handler', () => {
       expect(response.body).toBe(
         JSON.stringify({
           action: 'user-message-pending-find-error',
-          object: { userMessageResults: { items: [userMessagePending], count: 1 } },
+          userMessageResults: { items: [userMessagePending], count: 1 },
         }),
       );
       expect(mockPutItem).not.toHaveBeenCalled();
@@ -185,7 +185,7 @@ describe('handler', () => {
       expect(response.body).toBe(
         JSON.stringify({
           action: 'user-message-pending-find-error',
-          object: { userMessageResults: { items: [], count: 0 } },
+          userMessageResults: { items: [], count: 0 },
         }),
       );
       expect(mockPutItem).not.toHaveBeenCalled();
