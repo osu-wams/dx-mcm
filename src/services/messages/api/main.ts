@@ -15,7 +15,7 @@ const findById = async (req: Request, res: Response, next: NextFunction) => {
     if (!message) {
       res.status(400).json({ error: `Message ${id} not found.` });
     } else {
-      res.status(200).json({ message });
+      res.status(200).header('Cache-Control', 'max-age=5').json({ message });
     }
   } catch (err) {
     errorHandler(err, req, res, next);
