@@ -19,7 +19,7 @@ const findByChannel = async (req: Request, res: Response, next: NextFunction) =>
     if (!selectedChannel) throw new Error('Missing valid channelId in path.');
     const userMessageResults = await UserMessage.byChannel(onid, selectedChannel, lastKey);
 
-    res.status(200).json({
+    res.status(200).header('Cache-Control', 'max-age=0').json({
       action,
       userMessageResults,
     });
