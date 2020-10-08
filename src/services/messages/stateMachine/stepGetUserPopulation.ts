@@ -22,8 +22,8 @@ const affiliationLookup: { [key: string]: string } = {
   'into-students': `${dxGrouperBaseStem}:into-students`,
   'undergraduate-students': `${dxGrouperBaseStem}:undergraduate-students`,
   'graduate-students': `${dxGrouperBaseStem}:graduate-students`,
-  'all-employees': 'osu:ref:emp:employees-all',
-  teaching: 'osu:ref:stu:cert:next:cg11',
+  'all-employees': `${dxGrouperBaseStem}:employees-all`,
+  'non-student-employees': `${dxGrouperBaseStem}:employees-no-students`,
 };
 
 /**
