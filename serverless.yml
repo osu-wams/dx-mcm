@@ -48,6 +48,10 @@ provider:
         - !Join ['', [!GetAtt dataTransferBucket.Arn, '/*']]
     - Effect: Allow
       Action:
+        - elasticache:*
+      Resource: '*'
+    - Effect: Allow
+      Action:
         - sns:Publish
       Resource: '*'
     - Effect: Allow
@@ -128,6 +132,9 @@ resources:
     NatGateway: ${file(./serverless-vpc-resources.yml):NatGateway}
     PrivateRouteTable: ${file(./serverless-vpc-resources.yml):PrivateRouteTable}
     PrivateRoute: ${file(./serverless-vpc-resources.yml):PrivateRoute}
+    RedisSecurityGroup: ${file(./serverless-vpc-resources.yml):RedisSecurityGroup}
+    RedisCacheClusterSubnetGroup: ${file(./serverless-vpc-resources.yml):RedisCacheClusterSubnetGroup}
+    RedisCacheCluster: ${file(./serverless-vpc-resources.yml):RedisCacheCluster}
     SubnetRouteTableAssociationPrivateA: ${file(./serverless-vpc-resources.yml):SubnetRouteTableAssociationPrivateA}
     SubnetRouteTableAssociationPrivateB: ${file(./serverless-vpc-resources.yml):SubnetRouteTableAssociationPrivateB}
     SubnetRouteTableAssociationPrivateC: ${file(./serverless-vpc-resources.yml):SubnetRouteTableAssociationPrivateC}

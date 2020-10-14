@@ -77,6 +77,8 @@ stepGetUserPopulation:
     GROUPER_HOST: ${env:GROUPER_HOST}
     GROUPER_USERNAME: ${env:GROUPER_USERNAME}
     GROUPER_PASSWORD: ${env:GROUPER_PASSWORD}
+    REDIS_HOST: !GetAtt RedisCacheCluster.RedisEndpoint.Address
+    REDIS_PORT: !GetAtt RedisCacheCluster.RedisEndpoint.Port
     # Left for local debugging
     # DATA_TRANSFER_BUCKET: ${env:DATA_TRANSFER_BUCKET}
 
