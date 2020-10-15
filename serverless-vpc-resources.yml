@@ -120,3 +120,45 @@ LambdaSecurityGroup:
         CidrIp: 127.0.0.1/32
     VpcId:
       Ref: Vpc
+
+# Elasticache network security
+RedisSecurityGroup:
+  Type: AWS::EC2::SecurityGroup
+  Properties:
+    VpcId:
+      Ref: Vpc
+    GroupName: ${self:service}-redis-security-group
+    GroupDescription: Security Group to grant access to Redis Session Store.
+    SecurityGroupEgress:
+      - IpProtocol: '-1'
+        CidrIp: 0.0.0.0/0
+    SecurityGroupIngress:
+      - IpProtocol: tcp
+        CidrIp: 0.0.0.0/0
+        FromPort: 6379
+        ToPort: 6379
+
+# Elasticache network security
+RedisCacheClusterSubnetGroup:
+  Type: AWS::ElastiCache::SubnetGroup
+  Properties:
+    CacheSubnetGroupName: ${self:service}-redis-subnet-group
+    Description: Redis cluster subnets
+    SubnetIds:
+      - Ref: PrivateSubnetA
+      - Ref: PrivateSubnetB
+      - Ref: PrivateSubnetC
+
+# Elasticache cluster
+RedisCacheCluster:
+  Type: AWS::ElastiCache::CacheCluster
+  Properties:
+    Engine: redis
+    ClusterName: ${self:service}-redis-cluster
+    EngineVersion: 5.0.6
+    CacheNodeType: cache.t2.small
+    NumCacheNodes: 1
+    VpcSecurityGroupIds:
+      - !GetAtt RedisSecurityGroup.GroupId
+    CacheSubnetGroupName:
+      Ref: RedisCacheClusterSubnetGroup
