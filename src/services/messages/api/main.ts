@@ -14,12 +14,14 @@ const app = express();
 const cachedGroups = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const cache = new Cache(REDIS_HOST, REDIS_PORT);
-    const data: { [key: string]: any } = {};
+    const data: { [key: string]: { count: number; date: string } | undefined } = {};
     const keys = Object.keys(affiliationLookup);
     for (let i = 0; i < keys.length; i += 1) {
       const name = keys[i];
       // eslint-disable-next-line
-      data[name] = await cache.get(`${affiliationLookup[name]}-count`);
+      data[name] = await cache.get<{ count: number; date: string }>(
+        `${affiliationLookup[name]}-count`,
+      );
     }
     res.status(200).json(data);
   } catch (err) {
