@@ -7,8 +7,6 @@ import { Subject } from '@osu-wams/grouper/dist/types';
 import { putObject } from '@src/services/s3Utils';
 import { DATA_TRANSFER_BUCKET, REDIS_HOST, REDIS_PORT } from '@src/constants';
 
-const cache: Cache = new Cache(REDIS_HOST, REDIS_PORT);
-
 const dxGrouperBaseStem = 'app:dx:service:ref';
 
 // Grouper subjects with sourceId that doesn't represent a user, could be another
@@ -30,6 +28,7 @@ export const affiliationLookup: { [key: string]: string } = {
 };
 
 const setCache = <T>(key: string, value: T[]) => {
+  const cache: Cache = new Cache(REDIS_HOST, REDIS_PORT);
   const opts = { mode: 'EX', duration: 86400, flag: 'NX' };
   cache.set(key, JSON.stringify(value), opts);
   // No TTL so that the count remains until it is overwritten the next time it is queried
