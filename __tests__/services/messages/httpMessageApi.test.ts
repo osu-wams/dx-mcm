@@ -1,11 +1,12 @@
 import { handler } from '@src/services/messages/api/main';
 import { message, dynamoDbMessage } from '@mocks/message.mock';
+import { mockRedisError, mockRedisResponse } from '../../../__mocks__/redis';
 import * as findByIdEvent from '../../../events/lambda.http.messageApi.findById.json';
+import * as cachedGroupsEvent from '../../../events/lambda.http.messageApi.cachedGroups.json';
 import * as updateEvent from '../../../events/lambda.http.messageApi.update.json';
 import * as cancelEvent from '../../../events/lambda.http.messageApi.cancel.json';
 
 const mockEvent = jest.fn();
-
 const mockQuery = jest.fn();
 const mockPutItem = jest.fn();
 jest.mock('@src/database', () => ({
@@ -137,6 +138,50 @@ describe('handler', () => {
       expect(response.statusCode).toBe(500);
       expect(response.body).toBe(JSON.stringify({ message: 'error', data: null }));
       expect(mockPutItem).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('groups', () => {
+    beforeEach(() => {
+      mockEvent.mockReturnValue(JSON.parse(JSON.stringify(cachedGroupsEvent)));
+    });
+
+    it('finds a cached group', async () => {
+      const fromCache = JSON.stringify({ count: 1, date: '2020-04-20' });
+      const expected = JSON.stringify({ 'all-students': { count: 1, date: '2020-04-20' } });
+      mockRedisResponse.mockReturnValueOnce(fromCache).mockReturnValue('');
+      const response = await handler(mockEvent(), mockContext);
+      expect(response.statusCode).toBe(200);
+      expect(response.body).toBe(expected);
+      expect(mockRedisResponse).toBeCalledTimes(11);
+    });
+    it('finds all of the cached groups', async () => {
+      const fromCache = JSON.stringify({ count: 1, date: '2020-04-20' });
+      const expected = JSON.stringify({
+        'all-students': { count: 1, date: '2020-04-20' },
+        'ecampus-students': { count: 1, date: '2020-04-20' },
+        'cascades-students': { count: 1, date: '2020-04-20' },
+        'corvallis-students': { count: 1, date: '2020-04-20' },
+        'portland-students': { count: 1, date: '2020-04-20' },
+        'lagrande-students': { count: 1, date: '2020-04-20' },
+        'into-students': { count: 1, date: '2020-04-20' },
+        'undergraduate-students': { count: 1, date: '2020-04-20' },
+        'graduate-students': { count: 1, date: '2020-04-20' },
+        'all-employees': { count: 1, date: '2020-04-20' },
+        'non-student-employees': { count: 1, date: '2020-04-20' },
+      });
+      mockRedisResponse.mockReturnValue(fromCache);
+      const response = await handler(mockEvent(), mockContext);
+      expect(response.statusCode).toBe(200);
+      expect(response.body).toBe(expected);
+      expect(mockRedisResponse).toBeCalledTimes(11);
+    });
+
+    it('returns an error', async () => {
+      mockRedisError.mockReturnValue({ message: 'error' });
+      const response = await handler(mockEvent(), mockContext);
+      expect(response.statusCode).toBe(500);
+      expect(response.body).toBe(JSON.stringify({ message: 'error', data: null }));
     });
   });
 });
