@@ -5,32 +5,39 @@ const DEFAULT_DB: number = 0;
 export default class Cache {
   client: redis.RedisClient;
 
+  host: string;
+
+  port: number;
+
   db: number = DEFAULT_DB;
 
   constructor(host: string, port: number, db: number = DEFAULT_DB) {
     this.db = db;
-    this.client = redis.createClient({
-      host,
-      port,
-      db,
-    });
-    this.client.on('error', (err) => console.error(`cache: redisClient.on('error'): ${err}`));
+    this.host = host;
+    this.port = port;
+    this.client = this.createClient();
+  }
+
+  createClient(): redis.RedisClient {
+    const client = redis.createClient({ host: this.host, port: this.port, db: this.db });
+    client.on('error', (err) => console.error(`cache: redisClient.on('error'): ${err}`));
+    return client;
   }
 
   async get<T>(key: string): Promise<T | undefined> {
-    await this.selectDb();
-    const reply = await new Promise<T | undefined>((resolve, reject) => {
+    const reply = await new Promise<string | undefined>((resolve, reject) => {
       this.client.get(key, (err, data) => {
         if (err) reject(err);
-        if (data) resolve(JSON.parse(data.toString()));
+        if (data) resolve(data);
         if (!data) resolve(undefined);
       });
     });
     if (!reply) {
       console.debug(`getCache(${key}) did not find data.`);
-      return reply;
+      return undefined;
     }
-    return reply;
+    console.log('get returning', reply);
+    return JSON.parse(reply);
   }
 
   async set(
@@ -38,7 +45,6 @@ export default class Cache {
     data: string,
     options?: { mode: string; duration: number; flag: string },
   ): Promise<boolean> {
-    await this.selectDb();
     return new Promise((resolve, reject) => {
       if (options) {
         const { mode, duration, flag } = options;
