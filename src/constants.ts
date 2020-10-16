@@ -1,6 +1,6 @@
 require('./config');
 
-const DATA_TRANSFER_BUCKET = process.env.DATA_TRANSFER_BUCKET || '';
+const DATA_TRANSFER_BUCKET = process.env.DATA_TRANSFER_BUCKET?.toString() ?? '';
 const DX_ALERTS_SLACK_HOOK = process.env.DX_ALERTS_SLACK_HOOK || '';
 const DYNAMODB_API_VERSION = '2012-08-10';
 const DYNAMODB_TABLE_PREFIX = `${process.env.SERVICE_NAME}`;
