@@ -36,7 +36,6 @@ export default class Cache {
       console.debug(`getCache(${key}) did not find data.`);
       return undefined;
     }
-    console.log('get returning', reply);
     return JSON.parse(reply);
   }
 
