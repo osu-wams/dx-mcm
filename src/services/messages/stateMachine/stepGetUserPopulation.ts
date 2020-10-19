@@ -1,10 +1,11 @@
 /* eslint-disable no-unused-vars */
+import Cache from '@src/cache';
 import { Client, getMembers } from '@osu-wams/grouper';
 import type { MessageWithPopulation, UserData } from '@src/services/messages/types';
 import Message, { MessagePopulationParams } from '@src/models/message';
 import { Subject } from '@osu-wams/grouper/dist/types';
 import { putObject } from '@src/services/s3Utils';
-import { DATA_TRANSFER_BUCKET } from '@src/constants';
+import { DATA_TRANSFER_BUCKET, REDIS_HOST, REDIS_PORT } from '@src/constants';
 
 const dxGrouperBaseStem = 'app:dx:service:ref';
 
@@ -12,7 +13,7 @@ const dxGrouperBaseStem = 'app:dx:service:ref';
 // source group or similar.
 const ignoreSourceIds = ['g:gsa'];
 
-const affiliationLookup: { [key: string]: string } = {
+export const affiliationLookup: { [key: string]: string } = {
   'all-students': `${dxGrouperBaseStem}:eligible-to-register`,
   'ecampus-students': `${dxGrouperBaseStem}:campus-ecampus`,
   'cascades-students': `${dxGrouperBaseStem}:campus-cascades`,
@@ -26,6 +27,13 @@ const affiliationLookup: { [key: string]: string } = {
   'non-student-employees': `${dxGrouperBaseStem}:employees-no-students`,
 };
 
+const setCache = <T>(key: string, value: T[]) => {
+  const cache: Cache = new Cache(REDIS_HOST, REDIS_PORT);
+  const opts = { mode: 'EX', duration: 86400, flag: 'NX' };
+  cache.set(key, JSON.stringify(value), opts);
+  // No TTL so that the count remains until it is overwritten the next time it is queried
+  cache.set(`${key}-count`, JSON.stringify({ count: value.length, date: new Date() }));
+};
 /**
  * Return a unique array of Users found in a Grouper group
  * @param client Grouper client
@@ -67,6 +75,7 @@ const getAllMembers = async (client: Client, affiliations: string[]): Promise<Us
     for (let i = 0; i < affiliations.length; i += 1) {
       // eslint-disable-next-line
       const m = await getMembersInAffiliation(client, affiliations[i]);
+      setCache(affiliations[i], m);
       userData = userData.concat(m);
       console.debug(
         `getAllMembers affiliation process affiliation: ${affiliations[i]} returned ${m.length} making user data total ${userData.length}`,

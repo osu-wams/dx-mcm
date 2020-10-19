@@ -1,7 +1,7 @@
 {
   "populationParams": {
     "users": [{ "id": "bobross" }],
-    "affiliations": ["x-students", "y-students"]
+    "affiliations": ["lagrande-students"]
   },
   "channelIds": ["123"],
   "content": "content",

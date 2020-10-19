@@ -1,11 +1,33 @@
+import Cache from '@src/cache';
 import serverless from 'serverless-http';
 import express, { Request, Response, NextFunction } from 'express'; // eslint-disable-line no-unused-vars
 import { errorHandler } from '@src/services/expressUtils';
 import Message, { Status } from '@src/models/message';
+import { REDIS_HOST, REDIS_PORT } from '@src/constants';
+import { affiliationLookup } from '@src/services/messages/stateMachine/stepGetUserPopulation';
 
 const API_BASE_URL = '/api/v1/message';
 
 const app = express();
+
+// eslint-disable-next-line no-unused-vars
+const cachedGroups = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const cache = new Cache(REDIS_HOST, REDIS_PORT);
+    const data: { [key: string]: { count: number; date: string } | undefined } = {};
+    const keys = Object.keys(affiliationLookup);
+    for (let i = 0; i < keys.length; i += 1) {
+      const name = keys[i];
+      // eslint-disable-next-line
+      data[name] = await cache.get<{ count: number; date: string }>(
+        `${affiliationLookup[name]}-count`,
+      );
+    }
+    res.status(200).json(data);
+  } catch (err) {
+    errorHandler(err, req, res, next);
+  }
+};
 
 // eslint-disable-next-line no-unused-vars
 const findById = async (req: Request, res: Response, next: NextFunction) => {
@@ -65,6 +87,7 @@ const cancel = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+app.get(`${API_BASE_URL}/groups`, cachedGroups);
 app.get(`${API_BASE_URL}/:id`, findById);
 app.post(`${API_BASE_URL}/:id`, express.json({ type: '*/*' }), update);
 app.post(`${API_BASE_URL}/:id/cancel`, cancel);

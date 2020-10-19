@@ -2,6 +2,9 @@ httpMessageApi:
   handler: src/services/messages/api/main.handler
   name: ${self:service.name}-messageApi
   description: Message API endpoint
+  environment:
+    REDIS_HOST: !GetAtt RedisCacheCluster.RedisEndpoint.Address
+    REDIS_PORT: !GetAtt RedisCacheCluster.RedisEndpoint.Port
   events:
     - http:
         private: true # forces header x-api-key to be present with a valid key from provider.apiKeys
