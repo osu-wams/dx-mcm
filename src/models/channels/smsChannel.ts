@@ -1,3 +1,6 @@
+/* istanbul ignore file */
+/* No current need for measuring coverage on a channel that isn't being released yet. */
+
 import { parsePhoneNumberFromString, ParseError, isValidNumber } from 'libphonenumber-js';
 import { publish } from '@src/messagePubSub';
 import { ENV } from '@src/constants';

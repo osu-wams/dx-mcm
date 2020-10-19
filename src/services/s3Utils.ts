@@ -1,3 +1,6 @@
+/* istanbul ignore file */
+/* No current need for measuring coverage on these utility methods */
+
 import { S3 } from 'aws-sdk'; // eslint-disable-line no-unused-vars
 import { S3_API_VERSION, S3_REGION } from '@src/constants';
 
