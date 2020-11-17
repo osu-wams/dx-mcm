@@ -48,7 +48,8 @@ const buildUserMessages = (
   }
 };
 
-export const handler = async (event: MessageStateMachineResult, _context: any, callback: any) => {
+// eslint-disable-next-line no-unused-vars
+export const handler = async (event: MessageStateMachineResult, _context: any) => {
   const message = { ...event };
   try {
     // message.processedQueries[].channels as a result from stepGetChannels
@@ -75,16 +76,16 @@ export const handler = async (event: MessageStateMachineResult, _context: any, c
       Status.SENT,
       `Published at ${new Date().toISOString()} to be sent at ${message.sendAt}`,
     );
-    callback(null, {
+    return {
       userMessagePublishedCount: userMessages.length,
       messageId: message.id,
-    });
+    };
   } catch (err) {
     console.error('stepCreateUserMessage handler failed -->  ', err);
     const queueUrl = await getQueueUrl(SQS_ERROR_MESSAGE_QUEUE_NAME);
     publishToQueue({ error: err.message, object: { message } }, queueUrl);
     await Message.updateStatus(message, Status.ERROR, err.message);
-    callback(err.message, null);
+    throw err;
   }
 };
 

@@ -118,7 +118,7 @@ const copyMessageToS3 = async (message: Message, users: UserData[]): Promise<str
  * @param _context unused
  * @param callback callback to return from step function
  */
-export const handler = async (event: Message, _context: any, callback: any) => {
+export const handler = async (event: Message, _context: any) => {
   const { users, affiliations }: MessagePopulationParams = event.populationParams;
   const foundUsers: UserData[] = [];
   const affiliationStems = affiliations?.map((a) => affiliationLookup[a]).filter(Boolean);
@@ -143,13 +143,13 @@ export const handler = async (event: Message, _context: any, callback: any) => {
   // spread users into a new array prevents mutation of original object in getTargetPopulation
   const targetPopulation: UserData[] = getTargetPopulation([...(users ?? [])], foundUsers);
   const key = await copyMessageToS3(event, targetPopulation);
-  if (key) {
-    callback(null, { s3Data: { bucket: DATA_TRANSFER_BUCKET, key } });
-  } else {
+  console.debug(`copyMessageToS3 successfully returned key ${key}`);
+  if (!key) {
     throw new Error(
       'stepGetUserPopulation failed to upload message with target population data to S3.',
     );
   }
+  return { s3Data: { bucket: DATA_TRANSFER_BUCKET, key } };
 };
 
 export default handler;

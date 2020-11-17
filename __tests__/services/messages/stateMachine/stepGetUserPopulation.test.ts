@@ -1,7 +1,6 @@
 import { handler } from '@src/services/messages/stateMachine/stepGetUserPopulation';
 import * as invokeEvent from '../../../../events/lambda.step.stepGetUserPopulation.json';
 
-const mockCallBack = jest.fn();
 const mockEvent = jest.fn();
 const mockPutObject = jest.fn();
 jest.mock('@src/services/s3Utils', () => ({
@@ -25,8 +24,7 @@ describe('handler', () => {
   });
 
   it('does not process missing affiliation stems', async () => {
-    await handler(mockEvent(), undefined, mockCallBack);
-    expect(mockCallBack).toBeCalled();
+    await handler(mockEvent(), undefined);
     expect(mockGetMembers).toBeCalled();
   });
 });
