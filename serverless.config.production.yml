@@ -3,9 +3,6 @@ provider:
     apiGateway: false
     lambda: false
   usagePlan:
-    quota:
-      limit: 5000
-      period: DAY
     throttle:
-      burstLimit: 500
-      rateLimit: 100
+      burstLimit: 5000
+      rateLimit: 1000
