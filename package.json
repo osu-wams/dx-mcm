@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@osu-wams/grouper": "^0.0.2",
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "libphonenumber-js": "^1.7.51",
