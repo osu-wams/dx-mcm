@@ -1,13 +1,15 @@
-service:
-  name: osu-dx-mcm-${opt:stage, 'development'}${file(./src/serverless.js):developerSuffix}
+service: osu-dx-mcm-${env:ENV, 'development'}
+
+frameworkVersion: '2'
+useDotenv: true
+variablesResolutionMode: 20210326
 
 package:
   individually: true
-  exclude:
-    - .git/**
+  patterns:
+    - '!.git/**'
 
 plugins:
-  - serverless-dotenv-plugin
   - serverless-s3-sync
   - serverless-pseudo-parameters
   - serverless-step-functions
@@ -18,17 +20,17 @@ custom: ${file(./serverless-custom.yml)}
 
 provider:
   name: aws
-  runtime: nodejs12.x
-  stage: ${opt:stage, 'development'}
+  runtime: nodejs14.x
   region: ${opt:region, 'us-west-2'}
-  stackName: ${self:service.name}
+  stackName: ${self:service}
+  lambdaHashingVersion: 20201221
   deploymentBucket:
     name: osu-dx-mcm-deployments
     blockPublicAccess: true
-  deploymentPrefix: ${self:service.name}
+  deploymentPrefix: ${self:service}
   environment:
     ENV: ${env:ENV}
-    SERVICE_NAME: ${self:service.name}
+    SERVICE_NAME: ${self:service}
   vpc:
     securityGroupIds:
       - !Ref LambdaSecurityGroup
@@ -36,73 +38,78 @@ provider:
       - !Ref PrivateSubnetA
       - !Ref PrivateSubnetB
       - !Ref PrivateSubnetC
-  apiKeys:
-    - value: ${env:AWS_APIGW_API_KEY}${file(./src/serverless.js):developerSuffix} # ensure a unique key when using a developer stack
-  tracing: ${file(./serverless.config.${opt:stage, 'development'}.yml):provider.tracing}
-  iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - s3:*
-      Resource:
-        - !GetAtt dataTransferBucket.Arn
-        - !Join ['', [!GetAtt dataTransferBucket.Arn, '/*']]
-    - Effect: Allow
-      Action:
-        - elasticache:*
-      Resource: '*'
-    - Effect: Allow
-      Action:
-        - sns:Publish
-      Resource: '*'
-    - Effect: Allow
-      Action:
-        - dynamodb:GetItem
-        - dynamodb:BatchGetItem
-        - dynamodb:DeleteItem
-        - dynamodb:PutItem
-        - dynamodb:UpdateItem
-        - dynamodb:Query
-      Resource:
-        - !Join [
-            ':',
-            [
-              'arn:aws:dynamodb',
-              !Ref AWS::Region,
-              !Ref AWS::AccountId,
-              'table/osu-dx-mcm-${opt:stage, "development"}-*',
-            ],
-          ]
-    - Effect: Allow
-      Action:
-        - sqs:SendMessage
-        - sqs:GetQueueUrl
-        - sqs:DeleteMessage
-        - sqs:ReceiveMessage
-        - sqs:GetQueueAttributes
-      Resource:
-        - !GetAtt messagesSqsQueue.Arn
-        - !GetAtt messageErrorsSqsQueue.Arn
-        - !GetAtt userMessagesSqsQueue.Arn
-        - !GetAtt userMessageErrorsSqsQueue.Arn
-    - Effect: Allow
-      Action:
-        - logs:CreateLogDelivery
-        - logs:GetLogDelivery
-        - logs:UpdateLogDelivery
-        - logs:DeleteLogDelivery
-        - logs:ListLogDeliveries
-        - logs:PutResourcePolicy
-        - logs:DescribeResourcePolicies
-        - logs:DescribeLogGroups
-        - states:StartExecution
-      Resource:
-        - !Join [':', ['arn:aws:states', !Ref AWS::Region, !Ref AWS::AccountId, 'stateMachine:*']]
+  tracing: ${file(./serverless.config.${env:ENV, 'development'}.yml):provider.tracing}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - s3:*
+          Resource:
+            - !GetAtt dataTransferBucket.Arn
+            - !Join ['', [!GetAtt dataTransferBucket.Arn, '/*']]
+        - Effect: Allow
+          Action:
+            - elasticache:*
+          Resource: '*'
+        - Effect: Allow
+          Action:
+            - sns:Publish
+          Resource: '*'
+        - Effect: Allow
+          Action:
+            - dynamodb:GetItem
+            - dynamodb:BatchGetItem
+            - dynamodb:DeleteItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:Query
+          Resource:
+            - !Join [
+                ':',
+                [
+                  'arn:aws:dynamodb',
+                  !Ref AWS::Region,
+                  !Ref AWS::AccountId,
+                  'table/osu-dx-mcm-${env:ENV, "development"}-*',
+                ],
+              ]
+        - Effect: Allow
+          Action:
+            - sqs:SendMessage
+            - sqs:GetQueueUrl
+            - sqs:DeleteMessage
+            - sqs:ReceiveMessage
+            - sqs:GetQueueAttributes
+          Resource:
+            - !GetAtt messagesSqsQueue.Arn
+            - !GetAtt messageErrorsSqsQueue.Arn
+            - !GetAtt userMessagesSqsQueue.Arn
+            - !GetAtt userMessageErrorsSqsQueue.Arn
+        - Effect: Allow
+          Action:
+            - logs:CreateLogDelivery
+            - logs:GetLogDelivery
+            - logs:UpdateLogDelivery
+            - logs:DeleteLogDelivery
+            - logs:ListLogDeliveries
+            - logs:PutResourcePolicy
+            - logs:DescribeResourcePolicies
+            - logs:DescribeLogGroups
+            - states:StartExecution
+          Resource:
+            - !Join [
+                ':',
+                ['arn:aws:states', !Ref AWS::Region, !Ref AWS::AccountId, 'stateMachine:*'],
+              ]
 
   apiGateway:
     apiKeySourceType: HEADER
     description: OSU DX Multi-Channel Messaging API
-  apiName: ${self:service.name}
-  usagePlan: ${file(./serverless.config.${opt:stage, 'development'}.yml):provider.usagePlan}
+    apiKeys:
+      - value: ${env:AWS_APIGW_API_KEY}
+    usagePlan: ${file(./serverless.config.${env:ENV, 'development'}.yml):provider.usagePlan}
+  apiName: ${self:service}
 
 stepFunctions:
   stateMachines:

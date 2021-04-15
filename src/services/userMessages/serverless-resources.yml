@@ -1,15 +1,15 @@
 userMessagesSqsQueue:
   Type: AWS::SQS::Queue
   Properties:
-    QueueName: ${self:service.name}-user-messages
+    QueueName: ${self:service}-user-messages
 
 userMessageErrorsSqsQueue:
   Type: AWS::SQS::Queue
   Properties:
-    QueueName: ${self:service.name}-user-message-errors
+    QueueName: ${self:service}-user-message-errors
 
 userMessageStateMachineLogGroup:
   Type: AWS::Logs::LogGroup
   Properties:
-    LogGroupName: ${self:service.name}-userMessageStateMachineLogGroup
+    LogGroupName: ${self:service}-userMessageStateMachineLogGroup
     RetentionInDays: 14

@@ -113,7 +113,7 @@ SubnetRouteTableAssociationPublicD:
 LambdaSecurityGroup:
   Type: 'AWS::EC2::SecurityGroup'
   Properties:
-    GroupName: ${self:service}-${self:provider.stage}-lambda
+    GroupName: ${self:service}-${env:ENV, 'development'}-lambda
     GroupDescription: Allow all outbound traffic, no inbound
     SecurityGroupIngress:
       - IpProtocol: -1

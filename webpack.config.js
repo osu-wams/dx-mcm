@@ -1,11 +1,12 @@
 const path = require('path');
 const slsw = require('serverless-webpack');
-const isLocal = slsw.lib.webpack.isLocal;
+
+const { isLocal } = slsw.lib.webpack;
 
 module.exports = {
   mode: isLocal ? 'development' : 'production',
   entry: slsw.lib.entries,
-  devtool: isLocal ? 'source-map' : 'none',
+  devtool: isLocal ? 'source-map' : 'inline-source-map',
   resolve: {
     extensions: ['.js', '.jsx', '.json', '.ts', '.tsx'],
     alias: {
