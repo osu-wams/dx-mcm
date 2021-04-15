@@ -1,4 +1,4 @@
-service: osu-dx-mcm-${env:ENV, 'development'}${file(./src/serverless.js):developerSuffix}-infrastructure
+service: osu-dx-mcm-${env:ENV, 'development'}-infrastructure
 
 frameworkVersion: '2'
 useDotenv: true
