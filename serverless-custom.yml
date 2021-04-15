@@ -1,5 +1,5 @@
 s3Sync:
-  - bucketName: ${self:service.name}-static
+  - bucketName: ${self:service}-static
     localDir: dist/static
     acl: public-read
 

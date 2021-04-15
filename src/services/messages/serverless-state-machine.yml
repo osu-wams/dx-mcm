@@ -1,4 +1,4 @@
-name: ${self:service.name}-messageStateMachine
+name: ${self:service}-messageStateMachine
 id: messageStateMachine
 type: STANDARD
 loggingConfig:

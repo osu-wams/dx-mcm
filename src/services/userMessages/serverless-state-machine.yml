@@ -1,4 +1,4 @@
-name: ${self:service.name}-userMessageStateMachine
+name: ${self:service}-userMessageStateMachine
 id: userMessageStateMachine
 type: EXPRESS
 loggingConfig:

@@ -1,17 +1,17 @@
 messagesSqsQueue:
   Type: AWS::SQS::Queue
   Properties:
-    QueueName: ${self:service.name}-messages.fifo
+    QueueName: ${self:service}-messages.fifo
     ContentBasedDeduplication: true
     FifoQueue: true
 
 messageErrorsSqsQueue:
   Type: AWS::SQS::Queue
   Properties:
-    QueueName: ${self:service.name}-message-errors
+    QueueName: ${self:service}-message-errors
 
 messageStateMachineLogGroup:
   Type: AWS::Logs::LogGroup
   Properties:
-    LogGroupName: ${self:service.name}-messageStateMachineLogGroup
+    LogGroupName: ${self:service}-messageStateMachineLogGroup
     RetentionInDays: 14

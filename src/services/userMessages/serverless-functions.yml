@@ -1,6 +1,6 @@
 httpUserMessageApi:
   handler: src/services/userMessages/api/main.handler
-  name: ${self:service.name}-userMessageApi
+  name: ${self:service}-userMessageApi
   description: UserMessage API endpoint
   events:
     - http:
@@ -10,16 +10,8 @@ httpUserMessageApi:
 
 sqsUserMessageProcessor:
   handler: src/services/userMessages/sqsUserMessageProcessor.handler
-  name: ${self:service.name}-userMessageProcessor
-  description:
-    !Join [
-      ' ',
-      [
-        'Listens to SQS Queue',
-        !GetAtt messagesSqsQueue.QueueName,
-        'to deliver a UserMessage to its intended Channel.',
-      ],
-    ]
+  name: ${self:service}-userMessageProcessor
+  description: ${self:service}-messages.fifo
   environment:
     USER_MESSAGE_STATE_MACHINE_ARN:
       !Join [
@@ -28,7 +20,7 @@ sqsUserMessageProcessor:
           'arn:aws:states',
           !Ref AWS::Region,
           !Ref AWS::AccountId,
-          'stateMachine:${self:service.name}-userMessageStateMachine',
+          'stateMachine:${self:service}-userMessageStateMachine',
         ],
       ]
   events:
@@ -38,29 +30,29 @@ sqsUserMessageProcessor:
 
 stepGetUserPreferences:
   handler: src/services/userMessages/stepGetUserPreferences.handler
-  name: ${self:service.name}-getUserPreferences
+  name: ${self:service}-getUserPreferences
 
 stepApplyFlowControl:
   handler: src/services/userMessages/stepApplyFlowControl.handler
-  name: ${self:service.name}-applyFlowControl
+  name: ${self:service}-applyFlowControl
 
 stepPublishUserMessage:
   handler: src/services/userMessages/stepPublishUserMessage.handler
-  name: ${self:service.name}-publishUserMessage
+  name: ${self:service}-publishUserMessage
   timeout: 300
   environment:
     SQS_ERROR_USER_MESSAGE_QUEUE_NAME: !GetAtt userMessageErrorsSqsQueue.QueueName
 
 cronUserMessagePendingMonitor:
   handler: src/services/userMessages/cronUserMessagePendingMonitor.handler
-  name: ${self:service.name}-cronUserMessagePendingMonitor
+  name: ${self:service}-cronUserMessagePendingMonitor
   description: Scheduled Lambda to identify and send notifications about UserMessages that failed while trying to deliver.
   environment:
     DX_ALERTS_SLACK_HOOK: ${env:DX_ALERTS_SLACK_HOOK}
     PENDING_MIN_AGO: 15
   events:
     - schedule:
-        name: ${self:service.name}-cronUserMessagePendingMonitor
+        name: ${self:service}-cronUserMessagePendingMonitor
         description: Trigger the cronUserMessagePendingMonitor repeatedly
         rate: rate(15 minutes)
         enabled: true

@@ -3,14 +3,14 @@ staticBucket:
   DeletionPolicy: Retain
   Properties:
     AccessControl: PublicRead
-    BucketName: ${self:service.name}-static
+    BucketName: ${self:service}-static
 
 dataTransferBucket:
   Type: AWS::S3::Bucket
   DeletionPolicy: Retain
   Properties:
     AccessControl: Private
-    BucketName: ${self:service.name}-data-transfer
+    BucketName: ${self:service}-data-transfer
     PublicAccessBlockConfiguration:
       BlockPublicAcls: TRUE
       BlockPublicPolicy: TRUE
@@ -25,7 +25,7 @@ apiCloudFront:
   Properties:
     DistributionConfig:
       Aliases:
-        - ${file(./src/serverless.js):developerPrefix}${env:AWS_CLOUDFRONT_ALIAS} # optionally apply a developer prefix (<opt:developer>-) to the alias if command option provided
+        - ${env:AWS_CLOUDFRONT_ALIAS}
       Comment: OSU DX Multi-Channel Messaging API Distribution
       CustomErrorResponses:
         - ErrorCachingMinTTL: 60
@@ -53,12 +53,12 @@ apiCloudFront:
             - Authorization
             - x-api-key
           QueryString: true
-        TargetOriginId: ${self:service.name}-cloudfront
+        TargetOriginId: ${self:service}-cloudfront
         ViewerProtocolPolicy: https-only
       Enabled: true
       HttpVersion: http2
       Origins:
-        - Id: ${self:service.name}-cloudfront
+        - Id: ${self:service}-cloudfront
           CustomOriginConfig:
             OriginProtocolPolicy: https-only
             OriginSSLProtocols:
@@ -68,7 +68,7 @@ apiCloudFront:
               '',
               [!Ref ApiGatewayRestApi, '.execute-api.${self:provider.region}.amazonaws.com'],
             ]
-          OriginPath: '/${self:provider.stage}'
+          OriginPath: /${env:AWS_APIGW_STAGE, 'development'}
       PriceClass: PriceClass_All
       ViewerCertificate:
         AcmCertificateArn: ${env:AWS_CLOUDFRONT_CERT_ARN}

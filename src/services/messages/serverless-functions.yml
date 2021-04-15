@@ -1,6 +1,6 @@
 httpMessageApi:
   handler: src/services/messages/api/main.handler
-  name: ${self:service.name}-messageApi
+  name: ${self:service}-messageApi
   description: Message API endpoint
   environment:
     REDIS_HOST: !GetAtt RedisCacheCluster.RedisEndpoint.Address
@@ -12,7 +12,7 @@ httpMessageApi:
         path: /api/v1/message/{proxy+}
 httpMessagesPublisher:
   handler: src/services/messages/httpMessagesPublisher.handler
-  name: ${self:service.name}-messagesPublisher
+  name: ${self:service}-messagesPublisher
   description: Posts API calls to the SNS topic for lambda subscribers to act upon.
   environment:
     SQS_PROCESS_MESSAGE_QUEUE_NAME: !GetAtt messagesSqsQueue.QueueName
@@ -28,9 +28,8 @@ httpMessagesPublisher:
               action: true
 sqsMessageExecuteStateMachine:
   handler: src/services/messages/sqsMessageExecuteStateMachine.handler
-  name: ${self:service.name}-messageExecuteStateMachine
-  description:
-    !Join [' ', ['Listens to SQS Queue', !GetAtt messagesSqsQueue.QueueName, 'to send a Message.']]
+  name: ${self:service}-messageExecuteStateMachine
+  description: ${self:service}-messages.fifo
   environment:
     SQS_ERROR_MESSAGE_QUEUE_NAME: !GetAtt messageErrorsSqsQueue.QueueName
     MESSAGE_STATE_MACHINE_ARN:
@@ -40,7 +39,7 @@ sqsMessageExecuteStateMachine:
           'arn:aws:states',
           !Ref AWS::Region,
           !Ref AWS::AccountId,
-          'stateMachine:${self:service.name}-messageStateMachine',
+          'stateMachine:${self:service}-messageStateMachine',
         ],
       ]
   events:
@@ -50,7 +49,7 @@ sqsMessageExecuteStateMachine:
 
 stepCreateUserMessage:
   handler: src/services/messages/stateMachine/stepCreateUserMessage.handler
-  name: ${self:service.name}-messageCreateUserMessage
+  name: ${self:service}-messageCreateUserMessage
   timeout: 900
   environment:
     DATA_TRANSFER_BUCKET: !Ref dataTransferBucket
@@ -65,15 +64,15 @@ stepCreateUserMessage:
 
 stepFailState:
   handler: src/services/messages/stateMachine/stepFailState.handler
-  name: ${self:service.name}-messageFailState
+  name: ${self:service}-messageFailState
 
 stepGetChannels:
   handler: src/services/messages/stateMachine/stepGetChannels.handler
-  name: ${self:service.name}-messageGetChannels
+  name: ${self:service}-messageGetChannels
 
 stepGetUserPopulation:
   handler: src/services/messages/stateMachine/stepGetUserPopulation.handler
-  name: ${self:service.name}-messageGetUserPopulation
+  name: ${self:service}-messageGetUserPopulation
   timeout: 900
   environment:
     DATA_TRANSFER_BUCKET: !Ref dataTransferBucket
@@ -87,14 +86,14 @@ stepGetUserPopulation:
 
 cronInvokeMessageProcess:
   handler: src/services/messages/cronInvokeMessageProcess.handler
-  name: ${self:service.name}-cronInvokeMessageProcess
+  name: ${self:service}-cronInvokeMessageProcess
   description: 'Lambda that fires off post to the API to initiate processing messages ready to be sent'
   environment:
-    API_KEY: '${env:AWS_APIGW_API_KEY}${file(./src/serverless.js):developerSuffix}'
-    APP_URL: 'https://${file(./src/serverless.js):developerPrefix}${env:AWS_CLOUDFRONT_ALIAS}/api/v1/messages/action/process'
+    API_KEY: '${env:AWS_APIGW_API_KEY}'
+    APP_URL: 'https://${env:AWS_CLOUDFRONT_ALIAS}/api/v1/messages/action/process'
   events:
     - schedule:
-        name: ${self:service.name}-cronInvokeMessageProcess
+        name: ${self:service}-cronInvokeMessageProcess
         description: 'Trigger cronInvokeMessageProcess lambda every minute'
         rate: rate(1 minute)
         enabled: true
