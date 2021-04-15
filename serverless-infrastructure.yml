@@ -20,7 +20,7 @@ resources:
       Type: AWS::DynamoDB::Table
       DeletionPolicy: Retain
       Properties:
-        TableName: osu-dx-mcm-${env:ENV, 'development'}${file(./src/serverless.js):developerSuffix}-Messages
+        TableName: osu-dx-mcm-${env:ENV, 'development'}-Messages
         AttributeDefinitions:
           - AttributeName: sendAt
             AttributeType: S
@@ -39,7 +39,7 @@ resources:
         PointInTimeRecoverySpecification:
           PointInTimeRecoveryEnabled: true
         GlobalSecondaryIndexes:
-          - IndexName: osu-dx-mcm-${env:ENV, 'development'}${file(./src/serverless.js):developerSuffix}-MessageStatuses
+          - IndexName: osu-dx-mcm-${env:ENV, 'development'}-MessageStatuses
             KeySchema:
               - AttributeName: status
                 KeyType: HASH
@@ -49,7 +49,7 @@ resources:
               NonKeyAttributes:
                 - id
               ProjectionType: INCLUDE
-          - IndexName: osu-dx-mcm-${env:ENV, 'development'}${file(./src/serverless.js):developerSuffix}-MessageByHash
+          - IndexName: osu-dx-mcm-${env:ENV, 'development'}-MessageByHash
             KeySchema:
               - AttributeName: hash
                 KeyType: HASH
@@ -57,7 +57,7 @@ resources:
               ProjectionType: INCLUDE
               NonKeyAttributes:
                 - id
-          - IndexName: osu-dx-mcm-${env:ENV, 'development'}${file(./src/serverless.js):developerSuffix}-MessageId
+          - IndexName: osu-dx-mcm-${env:ENV, 'development'}-MessageId
             KeySchema:
               - AttributeName: id
                 KeyType: HASH
@@ -68,7 +68,7 @@ resources:
       Type: AWS::DynamoDB::Table
       DeletionPolicy: Retain
       Properties:
-        TableName: osu-dx-mcm-${env:ENV, 'development'}${file(./src/serverless.js):developerSuffix}-UserMessages
+        TableName: osu-dx-mcm-${env:ENV, 'development'}-UserMessages
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S
@@ -89,7 +89,7 @@ resources:
         PointInTimeRecoverySpecification:
           PointInTimeRecoveryEnabled: true
         LocalSecondaryIndexes:
-          - IndexName: osu-dx-mcm-${env:ENV, 'development'}${file(./src/serverless.js):developerSuffix}-UserMessageByChannel
+          - IndexName: osu-dx-mcm-${env:ENV, 'development'}-UserMessageByChannel
             KeySchema:
               - AttributeName: id
                 KeyType: HASH
@@ -101,7 +101,7 @@ resources:
                 - sendAt
                 - status
                 - channelDeliveredAt
-          - IndexName: osu-dx-mcm-${env:ENV, 'development'}${file(./src/serverless.js):developerSuffix}-UserMessageBySendAt
+          - IndexName: osu-dx-mcm-${env:ENV, 'development'}-UserMessageBySendAt
             KeySchema:
               - AttributeName: id
                 KeyType: HASH
@@ -112,7 +112,7 @@ resources:
               NonKeyAttributes:
                 - channelMessageId
         GlobalSecondaryIndexes:
-          - IndexName: osu-dx-mcm-${env:ENV, 'development'}${file(./src/serverless.js):developerSuffix}-UserMessageByStatus
+          - IndexName: osu-dx-mcm-${env:ENV, 'development'}-UserMessageByStatus
             KeySchema:
               - AttributeName: id
                 KeyType: HASH
@@ -127,7 +127,7 @@ resources:
       Type: AWS::DynamoDB::Table
       DeletionPolicy: Retain
       Properties:
-        TableName: osu-dx-mcm-${env:ENV, 'development'}${file(./src/serverless.js):developerSuffix}-UserMessagesPending
+        TableName: osu-dx-mcm-${env:ENV, 'development'}-UserMessagesPending
         AttributeDefinitions:
           - AttributeName: status
             AttributeType: S
@@ -144,7 +144,7 @@ resources:
         PointInTimeRecoverySpecification:
           PointInTimeRecoveryEnabled: true
         LocalSecondaryIndexes:
-          - IndexName: osu-dx-mcm-${env:ENV, 'development'}${file(./src/serverless.js):developerSuffix}-UserMessagePendingUpdatedAt
+          - IndexName: osu-dx-mcm-${env:ENV, 'development'}-UserMessagePendingUpdatedAt
             KeySchema:
               - AttributeName: status
                 KeyType: HASH
