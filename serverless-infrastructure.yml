@@ -6,7 +6,6 @@ variablesResolutionMode: 20210326
 
 plugins:
   - serverless-pseudo-parameters
-  - serverless-plugin-stack-outputs
 
 provider:
   name: aws

@@ -1,5 +1,5 @@
 import { SQSEvent, SQSRecord } from 'aws-lambda'; // eslint-disable-line no-unused-vars, import/no-unresolved
-import { AWSError, SQS } from 'aws-sdk'; // eslint-disable-line no-unused-vars
+import { SQS } from 'aws-sdk'; // eslint-disable-line no-unused-vars
 import { getQueueUrl as messageQueueGetQueueUrl, sendMessage } from '@src/messageQueue';
 import type Message from '@src/models/message'; // eslint-disable-line no-unused-vars
 import type UserMessage from '@src/models/userMessage'; // eslint-disable-line no-unused-vars
@@ -28,9 +28,6 @@ export const getQueueUrl = async (queueName: string): Promise<string> => {
   const response = await messageQueueGetQueueUrl(queueName).catch((err) => {
     throw new Error(`Failed fetching queueName: ${queueName}, caught: ${err}`);
   });
-  if (response === AWSError) {
-    throw new Error(`Handled AWSError when fetching queueUrl: ${response}`);
-  }
   const queueResponse = response as SQS.GetQueueUrlResult;
   if (!queueResponse.QueueUrl) {
     throw new Error(`Failed fetching queueUrl: ${queueResponse}`);
@@ -54,9 +51,7 @@ export const publishToQueue = async (
   if (messageGroupId) publish.MessageGroupId = messageGroupId;
 
   const published = await sendMessage(publish);
-  if (!published || published === AWSError) {
-    console.error('Failed to publish -->  ', message, published);
-  }
+
   console.log('Published -->  ', queueUrl, message, published);
 };
 
