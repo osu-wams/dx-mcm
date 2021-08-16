@@ -14,7 +14,6 @@ plugins:
   - serverless-pseudo-parameters
   - serverless-step-functions
   - serverless-webpack
-  - serverless-plugin-stack-outputs
 
 custom: ${file(./serverless-custom.yml)}
 
