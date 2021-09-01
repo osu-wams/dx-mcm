@@ -10,6 +10,19 @@ variable in your terminal before deploying or packaging the application.
 $ export NODE_OPTIONS=--max_old_space_size=8192
 ```
 
+# Deployment
+
+Deployment is using Serverless framework and provided `.env.*` files. Grab the files from Keeper and make sure they have the leading dot (.).
+
+Deploy development (default):
+
+```
+$ yarn install
+$ yarn deploy
+```
+
+alternatively, stage and production can be deployed with `yarn deploy:production` or `yarn deploy:stage`
+
 # Development Workflow
 
 ## ts-node as the REPL
