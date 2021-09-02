@@ -48,7 +48,7 @@ cronUserMessagePendingMonitor:
   name: ${self:service}-cronUserMessagePendingMonitor
   description: Scheduled Lambda to identify and send notifications about UserMessages that failed while trying to deliver.
   environment:
-    DX_ALERTS_SLACK_HOOK: ${env:DX_ALERTS_SLACK_HOOK}
+    DX_ALERTS_TEAMS_HOOK: ${env:DX_ALERTS_TEAMS_HOOK}
     PENDING_MIN_AGO: 15
   events:
     - schedule:
