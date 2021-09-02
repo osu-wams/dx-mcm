@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { Status } from '@src/models/message';
-import { DX_ALERTS_SLACK_HOOK, ENV, USER_MESSAGE_API_URL } from '@src/constants';
+import { DX_ALERTS_TEAMS_HOOK, ENV, USER_MESSAGE_API_URL } from '@src/constants';
 import UserMessagePending from '@src/models/userMessagePending';
 
 const fetchErrors = async (pendingMinAgo: number): Promise<UserMessagePending[]> => {
@@ -84,7 +84,7 @@ export const handler = async (_event: any, _context: any, _callback: any) => {
       },
     };
     data.blocks.push(curlContext, curlCommand);
-    await axios.post(DX_ALERTS_SLACK_HOOK, data, {
+    await axios.post(DX_ALERTS_TEAMS_HOOK, data, {
       headers: { 'Content-Type': 'application/json' },
     });
   }
