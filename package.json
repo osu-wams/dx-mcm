@@ -14,8 +14,8 @@
     "test:coverage": "jest --coverage"
   },
   "dependencies": {
-    "@osu-wams/grouper": "^0.0.5",
-    "axios": "^0.21.1",
+    "@osu-wams/grouper": "^0.0.10",
+    "axios": "^0.26.0",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "libphonenumber-js": "^1.7.51",
