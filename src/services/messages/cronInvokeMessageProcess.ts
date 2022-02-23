@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-unused-vars
 import axios, { AxiosRequestConfig } from 'axios';
 
 // eslint-disable-next-line no-unused-vars
